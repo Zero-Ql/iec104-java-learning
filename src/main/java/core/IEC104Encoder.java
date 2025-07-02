@@ -1,4 +1,4 @@
-package master;
+package core;
 
 import IEC104Frameformat.ASDUParser;
 import io.netty.buffer.ByteBuf;

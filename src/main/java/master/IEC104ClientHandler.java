@@ -7,6 +7,11 @@ import io.netty.channel.SimpleChannelInboundHandler;
 public class IEC104ClientHandler extends SimpleChannelInboundHandler<ASDUParser> {
 
     @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+    }
+
+    @Override
     protected void messageReceived(ChannelHandlerContext channelHandlerContext, ASDUParser asduParser) throws Exception {
         asduParser.toString();
     }

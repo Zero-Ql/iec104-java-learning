@@ -22,11 +22,6 @@ public class IEC104ThreadLocal {
      * @return 返回当前线程绑定的定时任务线程池实例
      */
     public static ScheduledTaskPool getScheduledTaskPool() {
-        ScheduledTaskPool scheduledTaskPool = scheduledTaskPoolThreadLocal.get();
-        if (scheduledTaskPool == null) {
-            scheduledTaskPool = new ScheduledTaskPool();
-            scheduledTaskPoolThreadLocal.set(scheduledTaskPool);
-        }
-        return scheduledTaskPool;
+        return scheduledTaskPoolThreadLocal.get();
     }
 }

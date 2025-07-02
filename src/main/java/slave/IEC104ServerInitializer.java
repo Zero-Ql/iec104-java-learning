@@ -4,8 +4,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
-import master.IEC104Decoder;
-import master.IEC104Encoder;
+import core.IEC104Decoder;
+import core.IEC104Encoder;
 import slave.handler.uFrameSlaveHandler;
 
 public class IEC104ServerInitializer extends ChannelInitializer<SocketChannel> {
