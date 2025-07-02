@@ -1,6 +1,6 @@
 package core;
 
-import IEC104Frameformat.ASDUParser;
+import IEC104Frameformat.AsduMessageDetail;
 import IEC104Frameformat.FrameParser;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -37,7 +37,7 @@ public class IEC104Decoder extends ByteToMessageDecoder {
         short coa = byteBuf.readShort();
         int ioa = byteBuf.readInt();
         float value = byteBuf.readFloat();
-        ASDUParser asdu = new ASDUParser(typeId, vsq, coa, ioa, value);
+        AsduMessageDetail asdu = new AsduMessageDetail(typeId, vsq, coa, ioa, value);
         list.add(asdu);
     }
 }

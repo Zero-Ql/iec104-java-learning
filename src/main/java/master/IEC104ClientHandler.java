@@ -1,10 +1,10 @@
 package master;
 
-import IEC104Frameformat.ASDUParser;
+import IEC104Frameformat.ApduMessageDetail;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-public class IEC104ClientHandler extends SimpleChannelInboundHandler<ASDUParser> {
+public class IEC104ClientHandler extends SimpleChannelInboundHandler<ApduMessageDetail> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -12,8 +12,8 @@ public class IEC104ClientHandler extends SimpleChannelInboundHandler<ASDUParser>
     }
 
     @Override
-    protected void messageReceived(ChannelHandlerContext channelHandlerContext, ASDUParser asduParser) throws Exception {
-        asduParser.toString();
+    protected void messageReceived(ChannelHandlerContext channelHandlerContext, ApduMessageDetail apduMessageDetail) throws Exception {
+        apduMessageDetail.toString();
     }
 
     @Override
