@@ -12,6 +12,7 @@ public class uFrameSlaveHandler extends uFrameHandler {
     @Override
     public void uInstructionHandler(ChannelHandlerContext ctx, IEC104UFrameType uFrameType) {
         byte[] result = null;
+        // 根据 u帧类型判断u帧命令
         switch (uFrameType) {
             case STARTDT_ACT:
                 log.info("收到启动指令");
@@ -29,6 +30,8 @@ public class uFrameSlaveHandler extends uFrameHandler {
                 log.error("U帧无效{}", uFrameType);
                 break;
         }
+
+        // 异步发送响应字节数组
         var future = ctx.writeAndFlush(result);
         future.addListener((ChannelFutureListener) channelFuture -> {
             if (channelFuture.isSuccess()) log.info("U帧发送成功");

@@ -3,7 +3,7 @@ package core;
 public class IEC104ThreadLocal {
 
     /**
-     * 定时发送启动链路指令、测试链路指令
+     * 定义一个线程局部变量，用于存储每个线程独立的 ScheduledTaskPool 实例
      */
     private static final ThreadLocal<ScheduledTaskPool> scheduledTaskPoolThreadLocal = new ThreadLocal<>();
 

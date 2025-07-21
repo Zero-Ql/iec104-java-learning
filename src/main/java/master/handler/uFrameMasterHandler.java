@@ -12,9 +12,10 @@ public class uFrameMasterHandler extends uFrameHandler {
     @Override
     public void uInstructionHandler(ChannelHandlerContext ctx, IEC104UFrameType uFrameType) {
         byte [] result = null;
+        // 根据 u确认帧类型执行不同操作
         switch (uFrameType) {
             case STARTDT_CON:
-                IEC104ThreadLocal.getScheduledTaskPool();
+                IEC104ThreadLocal.getScheduledTaskPool().onReceiveStartDTCon();
                 break;
             case STOPDT_CON:
                 result = IEC104BasicInstructions.STOPDT_CON;
