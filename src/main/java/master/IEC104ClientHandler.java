@@ -31,5 +31,6 @@ public class IEC104ClientHandler extends SimpleChannelInboundHandler<ApduMessage
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
         ctx.close();
+        IEC104ThreadLocal.getScheduledTaskPool().shutdown();
     }
 }

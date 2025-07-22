@@ -67,7 +67,9 @@ public class ScheduledTaskPool {
     }
 
     public void shutdown() {
+        // 检测线程池是否关闭
         if (!executor.isShutdown()) {
+            // 不再接收新的任务，直到所有任务执行完毕后关闭线程池
             executor.shutdown();
         }
     }
