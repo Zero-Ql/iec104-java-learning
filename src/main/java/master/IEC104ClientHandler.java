@@ -1,7 +1,6 @@
 package master;
 
 import IEC104Frameformat.ApduMessageDetail;
-import core.IEC104ThreadLocal;
 import core.ScheduledTaskPool;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -11,9 +10,9 @@ public class IEC104ClientHandler extends SimpleChannelInboundHandler<ApduMessage
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         // 创建一个与当前连接绑定的 ScheduledTaskPool 实例，并存入线程本地变量
-        IEC104ThreadLocal.setScheduledTaskPoolThreadLocal(new ScheduledTaskPool(ctx));
+        ScheduledTaskPool.bindToChannel(ctx);
         // 发送开始帧
-        IEC104ThreadLocal.getScheduledTaskPool().sendStartFrame();
+        ScheduledTaskPool.getFromChannel(ctx).sendStartFrame();
 
     }
 
@@ -30,7 +29,8 @@ public class IEC104ClientHandler extends SimpleChannelInboundHandler<ApduMessage
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         cause.printStackTrace();
+        ScheduledTaskPool pool = ScheduledTaskPool.getFromChannel(ctx);
+        if (pool != null) pool.shutdown();
         ctx.close();
-        IEC104ThreadLocal.getScheduledTaskPool().shutdown();
     }
 }
