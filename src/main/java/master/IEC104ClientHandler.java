@@ -7,12 +7,20 @@ import io.netty.channel.SimpleChannelInboundHandler;
 
 public class IEC104ClientHandler extends SimpleChannelInboundHandler<ApduMessageDetail> {
 
+    /**
+     * 在连接建立后调用该方法
+     *
+     * @param ctx 通道上下文对象
+     * @throws Exception 声明 Exception 异常
+     */
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        // 创建一个与当前连接绑定的 ScheduledTaskPool 实例，并存入线程本地变量
+        // 创建一个与当前通道处理器上下文绑定的 ScheduledTaskPool 实例
         ScheduledTaskPool.bindToChannel(ctx);
-        // 发送开始帧
+        // 获取 ScheduledTaskPool 并调用 sendStartFrame() 发送启动帧
         ScheduledTaskPool.getFromChannel(ctx).sendStartFrame();
+
+
 
     }
 

@@ -5,7 +5,6 @@ import enums.IEC104UFrameType;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.log4j.Log4j2;
 import util.ByteUtil;
 import util.IEC104Util;
@@ -19,6 +18,7 @@ public abstract class uFrameHandler extends ChannelHandlerAdapter {
         result.markReaderIndex();
         var bytes = new byte[6];
         // 只读前 6 个字节
+
         result.readBytes(bytes);
         // 判断是否为 U帧
         if (isUFrame(bytes)) {
@@ -42,7 +42,7 @@ public abstract class uFrameHandler extends ChannelHandlerAdapter {
         if (FrameParser.getFrameLength(bytes, 4) != 0x4) return false;
         // 指定为 U帧
         if (FrameParser.isFrameStart(bytes[0])) return false;
-        // 控制域第1、2位为 11
+        // 控制域第0、1bit为 11
         return (bytes[2] & 0x003) == 0x003;
     }
 

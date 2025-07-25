@@ -39,7 +39,7 @@ public class IEC104Client {
                             // 添加 IEC104 编解码器和业务处理器
                             ch.pipeline().addLast("decoder", new IEC104Decoder());
                             ch.pipeline().addLast("encoder", new IEC104Encoder());
-                            ch.pipeline().addLast(new IEC104ClientHandler());
+                            ch.pipeline().addLast("clientHandler", new IEC104ClientHandler());
                         }
                     });
             // 启动器使用指定的 host和port 连接服务器，使用 sync 阻塞调用，直到连接成功或失败
