@@ -3,7 +3,7 @@ package common;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-public class IEC104BasicInstructions {
+public class IEC104_BasicInstructions {
     /**
      * 定义启动数据传输的请求帧
      */
@@ -34,6 +34,6 @@ public class IEC104BasicInstructions {
      */
     public static final ByteBuf TESTFR_CON = Unpooled.unmodifiableBuffer(Unpooled.wrappedBuffer(new byte[]{0x68, 0x04, (byte) 0x83, 0x00, 0x00, 0x00}));
 
-    private IEC104BasicInstructions() {
+    private IEC104_BasicInstructions() {
     }
 }

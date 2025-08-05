@@ -1,14 +1,14 @@
 package master;
 
-import IEC104Frameformat.ApduMessageDetail;
-import core.ScheduledTaskPool;
+import Frameformat.IEC104_ApciMessageDetail;
+import core.IEC104_ScheduledTaskPool;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class IEC104ClientHandler extends SimpleChannelInboundHandler<ApduMessageDetail> {
-    private static final Logger log = LogManager.getLogger(IEC104ClientHandler.class);
+public class IEC104_ClientHandler extends SimpleChannelInboundHandler<IEC104_ApciMessageDetail> {
+    private static final Logger log = LogManager.getLogger(IEC104_ClientHandler.class);
 
     /**
      * 在连接建立后调用该方法
@@ -19,11 +19,11 @@ public class IEC104ClientHandler extends SimpleChannelInboundHandler<ApduMessage
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         log.info("连接已建立");
-        // 创建一个与当前通道处理器上下文绑定的 ScheduledTaskPool 实例
-        ScheduledTaskPool.bindToChannel(ctx);
-        // 获取 ScheduledTaskPool 并调用 sendStartFrame() 发送启动帧
-        ScheduledTaskPool.getFromChannel(ctx).sendStartFrame();
-        ScheduledTaskPool.getFromChannel(ctx).sendTestFrame();
+        // 创建一个与当前通道处理器上下文绑定的 IEC104_ScheduledTaskPool 实例
+        IEC104_ScheduledTaskPool.bindToChannel(ctx);
+        // 获取 IEC104_ScheduledTaskPool 并调用 sendStartFrame() 发送启动帧
+        IEC104_ScheduledTaskPool.getFromChannel(ctx).sendStartFrame();
+        IEC104_ScheduledTaskPool.getFromChannel(ctx).sendTestFrame();
     }
 
     /**
@@ -32,12 +32,12 @@ public class IEC104ClientHandler extends SimpleChannelInboundHandler<ApduMessage
      * 当通道接收到APDU消息时调用此方法进行处理
      *
      * @param channelHandlerContext 通道处理上下文
-     * @param apduMessageDetail     APDU消息详情对象
+     * @param IEC104ApduMessageDetail     APDU消息详情对象
      * @throws Exception 处理消息过程中可能抛出的异常
      */
     @Override
-    protected void messageReceived(ChannelHandlerContext channelHandlerContext, ApduMessageDetail apduMessageDetail) throws Exception {
-        apduMessageDetail.toString();
+    protected void messageReceived(ChannelHandlerContext channelHandlerContext, IEC104_ApciMessageDetail IEC104ApduMessageDetail) throws Exception {
+        IEC104ApduMessageDetail.toString();
     }
 
     /**
@@ -66,7 +66,7 @@ public class IEC104ClientHandler extends SimpleChannelInboundHandler<ApduMessage
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         log.error("发生异常：", cause);
-        ScheduledTaskPool pool = ScheduledTaskPool.getFromChannel(ctx);
+        IEC104_ScheduledTaskPool pool = IEC104_ScheduledTaskPool.getFromChannel(ctx);
         if (pool != null) pool.shutdown();
         ctx.close();
     }

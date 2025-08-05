@@ -1,6 +1,6 @@
 package enums;
 
-public enum IEC104State {
+public enum IEC104_State {
     /**
      * 断开
      */

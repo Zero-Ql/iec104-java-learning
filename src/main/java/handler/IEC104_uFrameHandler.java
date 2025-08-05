@@ -1,7 +1,7 @@
 package handler;
 
-import IEC104Frameformat.FrameParser;
-import enums.IEC104UFrameType;
+import Frameformat.IEC104_FrameParser;
+import enums.IEC104_UFrameType;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
@@ -10,8 +10,16 @@ import util.ByteUtil;
 import util.IEC104Util;
 
 @Log4j2
-public abstract class uFrameHandler extends ChannelHandlerAdapter {
-    @Override
+public abstract class IEC104_uFrameHandler extends ChannelHandlerAdapter {
+    /**
+     * 处理通道读取事件
+     * <p>
+     * 该方法用于解析接收到的数据，判断是否为U帧，如果是则进行相应处理，否则将数据传递给下一个处理器
+     *
+     * @param ctx 通道处理上下文
+     * @param msg 接收到的消息对象
+     * @throws Exception 处理过程中可能抛出的异常
+     */
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         var result = (ByteBuf) msg;
         // 存档
@@ -39,12 +47,12 @@ public abstract class uFrameHandler extends ChannelHandlerAdapter {
 
     private boolean isUFrame(byte[] bytes) {
         // 长度域必须为 4
-        if (FrameParser.getFrameLength(bytes, 4) != 0x4) return false;
+        if (IEC104_checkTheDataHandler.getFrameLength(bytes, 4) != 0x4) return false;
         // 指定为 U帧
-        if (FrameParser.isFrameStart(bytes[0])) return false;
+        if (IEC104_checkTheDataHandler.isFrameStart(bytes[0])) return false;
         // 控制域第0、1bit为 11
         return (bytes[2] & 0x003) == 0x003;
     }
 
-    public abstract void uInstructionHandler(ChannelHandlerContext ctx, IEC104UFrameType uFrameType);
+    public abstract void uInstructionHandler(ChannelHandlerContext ctx, IEC104_UFrameType uFrameType);
 }

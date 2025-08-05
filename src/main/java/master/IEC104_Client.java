@@ -1,16 +1,13 @@
 package master;
 
-import core.IEC104Decoder;
-import core.IEC104Encoder;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import master.handler.uFrameMasterHandler;
+import master.handler.IEC104_uFrameMasterHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import slave.handler.uFrameSlaveHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,13 +17,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-public class IEC104Client {
-    private static final Logger log = LogManager.getLogger(IEC104Client.class);
+public class IEC104_Client {
+    private static final Logger log = LogManager.getLogger(IEC104_Client.class);
 
     private final String host;
     private final int port;
 
-    public IEC104Client(String host, int port) {
+    public IEC104_Client(String host, int port) {
         this.host = host;
         this.port = port;
     }
@@ -47,14 +44,16 @@ public class IEC104Client {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
-                            ch.pipeline().addLast("uFrame", new uFrameMasterHandler());
+                            ch.pipeline().addLast("uFrame", new IEC104_uFrameMasterHandler());
+
+
                             // 添加 IEC104 编解码器和业务处理器
-//                            ch.pipeline().addLast("decoder", new IEC104Decoder());
-//                            ch.pipeline().addLast("encoder", new IEC104Encoder());
-                            ch.pipeline().addLast("clientHandler", new IEC104ClientHandler());
+//                            ch.pipeline().addLast("decoder", new IEC104_Decoder());
+//                            ch.pipeline().addLast("encoder", new IEC104_Encoder());
+                            ch.pipeline().addLast("clientHandler", new IEC104_ClientHandler());
                         }
                     });
-            log.info("IEC104Client start...");
+            log.info("IEC104_Client start...");
             log.info("尝试连接到 {}:{}", host, port);
             // 启动器使用指定的 host和port 连接服务器，使用 sync 阻塞调用，直到连接成功或失败
             ChannelFuture f = b.connect(host, port).sync();
@@ -78,11 +77,11 @@ public class IEC104Client {
      * @throws Exception 连接异常
      */
     public static void runMultipleClients(Map<String, Integer> servers) throws Exception {
-        List<IEC104Client> clients = new ArrayList<>();
+        List<IEC104_Client> clients = new ArrayList<>();
 
         // 创建多个客户端实例
         for (Map.Entry<String, Integer> entry : servers.entrySet()) {
-            clients.add(new IEC104Client(entry.getKey(), entry.getValue()));
+            clients.add(new IEC104_Client(entry.getKey(), entry.getValue()));
         }
 
         // 并行运行所有客户端
@@ -90,7 +89,7 @@ public class IEC104Client {
             try {
                 List<Future<?>> futures = new ArrayList<>();
 
-                for (IEC104Client client : clients) {
+                for (IEC104_Client client : clients) {
                     // 遍历客户端列表并运行
                     Future<?> future = executor.submit(() -> {
                         try {
@@ -120,7 +119,7 @@ public class IEC104Client {
         // 单个客户端连接示例
         // String host = "127.0.0.1";
         // int port = 2555;
-        // new IEC104Client(host, port).run();
+        // new IEC104_Client(host, port).run();
 
         // 多个客户端连接示例
         Map<String, Integer> servers = new HashMap<>();

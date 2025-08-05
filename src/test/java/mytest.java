@@ -1,4 +1,3 @@
-import enums.IEC104UFrameType;
 import org.ini4j.Ini;
 import org.junit.Test;
 
@@ -7,7 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import static enums.IEC104UFrameType.U_CONTROL_MAP;
+import static enums.IEC104_UFrameType.U_CONTROL_MAP;
 
 public class mytest {
     @Test

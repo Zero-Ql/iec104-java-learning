@@ -1,6 +1,6 @@
-package IEC104Frameformat;
+package handler;
 
-public class FrameParser {
+public class IEC104_checkTheDataHandler {
     public static boolean isFrameStart(byte b) {
         return b != 0x68;
     }

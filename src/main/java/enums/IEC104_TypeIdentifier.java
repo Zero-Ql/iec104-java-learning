@@ -5,7 +5,7 @@ import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum IEC104TypeIdentifier {
+public enum IEC104_TypeIdentifier {
 
     /**
      * 单点遥信
@@ -133,13 +133,13 @@ public enum IEC104TypeIdentifier {
     @Getter
     private final int msgLen;
 
-    private static final Map<Byte, IEC104TypeIdentifier> valueTOEnums = new HashMap<>();
+    private static final Map<Byte, IEC104_TypeIdentifier> valueTOEnums = new HashMap<>();
 
     /*
       检查 value 是否已经在 valueTOEnums 中，如果在抛出异常，否则添加
      */
     static {
-        for (IEC104TypeIdentifier type : IEC104TypeIdentifier.values()) {
+        for (IEC104_TypeIdentifier type : IEC104_TypeIdentifier.values()) {
             if (valueTOEnums.containsKey(type.value)) {
                 throw new IllegalArgumentException("Duplicate value: " + type.value);
             }
@@ -147,12 +147,12 @@ public enum IEC104TypeIdentifier {
         }
     }
 
-    IEC104TypeIdentifier(int value, int msgLen) {
+    IEC104_TypeIdentifier(int value, int msgLen) {
         this.value = (byte) value;
         this.msgLen = msgLen;
     }
 
-    public static IEC104TypeIdentifier getIEC104TypeIdentifier(byte value) {
+    public static IEC104_TypeIdentifier getIEC104TypeIdentifier(byte value) {
         return valueTOEnums.get(value);
     }
 }

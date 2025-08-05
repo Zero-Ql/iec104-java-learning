@@ -1,6 +1,6 @@
 package core;
 
-import common.IEC104BasicInstructions;
+import common.IEC104_BasicInstructions;
 import config.piec104Config;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
@@ -21,9 +21,9 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @author QSky
  */
-public class ScheduledTaskPool {
+public class IEC104_ScheduledTaskPool {
 
-    private static final Logger log = LogManager.getLogger(ScheduledTaskPool.class);
+    private static final Logger log = LogManager.getLogger(IEC104_ScheduledTaskPool.class);
 
     /**
      * 通道处理器上下文对象
@@ -57,7 +57,7 @@ public class ScheduledTaskPool {
     /**
      * ScheduledTaskPool在Channel属性中的键值
      */
-    private static final AttributeKey<ScheduledTaskPool> SCHEDULED_TASK_POOL_ATTRIBUTE_KEY =
+    private static final AttributeKey<IEC104_ScheduledTaskPool> SCHEDULED_TASK_POOL_ATTRIBUTE_KEY =
             AttributeKey.valueOf("scheduledTaskPool");
 
     /**
@@ -75,7 +75,7 @@ public class ScheduledTaskPool {
      *
      * @param ctx 通道处理器上下文
      */
-    public ScheduledTaskPool(ChannelHandlerContext ctx) {
+    public IEC104_ScheduledTaskPool(ChannelHandlerContext ctx) {
         this.ctx = ctx;
     }
 
@@ -95,9 +95,9 @@ public class ScheduledTaskPool {
             return;
         }
 
-        log.info("发送 {} 启动帧", IEC104BasicInstructions.STARTDT_ACT);
+        log.info("发送 {} 启动帧", IEC104_BasicInstructions.STARTDT_ACT);
         // 在handler中发送启动帧
-        ctx.writeAndFlush(IEC104BasicInstructions.STARTDT_ACT.retain());
+        ctx.writeAndFlush(IEC104_BasicInstructions.STARTDT_ACT.retain());
 
         // 提交任务并开启 T1 计时器
         ScheduledFuture<?> newTask = executor.schedule(() -> {
@@ -146,9 +146,9 @@ public class ScheduledTaskPool {
         isCancel(currentTask);
 
         ScheduledFuture<?> newTask = executor.schedule(() -> {
-            log.info("发送 {} 测试帧", IEC104BasicInstructions.TESTFR_ACT);
+            log.info("发送 {} 测试帧", IEC104_BasicInstructions.TESTFR_ACT);
             // 经过 T3 时间没有报文交互，发送 TESTFR_ACT U测试帧
-            ctx.writeAndFlush(IEC104BasicInstructions.TESTFR_ACT.retain());
+            ctx.writeAndFlush(IEC104_BasicInstructions.TESTFR_ACT.retain());
             // 开启 T1 计时器
             startT1Timer();
         }, Long.parseLong(channelTimeOut.getT3()), TimeUnit.SECONDS);
@@ -238,7 +238,7 @@ public class ScheduledTaskPool {
      * @param ctx 通道处理上下文，用于操作通道的属性
      */
     public static void bindToChannel(ChannelHandlerContext ctx) {
-        ScheduledTaskPool pool = new ScheduledTaskPool(ctx);
+        IEC104_ScheduledTaskPool pool = new IEC104_ScheduledTaskPool(ctx);
         ctx.channel().attr(SCHEDULED_TASK_POOL_ATTRIBUTE_KEY).set(pool);
     }
 
@@ -250,7 +250,7 @@ public class ScheduledTaskPool {
      * @param ctx 通道处理上下文，用于获取通道的属性
      * @return ScheduledTaskPool实例，如果没有绑定则返回null
      */
-    public static ScheduledTaskPool getFromChannel(ChannelHandlerContext ctx) {
+    public static IEC104_ScheduledTaskPool getFromChannel(ChannelHandlerContext ctx) {
         return ctx.channel().attr(SCHEDULED_TASK_POOL_ATTRIBUTE_KEY).get();
     }
 }
