@@ -40,6 +40,7 @@ public enum IEC104VariableStructureQualifiers {
             }
         }
 
-        if ()
+//        if ()
+        return null;
     }
 }

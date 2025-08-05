@@ -1,6 +1,9 @@
 import enums.IEC104UFrameType;
+import org.ini4j.Ini;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -41,4 +44,33 @@ public class mytest {
     public void demo4() {
         new b().test1();
     }
+
+    @Test
+    public void demo5(){
+        try {
+            Ini ini = new Ini(new File("src/test/resources/piec104.ini"));
+            var t1 = ini.get("test", "t1");
+            System.out.println(t1);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

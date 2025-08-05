@@ -3,6 +3,7 @@ package slave.handler;
 import common.IEC104BasicInstructions;
 import handler.uFrameHandler;
 import enums.IEC104UFrameType;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.log4j.Log4j2;
@@ -11,7 +12,7 @@ import lombok.extern.log4j.Log4j2;
 public class uFrameSlaveHandler extends uFrameHandler {
     @Override
     public void uInstructionHandler(ChannelHandlerContext ctx, IEC104UFrameType uFrameType) {
-        byte[] result = null;
+        ByteBuf result = null;
         // 根据 u帧类型判断u帧命令
         switch (uFrameType) {
             case STARTDT_ACT:

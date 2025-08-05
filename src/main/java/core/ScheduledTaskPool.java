@@ -1,6 +1,7 @@
 package core;
 
 import common.IEC104BasicInstructions;
+import config.piec104Config;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
 import org.apache.logging.log4j.LogManager;
@@ -24,21 +25,50 @@ public class ScheduledTaskPool {
 
     private static final Logger log = LogManager.getLogger(ScheduledTaskPool.class);
 
-    /** 通道处理器上下文对象 */
+    /**
+     * 通道处理器上下文对象
+     */
     private final ChannelHandlerContext ctx;
 
-    /** 保留2个线程的线程池对象 */
+    /**
+     * 保留2个线程的线程池对象
+     */
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
 
-    /** 启动任务的原子引用 */
+    /**
+     * 启动任务的原子引用
+     */
     private final AtomicReference<ScheduledFuture<?>> startTask = new AtomicReference<>();
 
-    /** ScheduledTaskPool在Channel属性中的键值 */
-    private static final AttributeKey<ScheduledTaskPool> SCHEDULED_TASK_POOL_ATTRIBUTE_KEY =
-        AttributeKey.valueOf("scheduledTaskPool");
 
-    /** 链路是否已启动标志 */
+    /**
+     * 测试任务的原子引用
+     */
+    private final AtomicReference<ScheduledFuture<?>> testTask = new AtomicReference<>();
+
+    private final AtomicReference<ScheduledFuture<?>> t1Task = new AtomicReference<>();
+    private final AtomicReference<ScheduledFuture<?>> t3Task = new AtomicReference<>();
+
+    /**
+     * 获取通道配置实例
+     */
+    private static final piec104Config channelTimeOut = new piec104Config();
+
+    /**
+     * ScheduledTaskPool在Channel属性中的键值
+     */
+    private static final AttributeKey<ScheduledTaskPool> SCHEDULED_TASK_POOL_ATTRIBUTE_KEY =
+            AttributeKey.valueOf("scheduledTaskPool");
+
+    /**
+     * 链路是否已启动标志
+     */
     private volatile boolean started = false;
+
+    /**
+     * U测试帧是否发送
+     */
+    private volatile boolean tested = false;
 
     /**
      * 构造函数
@@ -53,9 +83,10 @@ public class ScheduledTaskPool {
      * 发送链路启动帧
      * <p>
      * 如果当前没有正在进行的启动任务，则发送STARTDT_ACT帧并启动超时检测任务
-     * 超时时间为5秒，超时后将自动关闭连接
+     * 超时时间为15秒，超时后将自动关闭连接
      */
     public void sendStartFrame() {
+
         // 通过原子引用获取当前任务
         ScheduledFuture<?> currentTask = startTask.get();
 
@@ -66,9 +97,9 @@ public class ScheduledTaskPool {
 
         log.info("发送 {} 启动帧", IEC104BasicInstructions.STARTDT_ACT);
         // 在handler中发送启动帧
-        ctx.writeAndFlush(IEC104BasicInstructions.STARTDT_ACT);
+        ctx.writeAndFlush(IEC104BasicInstructions.STARTDT_ACT.retain());
 
-        // 提交任务并开启延时5秒的计时器
+        // 提交任务并开启 T1 计时器
         ScheduledFuture<?> newTask = executor.schedule(() -> {
             try {
                 if (ctx.channel().isActive()) {
@@ -78,7 +109,7 @@ public class ScheduledTaskPool {
             } catch (Exception e) {
                 log.error("执行超时任务异常", e);
             }
-        }, 5, TimeUnit.SECONDS);
+        }, Long.parseLong(channelTimeOut.getT1()), TimeUnit.SECONDS);
 
         // 使用 CAS乐观锁非阻塞更新
         startTask.compareAndSet(currentTask, newTask);
@@ -93,11 +124,7 @@ public class ScheduledTaskPool {
         // 获取启动任务的ScheduledFuture对象
         ScheduledFuture<?> task = startTask.get();
 
-        // 检查任务是否存在且未完成
-        if (task != null && !task.isDone()) {
-            // 取消超时任务
-            task.cancel(false);
-        }
+        isCancel(task);
 
         // 记录日志，表示链路已激活
         log.info("收到 STARTDT_CON，链路已激活");
@@ -105,22 +132,76 @@ public class ScheduledTaskPool {
         started = true;
     }
 
-    public void sendTestFrame(){
-        ScheduledFuture<?> currentTask = startTask.get();
+    /**
+     * 发送测试帧
+     * <p>
+     * 当经过T3时间没有报文交互时，发送TESTFR_ACT测试帧以检测链路是否正常
+     * 发送后启动T1计时器等待对方确认
+     */
+    public void sendTestFrame() {
+        // 获取t3Task的原子引用
+        ScheduledFuture<?> currentTask = t3Task.get();
 
-        int timetest = 15;
+        // 检查是否有任务未完成，有则取消任务(重置T3)
+        isCancel(currentTask);
 
-        // 防止重复发送，如果任务已完成或未提交过则跳过
-        if (currentTask != null && !currentTask.isDone()) {
-            return;
-        }
+        ScheduledFuture<?> newTask = executor.schedule(() -> {
+            log.info("发送 {} 测试帧", IEC104BasicInstructions.TESTFR_ACT);
+            // 经过 T3 时间没有报文交互，发送 TESTFR_ACT U测试帧
+            ctx.writeAndFlush(IEC104BasicInstructions.TESTFR_ACT.retain());
+            // 开启 T1 计时器
+            startT1Timer();
+        }, Long.parseLong(channelTimeOut.getT3()), TimeUnit.SECONDS);
+        t3Task.compareAndSet(currentTask, newTask);
+    }
 
-        ScheduledFuture<?> newTask = executor.scheduleWithFixedDelay(() -> {
-            if (){
+    /**
+     * 处理接收到的测试帧确认消息
+     * <p>
+     * 当收到TESTFR_CON确认帧时调用此方法，取消T1，重置T3
+     */
+    public void onReceiveTestFRCon() {
+        isCancel(t1Task.get());
+        sendTestFrame();
+        // 记录日志，表示链路已激活
+        log.info("收到 TESTFR_CON，链路正常");
+        // 设置test发送状态为true
+        tested = true;
+    }
 
+    /**
+     * 启动T1定时器
+     * <p>
+     * 在发送 I 帧或 U 帧后启动T1定时器，用于等待对方的确认响应
+     * 如果在T1时间内未收到确认，则关闭连接
+     */
+    private void startT1Timer() {
+        ScheduledFuture<?> task = t1Task.get();
+        isCancel(task);
+        ScheduledFuture<?> newTask = executor.schedule(() -> {
+            try {
+                log.warn("T1超时，关闭连接");
+                ctx.close();
+            } catch (Exception e) {
+                log.error("执行超时任务异常", e);
             }
-        }, timetest, timetest, TimeUnit.SECONDS);
+        }, Long.parseLong(channelTimeOut.getT1()), TimeUnit.SECONDS);
+        t1Task.compareAndSet(task, newTask);
+    }
 
+    /**
+     * 取消指定的定时任务
+     * <p>
+     * 检查任务是否存在且未完成，如果满足条件则取消该任务
+     *
+     * @param task 需要取消的定时任务
+     */
+    private void isCancel(ScheduledFuture<?> task) {
+        // 检查任务是否存在且未完成
+        if (task != null && !task.isDone()) {
+            // 取消超时任务
+            task.cancel(false);
+        }
     }
 
     /**

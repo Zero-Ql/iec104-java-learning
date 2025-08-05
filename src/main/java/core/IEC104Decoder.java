@@ -37,7 +37,7 @@ public class IEC104Decoder extends ByteToMessageDecoder {
         short coa = byteBuf.readShort();
         int ioa = byteBuf.readInt();
         float value = byteBuf.readFloat();
-        AsduMessageDetail asdu = new AsduMessageDetail(typeId, vsq, coa, ioa, value);
-        list.add(asdu);
+//        AsduMessageDetail asdu = new AsduMessageDetail(typeId, vsq, coa, ioa, value);
+//        list.add(asdu);
     }
 }
