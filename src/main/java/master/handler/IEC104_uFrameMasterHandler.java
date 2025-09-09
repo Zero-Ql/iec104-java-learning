@@ -1,7 +1,7 @@
 package master.handler;
 
 import common.IEC104_BasicInstructions;
-import core.IEC104_ScheduledTaskPool;
+import core.scheduler.IEC104_ScheduledTaskPool;
 import enums.IEC104_UFrameType;
 import handler.IEC104_uFrameHandler;
 import io.netty.buffer.ByteBuf;

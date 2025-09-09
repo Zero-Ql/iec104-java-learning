@@ -11,4 +11,6 @@ public class IEC104_checkTheDataHandler {
         }
         return data[1] & 0xFF;
     }
+
+
 }

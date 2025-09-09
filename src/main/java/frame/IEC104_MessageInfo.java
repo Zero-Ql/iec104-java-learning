@@ -1,5 +1,10 @@
-package Frameformat;
+package frame;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
 public class IEC104_MessageInfo {
     /**
      * IOA 3字节 信息对象地址

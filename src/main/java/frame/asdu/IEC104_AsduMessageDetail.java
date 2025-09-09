@@ -1,5 +1,6 @@
-package Frameformat;
+package frame.asdu;
 
+import frame.IEC104_MessageInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -56,6 +57,6 @@ public class IEC104_AsduMessageDetail {
     /**
      * 信息体对象数组
      */
-    private IEC104_MessageInfo [] IOA;
+    private IEC104_MessageInfo[] IOA;
 
 }

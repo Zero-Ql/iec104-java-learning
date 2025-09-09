@@ -1,6 +1,5 @@
-package core;
+package core.codec;
 
-import Frameformat.IEC104_FrameParser;
 import handler.IEC104_checkTheDataHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

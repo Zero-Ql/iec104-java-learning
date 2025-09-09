@@ -1,5 +1,6 @@
 import org.ini4j.Ini;
 import org.junit.Test;
+import util.ByteUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,11 @@ public class mytest {
         System.out.println(Arrays.toString(bytes));
     }
 
+    /**
+     * 演示U帧控制域解析测试
+     * <p>
+     * 该方法用于测试U帧控制域的解析逻辑，包括通过ByteBuffer获取整数值和位运算检查
+     */
     @Test
     public void demo3() {
         byte[] bytes = new byte[]{(byte) 0x83, (byte) 0x00, (byte) 0x00, (byte) 0x00};
@@ -41,7 +47,14 @@ public class mytest {
 
     @Test
     public void demo4() {
-        new b().test1();
+        // TODO 计算接收发送序号
+//        new b().test1();
+        short tx = -32768;
+        int rx = 65535;
+//        tx += 1;
+        rx += 2;
+        System.out.println(tx & 0xFFFF + 32767);
+        System.out.println(rx);
     }
 
     @Test

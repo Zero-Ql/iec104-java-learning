@@ -1,4 +1,4 @@
-package core;
+package core.scheduler;
 
 import common.IEC104_BasicInstructions;
 import config.piec104Config;

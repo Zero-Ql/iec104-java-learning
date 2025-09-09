@@ -1,7 +1,7 @@
 package master;
 
-import Frameformat.IEC104_ApciMessageDetail;
-import core.IEC104_ScheduledTaskPool;
+import frame.apci.IEC104_ApciMessageDetail;
+import core.scheduler.IEC104_ScheduledTaskPool;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.logging.log4j.LogManager;

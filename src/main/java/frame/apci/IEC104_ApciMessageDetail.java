@@ -1,5 +1,11 @@
-package Frameformat;
+package frame.apci;
 
+import core.control.IEC104_controlField;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
 public class IEC104_ApciMessageDetail {
 
     /**
@@ -14,6 +20,6 @@ public class IEC104_ApciMessageDetail {
     /**
      * 控制域 固定 四字节
      */
-    private byte[] controlField = null;
+    private IEC104_controlField iEC104_controlField;
 
 }

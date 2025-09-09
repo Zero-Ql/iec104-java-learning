@@ -1,6 +1,6 @@
 package slave;
 
-import Frameformat.IEC104_AsduMessageDetail;
+import frame.asdu.IEC104_AsduMessageDetail;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
