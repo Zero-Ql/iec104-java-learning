@@ -49,12 +49,11 @@ public class mytest {
     public void demo4() {
         // TODO 计算接收发送序号
 //        new b().test1();
-        short tx = -32768;
-        int rx = 65535;
-//        tx += 1;
-        rx += 2;
-        System.out.println(tx & 0xFFFF + 32767);
-        System.out.println(rx);
+        short tx = -1;
+        int rx_int = 65534;
+        byte[] bytes = ByteUtil.intToByte(rx_int);
+        byte[] rx_bytes = new byte[]{bytes[2], bytes[3]};
+        System.out.println(rx_bytes);
     }
 
     @Test
