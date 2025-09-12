@@ -25,12 +25,14 @@ public class IEC104_uFrameMasterHandler extends IEC104_uFrameHandler {
         switch (uFrameType) {
             case STARTDT_CON:
                 IEC104_ScheduledTaskPool.getFromChannel(ctx).onReceiveStartDTCon();
+                // 取消T1，重置T3
                 IEC104_ScheduledTaskPool.getFromChannel(ctx).onReceiveTestFRCon();
                 break;
             case STOPDT_CON:
                 result = IEC104_BasicInstructions.STOPDT_CON;
                 break;
             case TESTFR_CON:
+                // 取消T1，重置T3
                 IEC104_ScheduledTaskPool.getFromChannel(ctx).onReceiveTestFRCon();
                 break;
             default:

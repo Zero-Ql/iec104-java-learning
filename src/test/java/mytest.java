@@ -1,3 +1,10 @@
+import core.control.IEC104_controlField;
+import enums.IEC104_TypeIdentifier;
+import enums.IEC104_VariableStructureQualifiers;
+import frame.IEC104_FrameBuilder;
+import frame.IEC104_MessageInfo;
+import frame.apci.IEC104_ApciMessageDetail;
+import frame.asdu.IEC104_AsduMessageDetail;
 import org.ini4j.Ini;
 import org.junit.Test;
 import util.ByteUtil;
@@ -5,7 +12,9 @@ import util.ByteUtil;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static enums.IEC104_UFrameType.U_CONTROL_MAP;
 
@@ -49,16 +58,23 @@ public class mytest {
     public void demo4() {
         // TODO 计算接收发送序号
 //        new b().test1();
-        short tx = -32768;
-        int rx = 65535;
-//        tx += 1;
-        rx += 2;
-        System.out.println(tx & 0xFFFF + 32767);
+
+        // 发送
+        byte tx_1 = (byte) ((65534 >> 8) & 0xFF);
+        byte tx_2 = (byte) (65534 & 0xFF);
+
+        int test = 16;
+        test |= (1 << 7); //置1
+//        test &= ~(1 << 7); //清0
+        // 接收
+        int rx = ((tx_1 & 0xFF) << 8) | (tx_2 & 0xFF);
         System.out.println(rx);
+
+        System.out.println(test);
     }
 
     @Test
-    public void demo5(){
+    public void demo5() {
         try {
             Ini ini = new Ini(new File("src/test/resources/piec104.ini"));
             var t1 = ini.get("test", "t1");
@@ -66,6 +82,62 @@ public class mytest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * IEC104_FrameBuilder 单元测试
+     */
+    @Test
+    public void demo6() {
+
+        List<IEC104_MessageInfo> ioa = new ArrayList<>();
+        var iEC104_apciMessageDetail = new IEC104_ApciMessageDetail();
+        boolean sq = false;
+        short numIx = 1;
+
+        boolean negative = false;
+        boolean test = false;
+        short causeTx = 6;
+
+        byte variableStructureQualifiers;
+        byte transferReason;
+
+        byte senderAddress = 0;
+        short publicAddress = 1;
+
+        ioa.add(new IEC104_MessageInfo(0, IEC104_VariableStructureQualifiers.C_IC_NA_1_QUALIFIER.getValue()));
+        iEC104_apciMessageDetail.setIEC104_controlField(new byte[]{0x00, 0x00, 0x00, 0x00});
+
+        if (sq) {
+            numIx |= (1 << 7);
+        } else {
+            numIx &= ~(1 << 7);
+        }
+
+        if (negative) {
+            causeTx |= (1 << 7);
+            if (test) {
+                causeTx |= (1 << 6);
+            } else {
+                causeTx &= ~(1 << 6);
+            }
+        } else {
+            causeTx &= ~(1 << 7);
+        }
+
+        variableStructureQualifiers = (byte)numIx;
+        transferReason = (byte)causeTx;
+
+        var iEC104_asduMessageDetail = new IEC104_AsduMessageDetail.Builder(
+                IEC104_TypeIdentifier.C_IC_NA_1.getValue(),
+                variableStructureQualifiers,
+                transferReason,
+                senderAddress,
+                publicAddress,
+                ioa).build();
+
+        var iEC104_FrameBuilder = new IEC104_FrameBuilder.Builder(iEC104_apciMessageDetail).setAsduMessageDetail(iEC104_asduMessageDetail).build();
+        System.out.println(iEC104_FrameBuilder);
     }
 }
 

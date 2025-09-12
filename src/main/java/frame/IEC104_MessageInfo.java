@@ -1,22 +1,31 @@
 package frame;
 
-import lombok.AllArgsConstructor;
+import enums.IEC104_VariableStructureQualifiers;
 import lombok.Data;
+import lombok.Setter;
 
 @Data
-@AllArgsConstructor
 public class IEC104_MessageInfo {
     /**
      * IOA 3字节 信息对象地址
      * 一般情况下仅前两个字节可用，不同对象地址的最大数量限制为 65535
      * 第三个字节用于构造信息对象地址
      */
-    private int messageAddress;
+    private final int messageAddress;
 
     /**
-     * NVA 1字节 标准化值
+     * 值
      */
-    private byte [] nva ;
+    @Setter
+    private byte[] value;
 
+    /**
+     * 质量描述符
+     */
+    private final byte variableStructureQualifiers;
 
+    public IEC104_MessageInfo(int messageAddress, byte variableStructureQualifiers) {
+        this.messageAddress = messageAddress;
+        this.variableStructureQualifiers = variableStructureQualifiers;
+    }
 }
