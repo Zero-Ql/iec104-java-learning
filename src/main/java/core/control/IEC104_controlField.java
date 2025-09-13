@@ -1,9 +1,12 @@
 package core.control;
 
 
-import lombok.Getter;
+import lombok.Data;
 
+@Data
 public class IEC104_controlField {
+
+
 
     /**
      * 发送序号
@@ -15,9 +18,7 @@ public class IEC104_controlField {
      */
     private short Rx;
 
-    private int w;
-
-    IEC104_controlField(){
+    public IEC104_controlField() {
         this.Tx = 0;
         this.Rx = 0;
     }
@@ -35,11 +36,7 @@ public class IEC104_controlField {
     /**
      * 判断 I帧常量
      */
-    private static final int iControlFrame = 0x1;
-
-    public void setControl() {
-
-    }
+    private static final int iControlFrame = 0x0;
 
     public static boolean isTypeU(byte[] bytes) {
 
@@ -51,22 +48,16 @@ public class IEC104_controlField {
     }
 
     public static boolean isTypeI(byte[] bytes) {
-        return (bytes[2] & iControlFrame) == iControlFrame;
+        return (bytes[2] | iControlFrame) == iControlFrame;
     }
 
-    private IEC104_controlField getTxRxData(byte[] bytes) {
+    private IEC104_controlField getTxRxData() {
+        return this;
+    }
+
+    private IEC104_controlField setTxRxData(byte[] bytes) {
         this.Tx = bytes[2];
         this.Rx = bytes[3];
         return this;
     }
-
-    public boolean isReset(byte[] bytes) {
-        if (getTxRxData(bytes).Tx > 65534 && getTxRxData(bytes).Rx > 65534) {
-            this.Tx = 0;
-            this.Rx = 0;
-            return true;
-        }
-        return false;
-    }
-
 }

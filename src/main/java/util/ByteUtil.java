@@ -1,5 +1,7 @@
 package util;
 
+import java.nio.ByteBuffer;
+
 public class ByteUtil {
 
     public static byte[] subBytes(byte[] source, int startIndex, int offset) {
@@ -24,5 +26,17 @@ public class ByteUtil {
         bytes[2] = (byte) ((value >> 8) & 0xFF);
         bytes[3] = (byte) (value & 0xFF);
         return bytes;
+    }
+
+    public static byte[] customStructureToBytes(boolean sq, short numIx, boolean negative, boolean test, short causeTx, byte senderAddress) {
+        numIx = (short) (sq ? numIx | (1 << 7) : numIx & ~(1 << 7));
+        causeTx = (short) (negative ? causeTx | (1 << 7) : causeTx & ~(1 << 7));
+        causeTx = (short) (test ? causeTx | (1 << 6) : causeTx & ~(1 << 6));
+
+        byte[] result = new byte[3];
+        result[0] = (byte) numIx;
+        result[1] = (byte) causeTx;
+        result[2] = senderAddress;
+        return result;
     }
 }
