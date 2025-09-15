@@ -88,8 +88,8 @@ public class IEC104_IFrameTaskManager {
         ByteBuf commonInfo = allocator.buffer(2);
         byte [] byteAddress = ByteUtil.shortToByte(iFrame.getAsduMessageDetail().getPublicAddress());
         // 将 short 转为字节数组后转为 小端序 写入
-        commonInfo.writeShort(byteAddress[1]);
-        commonInfo.writeShort(byteAddress[0]);
+        commonInfo.writeByte(byteAddress[1]);
+        commonInfo.writeByte(byteAddress[0]);
 
         // IOA 地址（3 字节：使用 writeMedium 写入 3 字节整数）
         ByteBuf ioaAddress = allocator.buffer(3);
