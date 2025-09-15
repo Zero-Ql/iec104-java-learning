@@ -28,6 +28,13 @@ public class ByteUtil {
         return bytes;
     }
 
+    public static byte[] shortToByte(short value) {
+        byte[] bytes = new byte[2];
+        bytes[0] = (byte) ((value >> 8) & 0xFF);
+        bytes[1] = (byte) (value & 0xFF);
+        return bytes;
+    }
+
     public static byte[] customStructureToBytes(boolean sq, short numIx, boolean negative, boolean test, short causeTx, byte senderAddress) {
         numIx = (short) (sq ? numIx | (1 << 7) : numIx & ~(1 << 7));
         causeTx = (short) (negative ? causeTx | (1 << 7) : causeTx & ~(1 << 7));

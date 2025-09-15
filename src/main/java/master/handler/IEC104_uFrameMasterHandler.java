@@ -15,7 +15,7 @@ public class IEC104_uFrameMasterHandler extends IEC104_uFrameHandler {
      * <p>
      * 根据不同的U帧类型执行相应的操作，包括启动确认、停止确认和测试确认等
      *
-     * @param ctx 通道处理上下文
+     * @param ctx        通道处理上下文
      * @param uFrameType U帧类型枚举值
      */
     @Override
@@ -25,6 +25,8 @@ public class IEC104_uFrameMasterHandler extends IEC104_uFrameHandler {
         switch (uFrameType) {
             case STARTDT_CON:
                 IEC104_ScheduledTaskPool.getFromChannel(ctx).onReceiveStartDTCon();
+                // 发送总召
+                IEC104_ScheduledTaskPool.getFromChannel(ctx).sendInterrogationCommand();
                 // 取消T1，重置T3
                 IEC104_ScheduledTaskPool.getFromChannel(ctx).onReceiveTestFRCon();
                 break;
