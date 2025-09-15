@@ -1,7 +1,6 @@
 package common;
 
 import config.piec104Config;
-import core.scheduler.IEC104_ScheduledTaskPool;
 import enums.IEC104_TypeIdentifier;
 import enums.IEC104_VariableStructureQualifiers;
 import frame.IEC104_FrameBuilder;
@@ -12,31 +11,31 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import util.ByteUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class IEC104_IFrameTaskManager {
 
-    private final IEC104_ScheduledTaskPool iEC104_ScheduledTaskPool;
+    private static final Logger log = LogManager.getLogger(IEC104_IFrameTaskManager.class);
     private final ChannelHandlerContext ctx;
     private final ScheduledExecutorService executor;
     private final piec104Config config;
 
     private final AtomicReference<ScheduledFuture<?>> interrogationCommandTask = new AtomicReference<>();
 
-    private final IEC104_FrameBuilder iEC104_FrameParser;
-
-    public IEC104_IFrameTaskManager(IEC104_ScheduledTaskPool iEC104_ScheduledTaskPool, ChannelHandlerContext ctx, ScheduledExecutorService executor, piec104Config config, IEC104_FrameBuilder iEC104_FrameParser) {
-        this.iEC104_ScheduledTaskPool = iEC104_ScheduledTaskPool;
+    public IEC104_IFrameTaskManager(ChannelHandlerContext ctx, ScheduledExecutorService executor, piec104Config config) {
         this.ctx = ctx;
         this.executor = executor;
         this.config = config;
-        this.iEC104_FrameParser = iEC104_FrameParser;
     }
 
     public void sendIFrame() {
@@ -45,6 +44,9 @@ public class IEC104_IFrameTaskManager {
 
     public void sendInterrogationCommand() {
 
+        byte H = 0x68;
+
+        short L = 0;
 
         boolean sq = false;
         short numIx = 1;
@@ -71,32 +73,77 @@ public class IEC104_IFrameTaskManager {
         ByteBufAllocator allocator = ctx.alloc();
 
         // 合并可预测大小的字段
-        // 1. APCI 字段（假设控制字段为 4 字节）
+        // APCI 字段（控制字段为 4 字节）
         ByteBuf apcibuf = allocator.buffer(4);
         apcibuf.writeBytes(iFrame.getApciMessageDetail().getIEC104_controlField());
 
-        // 2. ASDU 头部字段（4 字节：Type ID + VSQ + Transfer Reason + Sender Address）
+        // ASDU 头部字段（4 字节：Type ID + VSQ + Transfer Reason + Sender Address）
         ByteBuf asduHeader = allocator.buffer(4);
         asduHeader.writeByte(iFrame.getAsduMessageDetail().getTypeIdentifier());
         asduHeader.writeByte(iFrame.getAsduMessageDetail().getVariableStructureQualifiers());
         asduHeader.writeByte(iFrame.getAsduMessageDetail().getTransferReason());
         asduHeader.writeByte(iFrame.getAsduMessageDetail().getSenderAddress());
 
-        // 3. 公共地址 + QOI（3 字节：Public Address 2 字节 + QOI 1 字节）
-        ByteBuf commonInfo = allocator.buffer(3);
-        commonInfo.writeShort(iFrame.getAsduMessageDetail().getPublicAddress());
-        commonInfo.writeByte(iFrame.getAsduMessageDetail().getIOA().getFirst().getVariableStructureQualifiers());
+        // 公共地址（2 字节：Public Address 2 字节）
+        ByteBuf commonInfo = allocator.buffer(2);
+        byte [] byteAddress = ByteUtil.shortToByte(iFrame.getAsduMessageDetail().getPublicAddress());
+        // 将 short 转为字节数组后转为 小端序 写入
+        commonInfo.writeShort(byteAddress[1]);
+        commonInfo.writeShort(byteAddress[0]);
 
-        // 4. IOA 地址（3 字节：使用 writeMedium 写入 3 字节整数）
+        // IOA 地址（3 字节：使用 writeMedium 写入 3 字节整数）
         ByteBuf ioaAddress = allocator.buffer(3);
         ioaAddress.writeMedium(iFrame.getAsduMessageDetail().getIOA().getFirst().getMessageAddress());
 
+        // QOI（1 字节：QualityDescriptors）
+        ByteBuf qoi = allocator.buffer(1);
+        qoi.writeByte(iFrame.getAsduMessageDetail().getIOA().getFirst().getQualityDescriptors());
+
+        List<ByteBuf> bufs = Arrays.asList(apcibuf, asduHeader, commonInfo, ioaAddress, qoi);
+
+        for (ByteBuf b : bufs) {
+            L += (short) b.readableBytes();
+        }
+
+        ByteBuf apciHeader = allocator.buffer(2);
+        apciHeader.writeByte(H);
+        apciHeader.writeByte((byte) (L & 0xFF));
+
         // 使用 CompositeByteBuf 拼接
         CompositeByteBuf composite = allocator.compositeBuffer();
-        composite.addComponent(true, apcibuf);       // 4 字节
-        composite.addComponent(true, asduHeader);    // 4 字节
-        composite.addComponent(true, commonInfo);    // 3 字节
-        composite.addComponent(true, ioaAddress);    // 3 字节
+        composite.addComponent(apciHeader);
+        composite.addComponent(apcibuf);       // 4 字节
+        composite.addComponent(asduHeader);    // 4 字节
+        composite.addComponent(commonInfo);    // 2 字节
+        composite.addComponent(ioaAddress);    // 3 字节
+        composite.addComponent(qoi);    // 1 字节
+
+        composite.writerIndex(composite.capacity());
+
+
+        // 防止重复发送，如果任务已完成或未提交过则跳过
+//        if (currentTask != null && !currentTask.isDone()) {
+//            return;
+//        }
+
+        log.info("发送 {} 启动帧", composite);
+        // 发送总召
+        ctx.writeAndFlush(composite);
+
+        // 提交任务并开启 T1 计时器
+        ScheduledFuture<?> newTask = executor.schedule(() -> {
+            try {
+                if (ctx.channel().isActive()) {
+                    log.warn("总召超时，关闭连接");
+                    ctx.close();
+                }
+            } catch (Exception e) {
+                log.error("执行超时任务异常", e);
+            }
+        }, Long.parseLong(config.getT1()), TimeUnit.SECONDS);
+
+        // 使用 CAS乐观锁非阻塞更新
+        interrogationCommandTask.compareAndSet(currentTask, newTask);
 
     }
 

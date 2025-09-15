@@ -20,12 +20,12 @@ public class IEC104_MessageInfo {
     private byte[] value;
 
     /**
-     * 质量描述符
+     * 召唤限定词(品质描述词)
      */
-    private final byte variableStructureQualifiers;
+    private final byte qualityDescriptors;
 
-    public IEC104_MessageInfo(int messageAddress, byte variableStructureQualifiers) {
+    public IEC104_MessageInfo(int messageAddress, byte qualityDescriptors) {
         this.messageAddress = messageAddress;
-        this.variableStructureQualifiers = variableStructureQualifiers;
+        this.qualityDescriptors = qualityDescriptors;
     }
 }

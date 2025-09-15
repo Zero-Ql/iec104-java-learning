@@ -5,6 +5,7 @@ import common.IEC104_TimeOutTaskManager;
 import common.IEC104_UFrameTaskManager;
 import config.piec104Config;
 import frame.IEC104_FrameBuilder;
+import frame.apci.IEC104_ApciMessageDetail;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
 import org.apache.logging.log4j.LogManager;
@@ -44,7 +45,7 @@ public class IEC104_ScheduledTaskPool {
     /**
      * i帧任务管理器
      */
-//    private final IEC104_IFrameTaskManager iFrameTaskManager;
+    private final IEC104_IFrameTaskManager iFrameTaskManager;
 
     /**
      * 超时任务管理器
@@ -60,8 +61,7 @@ public class IEC104_ScheduledTaskPool {
     /**
      * ScheduledTaskPool在Channel属性中的键值
      */
-    private static final AttributeKey<IEC104_ScheduledTaskPool> SCHEDULED_TASK_POOL_ATTRIBUTE_KEY =
-            AttributeKey.valueOf("scheduledTaskPool");
+    private static final AttributeKey<IEC104_ScheduledTaskPool> SCHEDULED_TASK_POOL_ATTRIBUTE_KEY = AttributeKey.valueOf("scheduledTaskPool");
 
     /**
      * 链路是否已启动标志
@@ -82,7 +82,7 @@ public class IEC104_ScheduledTaskPool {
         this.ctx = ctx;
         this.uFrameTaskManager = new IEC104_UFrameTaskManager(this, ctx, executor, channelTimeOut);
         this.timeOutTaskManager = new IEC104_TimeOutTaskManager(ctx, executor, channelTimeOut);
-//        this.iFrameTaskManager = new IEC104_IFrameTaskManager(this, ctx, executor, channelTimeOut, new IEC104_FrameBuilder());
+        this.iFrameTaskManager = new IEC104_IFrameTaskManager(ctx, executor, channelTimeOut);
     }
 
 
@@ -112,6 +112,16 @@ public class IEC104_ScheduledTaskPool {
      */
     public void sendTestFrame() {
         uFrameTaskManager.sendTestFrame();
+    }
+
+    /**
+     * 发送总召
+     * <p>
+     * 当收到启动帧回复后立即调用此方法
+     * 发送后启动T1计时器等待对方确认
+     */
+    public void sendInterrogationCommand(){
+        iFrameTaskManager.sendInterrogationCommand();
     }
 
 
