@@ -5,6 +5,7 @@ import lombok.Getter;
 import java.util.HashMap;
 import java.util.Map;
 
+@Getter
 public enum IEC104_TypeIdentifier {
 
     /**
@@ -125,12 +126,10 @@ public enum IEC104_TypeIdentifier {
     /**
      * 类型标识
      */
-    @Getter
     private final byte value;
     /**
      * NVA 长度
      */
-    @Getter
     private final int msgLen;
 
     private static final Map<Byte, IEC104_TypeIdentifier> valueTOEnums = new HashMap<>();

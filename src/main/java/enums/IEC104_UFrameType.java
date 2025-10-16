@@ -27,6 +27,7 @@ public enum IEC104_UFrameType {
         this.value = value;
     }
 
+    // 在类初始化时将本类的枚举值添加到 U_CONTROL_MAP 中
     static {
         for (IEC104_UFrameType type : values())
             U_CONTROL_MAP.put(type.value, type);
