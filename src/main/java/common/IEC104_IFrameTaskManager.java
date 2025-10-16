@@ -59,7 +59,7 @@ public class IEC104_IFrameTaskManager {
         short publicAddress = 1;
 
         IEC104_ApciMessageDetail apciMessageDetail = new IEC104_ApciMessageDetail();
-        List<frame.IEC104_MessageInfo> ioa = new ArrayList<>();
+        List<IEC104_MessageInfo> ioa = new ArrayList<>();
 
         // 通过原子引用获取当前任务
         ScheduledFuture<?> currentTask = interrogationCommandTask.get();
@@ -67,6 +67,7 @@ public class IEC104_IFrameTaskManager {
         ioa.add(new IEC104_MessageInfo(0, IEC104_VariableStructureQualifiers.C_IC_NA_1_QUALIFIER.getValue()));
         apciMessageDetail.setIEC104_controlField(new byte[]{0x00, 0x00, 0x00, 0x00});
 
+        // 构建帧对象
         IEC104_FrameBuilder iFrame = buildFrames(apciMessageDetail, ByteUtil.customStructureToBytes(sq, numIx, negative, test, causeTx, senderAddress), publicAddress, ioa);
 
         // 使用 PooledByteBufAllocator 优化内存池化

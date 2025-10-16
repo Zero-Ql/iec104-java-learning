@@ -28,6 +28,15 @@ public class ByteUtil {
         return bytes;
     }
 
+    public static short byteToShort(byte[] bytes) {
+        short value = 0;
+        for (int i = 0; i < 2; i++) {
+            short shift = (short) ((1 - i) * 8);
+            value += (bytes[i] & 0xFF) << shift;
+        }
+        return value;
+    }
+
     public static byte[] shortToByte(short value) {
         byte[] bytes = new byte[2];
         bytes[0] = (byte) ((value >> 8) & 0xFF);

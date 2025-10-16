@@ -17,6 +17,13 @@ public class IEC104Util {
         return U_CONTROL_MAP.get(key);
     }
 
+    public static IEC104_UFrameType getIControlType(byte[] control) {
+        if (control.length < controlLength)
+            return null;
+        int key = ByteBuffer.wrap(control).getInt();
+        return U_CONTROL_MAP.get(key);
+    }
+
     /**
      * 取消指定的定时任务
      * <p>
