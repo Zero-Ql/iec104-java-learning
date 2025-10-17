@@ -1,6 +1,5 @@
 package handler;
 
-import core.control.IEC104_controlField;
 import enums.IEC104_UFrameType;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerAdapter;
@@ -52,7 +51,7 @@ public abstract class IEC104_uFrameHandler extends ChannelHandlerAdapter {
         if (IEC104_checkTheDataHandler.isFrameStart(bytes[0])) return false;
         // 注：wireshark 的控制域字节从右向左
         // 控制域第0、1bit为 11
-        return IEC104_controlField.isTypeU(bytes);
+        return ByteUtil.isTypeU(bytes);
     }
 
     public abstract void uInstructionHandler(ChannelHandlerContext ctx, IEC104_UFrameType uFrameType);

@@ -7,6 +7,34 @@ import java.nio.ByteBuffer;
 
 public class ByteUtil {
 
+    /**
+     * 判断 U帧常量
+     */
+    private static final int uControlFrame = 0x3;
+
+    /**
+     * 判断 S帧常量
+     */
+    private static final int sControlFrame = 0x3;
+
+    /**
+     * 判断 I帧常量
+     */
+    private static final int iControlFrame = 0x0;
+
+    public static boolean isTypeU(byte[] bytes) {
+
+        return (bytes[2] & uControlFrame) == uControlFrame;
+    }
+
+    public static boolean isTypeS(byte[] bytes) {
+        return (bytes[2] & sControlFrame) == sControlFrame;
+    }
+
+    public static boolean isTypeI(byte[] bytes) {
+        return (bytes[2] | iControlFrame) == iControlFrame;
+    }
+
     public static byte[] subBytes(byte[] source, int startIndex, int offset) {
         byte[] result = new byte[offset];
         System.arraycopy(source, startIndex, result, 0, offset);

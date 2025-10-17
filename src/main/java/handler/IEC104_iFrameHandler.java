@@ -1,14 +1,16 @@
 package handler;
 
-import core.control.IEC104_controlField;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.log4j.Log4j2;
+import util.ByteUtil;
 
 @Log4j2
 public abstract class IEC104_iFrameHandler extends ChannelHandlerAdapter {
+
+    private short nextRx = 0;
 
     /**
      * 处理通道读取事件
@@ -24,9 +26,9 @@ public abstract class IEC104_iFrameHandler extends ChannelHandlerAdapter {
         var result = (ByteBuf) msg;
         // 存档
         result.markReaderIndex();
-        var bytes = new byte[6];
+        var bytes = new byte[2];
 
-        // 读取头、长度、控制域
+        // 读取头、长度
         result.readBytes(bytes);
 
         // 判断是否为 I 帧
@@ -34,6 +36,15 @@ public abstract class IEC104_iFrameHandler extends ChannelHandlerAdapter {
             var iFrameLen = IEC104_checkTheDataHandler.getFrameLength(bytes, 4);
 
             ByteBufAllocator allocator = ctx.alloc();
+
+            // 发送序号
+            var TxSeq = (result.readUnsignedShort() & 0x7FFF);
+            // 接收序号
+            var RxSeq = (result.readUnsignedShort() & 0x7FFF);
+
+            if (RxSeq != nextRx && TxSeq != ){
+
+            }
 
             var data = allocator.buffer(iFrameLen);
             result.readBytes(data);
@@ -58,7 +69,7 @@ public abstract class IEC104_iFrameHandler extends ChannelHandlerAdapter {
         if (IEC104_checkTheDataHandler.isFrameStart(bytes[0])) return false;
         // 注：wireshark 的控制域字节从右向左
         // 控制域第0bit为 0, 1bit 为 1
-        return IEC104_controlField.isTypeI(bytes);
+        return ByteUtil.isTypeI(bytes);
     }
 
     public abstract void iInstructionHandler(ChannelHandlerContext ctx, ByteBuf payload);

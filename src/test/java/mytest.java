@@ -1,4 +1,4 @@
-import core.control.IEC104_controlField;
+
 import enums.IEC104_TypeIdentifier;
 import enums.IEC104_VariableStructureQualifiers;
 import frame.IEC104_FrameBuilder;
