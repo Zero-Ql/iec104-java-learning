@@ -10,29 +10,28 @@ public class ByteUtil {
     /**
      * 判断 U帧常量
      */
-    private static final int uControlFrame = 0x3;
+    private static final int uControlFrame = 0x03;
 
     /**
      * 判断 S帧常量
      */
-    private static final int sControlFrame = 0x3;
+    private static final int sControlFrame = 0x03;
 
     /**
      * 判断 I帧常量
      */
-    private static final int iControlFrame = 0x0;
+    private static final int iControlFrame = 0x01;
 
-    public static boolean isTypeU(byte[] bytes) {
-
-        return (bytes[2] & uControlFrame) == uControlFrame;
+    public static boolean isTypeU(byte bytes) {
+        return (bytes & uControlFrame) == 3;
     }
 
-    public static boolean isTypeS(byte[] bytes) {
-        return (bytes[2] & sControlFrame) == sControlFrame;
+    public static boolean isTypeS(byte bytes) {
+        return (bytes & sControlFrame) == 1;
     }
 
-    public static boolean isTypeI(byte[] bytes) {
-        return (bytes[2] | iControlFrame) == iControlFrame;
+    public static boolean isTypeI(byte bytes) {
+        return (bytes & iControlFrame) == 0;
     }
 
     public static byte[] subBytes(byte[] source, int startIndex, int offset) {
@@ -76,6 +75,7 @@ public class ByteUtil {
     }
 
     public static byte[] customStructureToBytes(boolean sq, short numIx, boolean negative, boolean test, short causeTx, byte senderAddress) {
+
         numIx = (short) (sq ? numIx | (1 << 7) : numIx & ~(1 << 7));
         causeTx = (short) (negative ? causeTx | (1 << 7) : causeTx & ~(1 << 7));
         causeTx = (short) (test ? causeTx | (1 << 6) : causeTx & ~(1 << 6));

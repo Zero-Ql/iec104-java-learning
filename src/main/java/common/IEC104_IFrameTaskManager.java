@@ -87,7 +87,7 @@ public class IEC104_IFrameTaskManager {
 
         // 公共地址（2 字节：Public Address 2 字节）
         ByteBuf commonInfo = allocator.buffer(2);
-        byte [] byteAddress = ByteUtil.shortToByte(iFrame.getAsduMessageDetail().getPublicAddress());
+        byte[] byteAddress = ByteUtil.shortToByte(iFrame.getAsduMessageDetail().getPublicAddress());
         // 将 short 转为字节数组后转为 小端序 写入
         commonInfo.writeByte(byteAddress[1]);
         commonInfo.writeByte(byteAddress[0]);
@@ -128,8 +128,13 @@ public class IEC104_IFrameTaskManager {
 //        }
 
         log.info("发送 {} 启动帧", composite);
-        // 发送总召
-        ctx.writeAndFlush(composite);
+        try {
+            // 发送总召
+            ctx.writeAndFlush(composite);
+        } catch (Exception e) {
+            log.error("发送总召异常", e);
+            composite.release();
+        }
 
         // 提交任务并开启 T1 计时器
         ScheduledFuture<?> newTask = executor.schedule(() -> {

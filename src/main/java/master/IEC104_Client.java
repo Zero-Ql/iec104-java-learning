@@ -1,11 +1,12 @@
 package master;
 
+import handler.IEC104_SeqManager;
+import handler.IEC104_uFrameHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import master.handler.IEC104_uFrameMasterHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,7 +45,10 @@ public class IEC104_Client {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
-                            ch.pipeline().addLast("uFrame", new IEC104_uFrameMasterHandler());
+
+                            ch.pipeline().addLast("seqManager", new IEC104_SeqManager());
+
+                            ch.pipeline().addLast("uFrame", new IEC104_uFrameHandler());
 
 
                             // 添加 IEC104 编解码器和业务处理器
