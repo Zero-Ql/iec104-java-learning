@@ -1,5 +1,6 @@
 package util;
 
+import enums.IEC104_TypeIdentifier;
 import enums.IEC104_VariableStructureQualifiers;
 import frame.IEC104_MessageInfo;
 import frame.asdu.IEC104_AsduMessageDetail;
@@ -33,7 +34,7 @@ public class IEC104Util {
         byte variableStructureQualifiers = payload.readByte();
 
         // 获取 SQ 值
-        boolean sq = ~(variableStructureQualifiers >> 7) == 1 ? true:false;
+        boolean sq = (variableStructureQualifiers & 0x80) != 0;
         // 获取信息体对象数量
         short NumIx = (short) (variableStructureQualifiers & (~(1 << 7)));
 
@@ -43,31 +44,54 @@ public class IEC104Util {
         byte senderAddress = payload.readByte();
         // 公共地址
         short publicAddress = payload.readShort();
+
         // 切割剩余字节（当前版本 slice 不会增加引用计数）
         ByteBuf IOAList = payload.slice();
 
         // TODO 解析 IOA
-        // sq 为 true 连续
-        if (sq) {
-
-        }
-
-        while (payload.isReadable()) {
-            // TODO 如何读取IOA
-            if (IEC104_VariableStructureQualifiers.getQualifiers())
-        }
+        List<IEC104_MessageInfo> meslist = decoderIoa(typeIdentifier, sq, NumIx, IOAList);
 
         new IEC104_AsduMessageDetail.Builder(
 
         )
-        return ;
+        return;
     }
 
-    public static List<IEC104_MessageInfo> decoderIoa(short num, ByteBuf ioaList){
+    public static List<IEC104_MessageInfo> decoderIoa(byte typeIdentifier, boolean sq, short num, ByteBuf ioaList) {
+
+        List<IEC104_MessageInfo> meslist = new ArrayList<>();
+
         // 获取剩余字节长度
         int len = ioaList.readableBytes();
 
+        // sq 为 true 连续
+        if (sq) {
+            // 获取信息对象
+            IEC104_TypeIdentifier messageObject = IEC104_TypeIdentifier.getIEC104TypeIdentifier(typeIdentifier);
+            // 获取计算信息对象数量
+            int ioaNum = len / messageObject.getMsgLen();
 
+            // NumIx 必须等于实际计算的数量
+            if (num == ioaNum) {
+                // 读取第一个点号(3字节)
+                int messageAddress = ioaList.readUnsignedMedium();
+                for (int messageAddressAuto = messageAddress; messageAddressAuto < messageAddress + num; messageAddressAuto++) {
+                    // 读取信息对象值
+                    ByteBuf value = ioaList.readBytes(messageObject.getMsgLen());
+                    // 读取质量描述符
+                    byte qualityDescriptors = ioaList.readByte();
+
+                    IEC104_MessageInfo info = new IEC104_MessageInfo(
+                            messageAddressAuto,
+                            // 通过读取的 typeId 获取对应的信息对象，通过读取的 qualityDescriptors 及信息对象获取对应质量描述符
+                            IEC104_VariableStructureQualifiers.getQualifiers(messageObject, qualityDescriptors).getQualityDescriptors()
+                    );
+                    info.setValue(value);
+                    meslist.add(info);
+                }
+            }
+        }
+        return meslist;
     }
 
 }

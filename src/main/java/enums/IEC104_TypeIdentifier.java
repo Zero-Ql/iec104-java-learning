@@ -51,12 +51,12 @@ public enum IEC104_TypeIdentifier {
     /**
      * 遥测，短浮点数
      */
-    M_ME_NC_1(0x0D, 2),
+    M_ME_NC_1(0x0D, 4),
 
     /**
      * 带时标的遥测，短浮点数
      */
-    M_ME_TF_1(0x36, 2),
+    M_ME_TF_1(0x36, 4),
 
     /**
      * 单命令，遥控
