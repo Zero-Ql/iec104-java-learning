@@ -31,19 +31,25 @@ public class IEC104Util {
         byte typeIdentifier = payload.readByte();
         // 可变结构限定词
         byte variableStructureQualifiers = payload.readByte();
+
+        // 获取 SQ 值
+        boolean sq = ~(variableStructureQualifiers >> 7) == 1 ? true:false;
+        // 获取信息体对象数量
+        short NumIx = (short) (variableStructureQualifiers & (~(1 << 7)));
+
         // 传送原因
         byte transferReason = payload.readByte();
         // 发送方地址
         byte senderAddress = payload.readByte();
         // 公共地址
         short publicAddress = payload.readShort();
-
-        List<IEC104_MessageInfo> IOA = new ArrayList<>();
+        // 切割剩余字节（当前版本 slice 不会增加引用计数）
+        ByteBuf IOAList = payload.slice();
 
         // TODO 解析 IOA
-        if (~(variableStructureQualifiers >> 7) == 0) {
-            // 获取信息体对象数量
-            short NumIx = (short) (variableStructureQualifiers & (~(1 << 7)));
+        // sq 为 true 连续
+        if (sq) {
+
         }
 
         while (payload.isReadable()) {
@@ -54,6 +60,14 @@ public class IEC104Util {
         new IEC104_AsduMessageDetail.Builder(
 
         )
+        return ;
+    }
+
+    public static List<IEC104_MessageInfo> decoderIoa(short num, ByteBuf ioaList){
+        // 获取剩余字节长度
+        int len = ioaList.readableBytes();
+
+
     }
 
 }

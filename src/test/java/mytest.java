@@ -5,6 +5,9 @@ import frame.IEC104_FrameBuilder;
 import frame.IEC104_MessageInfo;
 import frame.apci.IEC104_ApciMessageDetail;
 import frame.asdu.IEC104_AsduMessageDetail;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.PooledByteBufAllocator;
 import org.ini4j.Ini;
 import org.junit.Test;
 import util.ByteUtil;
@@ -15,8 +18,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static enums.IEC104_UFrameType.U_CONTROL_MAP;
 
 public class mytest {
     @Test
@@ -50,13 +51,12 @@ public class mytest {
     public void demo3() {
         byte[] bytes = new byte[]{(byte) 0x83, (byte) 0x00, (byte) 0x00, (byte) 0x00};
         int key = ByteBuffer.wrap(bytes).getInt();
-        System.out.println(U_CONTROL_MAP.get(key));
+//        System.out.println(U_CONTROL_MAP.get(key));
         System.out.println((bytes[0] & 0x003) == 0x003);
     }
 
     @Test
     public void demo4() {
-        // TODO 计算接收发送序号
 //        new b().test1();
 
         // 发送
@@ -138,6 +138,18 @@ public class mytest {
 
         var iEC104_FrameBuilder = new IEC104_FrameBuilder.Builder(iEC104_apciMessageDetail).setAsduMessageDetail(iEC104_asduMessageDetail).build();
         System.out.println(iEC104_FrameBuilder);
+    }
+
+    @Test
+    public void demo7(){
+        ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer(8);
+        System.out.println("after alloc: " + buf.refCnt()); // 1
+
+        ByteBuf a = buf.slice();
+        System.out.println("after 1st slice："+ a.refCnt());
+
+        buf.release();
+        System.out.println("after 2nd release: " + a.refCnt()); // 0 → 内存已回收
     }
 }
 
