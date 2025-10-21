@@ -1,11 +1,9 @@
 package util;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-
-import java.nio.ByteBuffer;
-
 public class ByteUtil {
+
+    private static final int SIGN_BIT_MASK = 1 << 7;
+    private static final int TEST_BIT_MASK = 1 << 6;
 
     /**
      * 判断 U帧常量
@@ -74,12 +72,14 @@ public class ByteUtil {
         return bytes;
     }
 
-    public static byte[] customStructureToBytes(boolean sq, short numIx, boolean negative, boolean test, short causeTx, byte senderAddress) {
+    private static short setBit(short vessel, int bitMask, boolean value) {
+        return (short) (value ? vessel | bitMask : vessel & ~bitMask);
+    }
 
-        //
-        numIx = (short) (sq ? numIx | (1 << 7) : numIx & ~(1 << 7));
-        causeTx = (short) (negative ? causeTx | (1 << 7) : causeTx & ~(1 << 7));
-        causeTx = (short) (test ? causeTx | (1 << 6) : causeTx & ~(1 << 6));
+    public static byte[] customStructureToBytes(boolean sq, short numIx, boolean negative, boolean test, short causeTx, byte senderAddress) {
+        numIx = setBit(numIx, SIGN_BIT_MASK, sq);
+        causeTx = setBit(causeTx, SIGN_BIT_MASK, negative);
+        causeTx = setBit(causeTx, TEST_BIT_MASK, test);
 
         byte[] result = new byte[3];
         result[0] = (byte) numIx;

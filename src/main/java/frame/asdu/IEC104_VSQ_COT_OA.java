@@ -7,16 +7,16 @@ import lombok.Setter;
 public class IEC104_VSQ_COT_OA {
     private final boolean SQ;
     private final short NumIx;
-    private final boolean Negative;
     private final boolean Test;
+    private final boolean Negative;
     private final short CauseTx;
     private final byte SenderAddress;
 
     private IEC104_VSQ_COT_OA(Builder builder) {
         this.SQ = builder.SQ;
         this.NumIx = builder.NumIx;
-        this.Negative = builder.Negative;
         this.Test = builder.Test;
+        this.Negative = builder.Negative;
         this.CauseTx = builder.CauseTx;
         this.SenderAddress = builder.SenderAddress;
     }
@@ -24,18 +24,23 @@ public class IEC104_VSQ_COT_OA {
     public static class Builder {
         private final boolean SQ;
         private final short NumIx;
-        private final boolean Negative;
         private final boolean Test;
+        private final boolean Negative;
         private final short CauseTx;
         private final byte SenderAddress;
 
-        public Builder(byte VSQ, short COT, byte OA) {
-            this.SQ = (VSQ << 7) == 0x80;
-            this.NumIx = (short) (VSQ & ~(1 << 7));
-            this.Negative = Negative;
-            this.Test = Test;
-            this.CauseTx = CauseTx;
-            this.SenderAddress = SenderAddress;
+        public Builder(byte VSQ, byte COT, byte OA) {
+            // 提取第7位
+            this.SQ = (VSQ & 0x80) != 0;
+            // 提取第6-0位
+            this.NumIx = (short) (VSQ & 0x7F);
+            // 提取第7位
+            this.Test = (COT & 0x80) != 0;
+            // 提取第6位
+            this.Negative = (COT & 0x40) != 0;
+            // 提取第5-0位
+            this.CauseTx = (short) (COT & 0x3F);
+            this.SenderAddress = OA;
         }
 
         public IEC104_VSQ_COT_OA build() {
