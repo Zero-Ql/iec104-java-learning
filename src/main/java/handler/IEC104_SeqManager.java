@@ -3,7 +3,6 @@ package handler;
 import frame.apci.event.UFrameEvent;
 import frame.asdu.IEC104_AsduMessageDetail;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.log4j.Log4j2;
@@ -46,6 +45,7 @@ public class IEC104_SeqManager extends ChannelHandlerAdapter {
                 boolean test_con = (type & 0x83) == 0x83;
                 boolean start_con = (type & 0x0B) == 0x0B;
                 boolean stop_con = (type & 0x23) == 0x23;
+                // 传递U帧事件给下一个处理器
                 ctx.fireUserEventTriggered(UFrameEvent.of(
                         type,
                         test,
@@ -74,6 +74,9 @@ public class IEC104_SeqManager extends ChannelHandlerAdapter {
 
                 IEC104_AsduMessageDetail asduMessageDetail = IEC104Util.decodeAsdu(
                         frame.slice(6, frame.readableBytes() - 6));
+
+                // 传递I帧asdu给下一个处理器
+                ctx.fireChannelRead(asduMessageDetail);
             }
         } finally {
             frame.release();

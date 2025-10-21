@@ -1,13 +1,12 @@
 package master;
 
-import frame.apci.IEC104_ApciMessageDetail;
 import core.scheduler.IEC104_ScheduledTaskPool;
+import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class IEC104_ClientHandler extends SimpleChannelInboundHandler<IEC104_ApciMessageDetail> {
+public class IEC104_ClientHandler extends ChannelHandlerAdapter {
     private static final Logger log = LogManager.getLogger(IEC104_ClientHandler.class);
 
     /**
@@ -24,20 +23,6 @@ public class IEC104_ClientHandler extends SimpleChannelInboundHandler<IEC104_Apc
         // 获取 IEC104_ScheduledTaskPool 并调用 sendStartFrame() 发送启动帧
         IEC104_ScheduledTaskPool.getFromChannel(ctx).sendStartFrame();
         IEC104_ScheduledTaskPool.getFromChannel(ctx).sendTestFrame();
-    }
-
-    /**
-     * 处理接收到的消息
-     * <p>
-     * 当通道接收到APDU消息时调用此方法进行处理
-     *
-     * @param channelHandlerContext 通道处理上下文
-     * @param IEC104ApduMessageDetail     APDU消息详情对象
-     * @throws Exception 处理消息过程中可能抛出的异常
-     */
-    @Override
-    protected void messageReceived(ChannelHandlerContext channelHandlerContext, IEC104_ApciMessageDetail IEC104ApduMessageDetail) throws Exception {
-        IEC104ApduMessageDetail.toString();
     }
 
     /**

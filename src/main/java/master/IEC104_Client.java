@@ -1,5 +1,6 @@
 package master;
 
+import core.codec.IEC104_Decoder;
 import handler.IEC104_SeqManager;
 import handler.IEC104_uFrameHandler;
 import io.netty.bootstrap.Bootstrap;
@@ -7,6 +8,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import master.handler.IEC104_iFrameMasterHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -46,10 +48,13 @@ public class IEC104_Client {
                         @Override
                         protected void initChannel(SocketChannel ch) {
 
+                            ch.pipeline().addLast("decoder", new IEC104_Decoder());
+
                             ch.pipeline().addLast("seqManager", new IEC104_SeqManager());
 
                             ch.pipeline().addLast("uFrame", new IEC104_uFrameHandler());
 
+                            ch.pipeline().addLast("iFrame", new IEC104_iFrameMasterHandler());
 
                             // 添加 IEC104 编解码器和业务处理器
 //                            ch.pipeline().addLast("decoder", new IEC104_Decoder());

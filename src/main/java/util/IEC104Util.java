@@ -97,7 +97,7 @@ public class IEC104Util {
                                     Integer上限：%d
                             """.formatted(messageAddress, Integer.MAX_VALUE - num));
                 }
-                for (int messageAddressAuto = messageAddress; messageAddressAuto < messageAddress + num; messageAddressAuto++) {
+                for (int offset = messageAddress; offset < messageAddress + num; offset++) {
                     if (ioaList.readableBytes() < messageObject.getMsgLen() + 1) {
 
                         throw new CorruptedFrameException("""
@@ -111,7 +111,7 @@ public class IEC104Util {
                     ByteBuf value = ioaList.readBytes(messageObject.getMsgLen());
                     // 读取质量描述符
                     byte qualityDescriptors = ioaList.readByte();
-                    meslist.add(createInfo(messageAddressAuto, value, qualityDescriptors, messageObject));
+                    meslist.add(createInfo(offset, value, qualityDescriptors, messageObject));
                 }
             } else {
                 for (int offset = 0; offset < num; offset++) {
@@ -156,5 +156,4 @@ public class IEC104Util {
                     """).formatted(messageObject, messageAddressAuto, value, qualityDescriptors), e);
         }
     }
-
 }

@@ -111,7 +111,7 @@ public enum IEC104_TypeIdentifier {
     /**
      * 总召唤
      */
-    C_IC_NA_1(0x64, 1),
+    C_IC_NA_1(0x64, 0),
 
     /**
      * 时钟同步命令

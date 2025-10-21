@@ -64,7 +64,7 @@ public class IEC104_IFrameTaskManager {
         // 通过原子引用获取当前任务
         ScheduledFuture<?> currentTask = interrogationCommandTask.get();
 
-        ioa.add(new IEC104_MessageInfo(0, IEC104_VariableStructureQualifiers.C_IC_NA_1_QUALIFIER.getValue()));
+        ioa.add(new IEC104_MessageInfo(0, IEC104_VariableStructureQualifiers.C_IC_NA_1_QUALIFIER.getQualityDescriptors()));
         apciMessageDetail.setIEC104_controlField(new byte[]{0x00, 0x00, 0x00, 0x00});
 
         // 构建帧对象
