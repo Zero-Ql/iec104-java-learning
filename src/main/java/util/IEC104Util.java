@@ -9,6 +9,7 @@ import io.netty.handler.codec.CorruptedFrameException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ScheduledFuture;
 
 public class IEC104Util {
@@ -68,7 +69,8 @@ public class IEC104Util {
         try {
             if (num <= 0 || num > 127) throw new IllegalArgumentException("num out of range: " + num);
             // 获取信息对象
-            IEC104_TypeIdentifier messageObject = IEC104_TypeIdentifier.getIEC104TypeIdentifier(typeIdentifier);
+            IEC104_TypeIdentifier messageObject = IEC104_TypeIdentifier.getIEC104TypeIdentifier(typeIdentifier)
+                    .orElseThrow(() -> new NoSuchElementException("无法解析的类型标识：" + typeIdentifier));
             /*
               获取计算信息对象理论长度
               计算公式：
