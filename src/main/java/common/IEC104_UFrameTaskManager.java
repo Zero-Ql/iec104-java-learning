@@ -1,6 +1,6 @@
 package common;
 
-import config.piec104Config;
+import config.Piec104Config;
 import core.scheduler.IEC104_ScheduledTaskPool;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.logging.log4j.LogManager;
@@ -16,12 +16,12 @@ public class IEC104_UFrameTaskManager {
     private final IEC104_ScheduledTaskPool parent;
     private final ChannelHandlerContext ctx;
     private final ScheduledExecutorService executor;
-    private final piec104Config config;
+    private final Piec104Config config;
     private final AtomicReference<ScheduledFuture<?>> startTask = new AtomicReference<>();
     private final AtomicReference<ScheduledFuture<?>> t3Task = new AtomicReference<>();
     private static final Logger log = LogManager.getLogger(IEC104_UFrameTaskManager.class);
 
-    public IEC104_UFrameTaskManager(IEC104_ScheduledTaskPool parent, ChannelHandlerContext ctx, ScheduledExecutorService executor, piec104Config config) {
+    public IEC104_UFrameTaskManager(IEC104_ScheduledTaskPool parent, ChannelHandlerContext ctx, ScheduledExecutorService executor, Piec104Config config) {
         this.parent = parent;
         this.ctx = ctx;
         this.executor = executor;

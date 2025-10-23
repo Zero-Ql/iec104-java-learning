@@ -1,6 +1,6 @@
 package common;
 
-import config.piec104Config;
+import config.Piec104Config;
 import enums.IEC104_TypeIdentifier;
 import enums.IEC104_VariableStructureQualifiers;
 import frame.IEC104_FrameBuilder;
@@ -28,11 +28,11 @@ public class IEC104_IFrameTaskManager {
     private static final Logger log = LogManager.getLogger(IEC104_IFrameTaskManager.class);
     private final ChannelHandlerContext ctx;
     private final ScheduledExecutorService executor;
-    private final piec104Config config;
+    private final Piec104Config config;
 
     private final AtomicReference<ScheduledFuture<?>> interrogationCommandTask = new AtomicReference<>();
 
-    public IEC104_IFrameTaskManager(ChannelHandlerContext ctx, ScheduledExecutorService executor, piec104Config config) {
+    public IEC104_IFrameTaskManager(ChannelHandlerContext ctx, ScheduledExecutorService executor, Piec104Config config) {
         this.ctx = ctx;
         this.executor = executor;
         this.config = config;

@@ -1,4 +1,5 @@
 
+import config.Piec104Config;
 import enums.IEC104_TypeIdentifier;
 import enums.IEC104_VariableStructureQualifiers;
 import frame.IEC104_FrameBuilder;
@@ -75,13 +76,8 @@ public class mytest {
 
     @Test
     public void demo5() {
-        try {
-            Ini ini = new Ini(new File("src/test/resources/piec104.ini"));
-            var t1 = ini.get("test", "t1");
-            System.out.println(t1);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        Piec104Config cfg = Piec104Config.getInstance();
+        System.out.println(cfg.getT2() + " " + cfg.getW());
     }
 
     /**
@@ -89,64 +85,64 @@ public class mytest {
      */
     @Test
     public void demo6() {
-
-        List<IEC104_MessageInfo> ioa = new ArrayList<>();
-        var iEC104_apciMessageDetail = new IEC104_ApciMessageDetail();
-        boolean sq = false;
-        short numIx = 1;
-
-        boolean negative = false;
-        boolean test = false;
-        short causeTx = 6;
-
-        byte variableStructureQualifiers;
-        byte transferReason;
-
-        byte senderAddress = 0;
-        short publicAddress = 1;
-
-        ioa.add(new IEC104_MessageInfo(0, IEC104_VariableStructureQualifiers.C_IC_NA_1_QUALIFIER.getValue()));
-        iEC104_apciMessageDetail.setIEC104_controlField(new byte[]{0x00, 0x00, 0x00, 0x00});
-
-        if (sq) {
-            numIx |= (1 << 7);
-        } else {
-            numIx &= ~(1 << 7);
-        }
-
-        if (negative) {
-            causeTx |= (1 << 7);
-            if (test) {
-                causeTx |= (1 << 6);
-            } else {
-                causeTx &= ~(1 << 6);
-            }
-        } else {
-            causeTx &= ~(1 << 7);
-        }
-
-        variableStructureQualifiers = (byte)numIx;
-        transferReason = (byte)causeTx;
-
-        var iEC104_asduMessageDetail = new IEC104_AsduMessageDetail.Builder(
-                IEC104_TypeIdentifier.C_IC_NA_1.getValue(),
-                variableStructureQualifiers,
-                transferReason,
-                senderAddress,
-                publicAddress,
-                ioa).build();
-
-        var iEC104_FrameBuilder = new IEC104_FrameBuilder.Builder(iEC104_apciMessageDetail).setAsduMessageDetail(iEC104_asduMessageDetail).build();
-        System.out.println(iEC104_FrameBuilder);
+//
+//        List<IEC104_MessageInfo> ioa = new ArrayList<>();
+//        var iEC104_apciMessageDetail = new IEC104_ApciMessageDetail();
+//        boolean sq = false;
+//        short numIx = 1;
+//
+//        boolean negative = false;
+//        boolean test = false;
+//        short causeTx = 6;
+//
+//        byte variableStructureQualifiers;
+//        byte transferReason;
+//
+//        byte senderAddress = 0;
+//        short publicAddress = 1;
+//
+//        ioa.add(new IEC104_MessageInfo(0, IEC104_VariableStructureQualifiers.C_IC_NA_1_QUALIFIER.getValue()));
+//        iEC104_apciMessageDetail.setIEC104_controlField(new byte[]{0x00, 0x00, 0x00, 0x00});
+//
+//        if (sq) {
+//            numIx |= (1 << 7);
+//        } else {
+//            numIx &= ~(1 << 7);
+//        }
+//
+//        if (negative) {
+//            causeTx |= (1 << 7);
+//            if (test) {
+//                causeTx |= (1 << 6);
+//            } else {
+//                causeTx &= ~(1 << 6);
+//            }
+//        } else {
+//            causeTx &= ~(1 << 7);
+//        }
+//
+//        variableStructureQualifiers = (byte) numIx;
+//        transferReason = (byte) causeTx;
+//
+//        var iEC104_asduMessageDetail = new IEC104_AsduMessageDetail.Builder(
+//                IEC104_TypeIdentifier.C_IC_NA_1.getValue(),
+//                variableStructureQualifiers,
+//                transferReason,
+//                senderAddress,
+//                publicAddress,
+//                ioa).build();
+//
+//        var iEC104_FrameBuilder = new IEC104_FrameBuilder.Builder(iEC104_apciMessageDetail).setAsduMessageDetail(iEC104_asduMessageDetail).build();
+//        System.out.println(iEC104_FrameBuilder);
     }
 
     @Test
-    public void demo7(){
+    public void demo7() {
         ByteBuf buf = PooledByteBufAllocator.DEFAULT.buffer(8);
         System.out.println("after alloc: " + buf.refCnt()); // 1
 
         ByteBuf a = buf.slice();
-        System.out.println("after 1st slice："+ a.refCnt());
+        System.out.println("after 1st slice：" + a.refCnt());
 
         buf.release();
         System.out.println("after 2nd release: " + a.refCnt()); // 0 → 内存已回收

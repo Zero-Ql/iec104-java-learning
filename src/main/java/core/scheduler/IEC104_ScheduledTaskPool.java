@@ -1,9 +1,10 @@
 package core.scheduler;
 
 import common.IEC104_IFrameTaskManager;
+import common.IEC104_SFrameTaskManager;
 import common.IEC104_TimeOutTaskManager;
 import common.IEC104_UFrameTaskManager;
-import config.piec104Config;
+import config.Piec104Config;
 import frame.IEC104_FrameBuilder;
 import frame.apci.IEC104_ApciMessageDetail;
 import io.netty.channel.ChannelHandlerContext;
@@ -28,11 +29,6 @@ public class IEC104_ScheduledTaskPool {
     private static final Logger log = LogManager.getLogger(IEC104_ScheduledTaskPool.class);
 
     /**
-     * 通道处理器上下文对象
-     */
-    private final ChannelHandlerContext ctx;
-
-    /**
      * 保留2个线程的线程池对象
      */
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
@@ -41,6 +37,11 @@ public class IEC104_ScheduledTaskPool {
      * u帧任务管理器
      */
     private final IEC104_UFrameTaskManager uFrameTaskManager;
+
+    /**
+     * s帧任务管理器
+     */
+    private final IEC104_SFrameTaskManager sFrameTaskManager;
 
     /**
      * i帧任务管理器
@@ -56,7 +57,7 @@ public class IEC104_ScheduledTaskPool {
     /**
      * 获取通道配置实例
      */
-    private static final piec104Config channelTimeOut = new piec104Config();
+    private static final Piec104Config piec104Config = Piec104Config.getInstance();
 
     /**
      * ScheduledTaskPool在Channel属性中的键值
@@ -79,10 +80,10 @@ public class IEC104_ScheduledTaskPool {
      * @param ctx 通道处理器上下文
      */
     public IEC104_ScheduledTaskPool(ChannelHandlerContext ctx) {
-        this.ctx = ctx;
-        this.uFrameTaskManager = new IEC104_UFrameTaskManager(this, ctx, executor, channelTimeOut);
-        this.timeOutTaskManager = new IEC104_TimeOutTaskManager(ctx, executor, channelTimeOut);
-        this.iFrameTaskManager = new IEC104_IFrameTaskManager(ctx, executor, channelTimeOut);
+        this.uFrameTaskManager = new IEC104_UFrameTaskManager(this, ctx, executor, piec104Config);
+        this.timeOutTaskManager = new IEC104_TimeOutTaskManager(ctx, executor, piec104Config);
+        this.sFrameTaskManager = new IEC104_SFrameTaskManager(ctx, executor, piec104Config);
+        this.iFrameTaskManager = new IEC104_IFrameTaskManager(ctx, executor, piec104Config);
     }
 
 
@@ -104,6 +105,10 @@ public class IEC104_ScheduledTaskPool {
         started = true;
     }
 
+    public void sendSFrame(short recvOrdinal){
+        sFrameTaskManager.sendSFrame(recvOrdinal);
+    }
+
     /**
      * 发送测试帧
      * <p>
@@ -120,7 +125,7 @@ public class IEC104_ScheduledTaskPool {
      * 当收到启动帧回复后立即调用此方法
      * 发送后启动T1计时器等待对方确认
      */
-    public void sendInterrogationCommand(){
+    public void sendInterrogationCommand() {
         iFrameTaskManager.sendInterrogationCommand();
     }
 

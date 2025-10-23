@@ -25,6 +25,7 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
     protected void messageReceived(ChannelHandlerContext ctx, IEC104_AsduMessageDetail asdu) {
         if (asdu instanceof IEC104_AsduMessageDetail payload) {
             byte typeIdentifier = payload.getTypeIdentifier();
+            // 通过构建器创建 IEC104_VSQ_COT_OA 对象
             IEC104_VSQ_COT_OA vsqCotOa = new IEC104_VSQ_COT_OA.Builder(
                     payload.getVariableStructureQualifiers(),
                     payload.getTransferReason(),
@@ -56,11 +57,13 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
                     typeIdentifier, sq, numIx, test, negative, causeTx, senderAddress, publicAddress
             );
             log.info(headerLog);
-            // 如果是总召响应
+            // 如果类型标识为总召(0x64)且传送原因为激活确认(0x07)
+            // 如果无法解析类型标识或传送原因则抛出异常
             if (IEC104_TypeIdentifier.getIEC104TypeIdentifier(typeIdentifier)
                     .orElseThrow(() -> new NoSuchElementException("无法解析的类型标识：" + typeIdentifier))
                     .getValue() == IEC104_TypeIdentifier.C_IC_NA_1.getValue() &&
-                    CauseOfTransmission.of(causeTx).orElseThrow().getCot() == CauseOfTransmission.ACT_CON.getCot()) {
+                    CauseOfTransmission.of(causeTx).orElseThrow(() -> new NoSuchElementException("无法解析的传送原因：" + causeTx))
+                            .getCot() == CauseOfTransmission.ACT_CON.getCot()) {
 
             }
             parserYc(IOA);
@@ -76,15 +79,15 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
         }
         for (IEC104_MessageInfo messageInfo : IOA) {
             try {
-                final ByteBuf value = ReferenceCountUtil.releaseLater(messageInfo.getValue());
+                final ByteBuf value = messageInfo.getValue();
                 if (value != null)
                     log.info("IOA：{}    Value：{}    QualityDescriptors：{} ",
                             messageInfo.getMessageAddress(),
                             value.readFloat(),
                             messageInfo.getQualityDescriptors());
             } finally {
-                final ByteBuf value = ReferenceCountUtil.releaseLater(messageInfo.getValue());
-                if (value != null) value.release();
+                // 使用 releaseLater 确保资源在适当时候被释放
+                ReferenceCountUtil.releaseLater(messageInfo.getValue());
             }
         }
     }
