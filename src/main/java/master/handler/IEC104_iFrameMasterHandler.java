@@ -2,6 +2,7 @@ package master.handler;
 
 import enums.CauseOfTransmission;
 import enums.IEC104_TypeIdentifier;
+import frame.IEC104_FrameBuilder;
 import frame.IEC104_MessageInfo;
 import frame.asdu.IEC104_AsduMessageDetail;
 import frame.asdu.IEC104_VSQ_COT_OA;
@@ -59,24 +60,53 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
             log.info(headerLog);
             // 如果类型标识为总召(0x64)且传送原因为激活确认(0x07)
             // 如果无法解析类型标识或传送原因则抛出异常
-            if (IEC104_TypeIdentifier.getIEC104TypeIdentifier(typeIdentifier)
+
+            byte typeId = IEC104_TypeIdentifier.getIEC104TypeIdentifier(typeIdentifier)
                     .orElseThrow(() -> new NoSuchElementException("无法解析的类型标识：" + typeIdentifier))
-                    .getValue() == IEC104_TypeIdentifier.C_IC_NA_1.getValue() &&
+                    .getValue();
+            if ( typeId == IEC104_TypeIdentifier.C_IC_NA_1.getValue() &&
                     CauseOfTransmission.of(causeTx).orElseThrow(() -> new NoSuchElementException("无法解析的传送原因：" + causeTx))
                             .getCot() == CauseOfTransmission.ACT_CON.getCot()) {
-
+                // 解析总召响应
+                parserGeneralSummons(IOA);
             }
-            parserYc(IOA);
+            //
+            if (typeId == IEC104_TypeIdentifier.M_ME_NC_1.getValue() ||
+                    typeId == IEC104_TypeIdentifier.M_ME_NA_1.getValue() ||
+                    typeId == IEC104_TypeIdentifier.M_ME_NB_1.getValue() &&
+            ) {
+                parserYc(IOA);
+            }
         }
     }
 
     /**
+     * 解析总召
+     *
+     * @param IOA 遥测IOA列表
+     */
+    private void parserGeneralSummons(List<IEC104_MessageInfo> IOA) {
+        if (IOA == null || IOA.isEmpty()) return;
+        // 获取第一个元素
+        final IEC104_MessageInfo messageInfo = IOA.getFirst();
+        try {
+            log.info("IOA：{}    QualityDescriptors：{} ",
+                    messageInfo.getMessageAddress(),
+                    messageInfo.getQualityDescriptors());
+        } finally {
+            // 使用 releaseLater 确保资源在适当时候被释放
+            // 总召的 value 为空的 ByteBuf 缓冲区
+            ReferenceCountUtil.releaseLater(messageInfo.getValue());
+        }
+    }
+
+    /**
+     * 解析遥测
+     *
      * @param IOA 遥测IOA列表
      */
     private void parserYc(List<IEC104_MessageInfo> IOA) {
-        if (IOA == null) {
-            return;
-        }
+        if (IOA == null) return;
         for (IEC104_MessageInfo messageInfo : IOA) {
             try {
                 final ByteBuf value = messageInfo.getValue();

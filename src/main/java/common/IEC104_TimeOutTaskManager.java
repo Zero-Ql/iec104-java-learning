@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class IEC104_TimeOutTaskManager {
     private final ChannelHandlerContext ctx;
     private final ScheduledExecutorService executor;
-    private final Piec104Config config;
+    private final long t1;
     private final AtomicReference<ScheduledFuture<?>> t1Task = new AtomicReference<>();
 
     private static final Logger log = LogManager.getLogger(IEC104_TimeOutTaskManager.class);
@@ -22,14 +22,14 @@ public class IEC104_TimeOutTaskManager {
     public IEC104_TimeOutTaskManager(ChannelHandlerContext ctx, ScheduledExecutorService executor, Piec104Config config) {
         this.ctx = ctx;
         this.executor = executor;
-        this.config = config;
+        this.t1 = Long.parseLong(config.getT1());
     }
 
     /**
      * 启动 T1 任务
      */
     public void startT1Timer() {
-        ScheduledFuture<?> task = t1Task.get();
+        ScheduledFuture<?> task = t1Task.getAndSet(null);
         IEC104Util.isCancel(task);
         ScheduledFuture<?> newTask = executor.schedule(() -> {
             try {
@@ -38,7 +38,7 @@ public class IEC104_TimeOutTaskManager {
             } catch (Exception e) {
                 log.error("执行超时任务异常", e);
             }
-        }, Long.parseLong(config.getT1()), TimeUnit.SECONDS);
+        }, t1, TimeUnit.SECONDS);
         // 使用 CAS乐观锁非阻塞更新
         t1Task.compareAndSet(task, newTask);
     }
@@ -47,6 +47,6 @@ public class IEC104_TimeOutTaskManager {
      * 取消 T1 任务
      */
     public void cancelT1Timer() {
-        IEC104Util.isCancel(t1Task.get());
+        IEC104Util.isCancel(t1Task.getAndSet(null));
     }
 }

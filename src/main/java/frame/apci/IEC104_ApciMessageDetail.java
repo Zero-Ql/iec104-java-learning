@@ -12,14 +12,17 @@ public class IEC104_ApciMessageDetail {
 
     /**
      * 控制域 固定 四字节
+     * 发送 两字节
      */
-    private byte[] iEC104_controlField;
+    private short sendOrdinal;
 
-    public void setTxRxData(byte[] bytes) {
-        this.iEC104_controlField[0] = bytes[0];
-        this.iEC104_controlField[1] = bytes[1];
-        this.iEC104_controlField[2] = bytes[2];
-        this.iEC104_controlField[3] = bytes[3];
+    /**
+     * 接收 两字节
+     */
+    private short recvOrdinal;
+
+    public IEC104_ApciMessageDetail(short sendOrdinal, short recvOrdinal){
+        this.sendOrdinal = sendOrdinal;
+        this.recvOrdinal = recvOrdinal;
     }
-
 }

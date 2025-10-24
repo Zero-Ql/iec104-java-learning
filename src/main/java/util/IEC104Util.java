@@ -10,6 +10,7 @@ import io.netty.handler.codec.CorruptedFrameException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 
 public class IEC104Util {
@@ -28,6 +29,10 @@ public class IEC104Util {
         }
     }
 
+    /**
+     * @param payload ASDU的有效载荷
+     * @return 返回解析完成的 ASDU 对象
+     */
     public static IEC104_AsduMessageDetail decodeAsdu(ByteBuf payload) {
 
         // 类型标识符
@@ -62,6 +67,13 @@ public class IEC104Util {
         ).build();
     }
 
+    /**
+     * @param typeIdentifier 类型标识
+     * @param sq             可变结构限定词
+     * @param num            IOA数量
+     * @param ioaList        有效载荷的 ByteBuf 对象
+     * @return 信息对象 List 列表
+     */
     private static List<IEC104_MessageInfo> decoderIoa(byte typeIdentifier, boolean sq, short num, ByteBuf ioaList) {
 
         List<IEC104_MessageInfo> meslist = new ArrayList<>();
@@ -126,6 +138,7 @@ public class IEC104Util {
                                 """.formatted(ioaList.readableBytes(), messageObject.getMsgLen() + 4, ioaList.getBytes(ioaList.readerIndex(), new byte[ioaList.readableBytes()])));
                     }
                     int messageAddress = ioaList.readUnsignedMedium();
+                    // 根据 typeId(类型标识) 获取对应的 value 长度; readBytes 传入 0 则什么都不做
                     ByteBuf value = ioaList.readBytes(messageObject.getMsgLen());
                     byte qualityDescriptors = ioaList.readByte();
                     meslist.add(createInfo(messageAddress, value, qualityDescriptors, messageObject));
@@ -139,6 +152,13 @@ public class IEC104Util {
         }
     }
 
+    /**
+     * @param messageAddressAuto IOA
+     * @param value              值
+     * @param qualityDescriptors 质量描述符
+     * @param messageObject      消息对象
+     * @return 信息对象
+     */
     private static IEC104_MessageInfo createInfo(int messageAddressAuto, ByteBuf value, byte qualityDescriptors, IEC104_TypeIdentifier messageObject) {
         try {
             IEC104_MessageInfo info = new IEC104_MessageInfo(

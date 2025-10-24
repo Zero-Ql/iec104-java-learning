@@ -25,17 +25,18 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class IEC104_IFrameTaskManager {
 
-    private static final Logger log = LogManager.getLogger(IEC104_IFrameTaskManager.class);
+    private final long t1;
     private final ChannelHandlerContext ctx;
     private final ScheduledExecutorService executor;
-    private final Piec104Config config;
+
+    private static final Logger log = LogManager.getLogger(IEC104_IFrameTaskManager.class);
 
     private final AtomicReference<ScheduledFuture<?>> interrogationCommandTask = new AtomicReference<>();
 
     public IEC104_IFrameTaskManager(ChannelHandlerContext ctx, ScheduledExecutorService executor, Piec104Config config) {
         this.ctx = ctx;
         this.executor = executor;
-        this.config = config;
+        this.t1 = Long.parseLong(config.getT1());
     }
 
     public void sendIFrame() {
@@ -58,14 +59,13 @@ public class IEC104_IFrameTaskManager {
         byte senderAddress = 0;
         short publicAddress = 1;
 
-        IEC104_ApciMessageDetail apciMessageDetail = new IEC104_ApciMessageDetail();
+        IEC104_ApciMessageDetail apciMessageDetail = new IEC104_ApciMessageDetail((short) 0x00, (short) 0x00);
         List<IEC104_MessageInfo> ioa = new ArrayList<>();
 
         // 通过原子引用获取当前任务
         ScheduledFuture<?> currentTask = interrogationCommandTask.get();
 
         ioa.add(new IEC104_MessageInfo(0, IEC104_VariableStructureQualifiers.C_IC_NA_1_QUALIFIER.getQualityDescriptors()));
-        apciMessageDetail.setIEC104_controlField(new byte[]{0x00, 0x00, 0x00, 0x00});
 
         // 构建帧对象
         IEC104_FrameBuilder iFrame = buildFrames(apciMessageDetail, ByteUtil.customStructureToBytes(sq, numIx, negative, test, causeTx, senderAddress), publicAddress, ioa);
@@ -76,7 +76,8 @@ public class IEC104_IFrameTaskManager {
         // 合并可预测大小的字段
         // APCI 字段（控制字段为 4 字节）
         ByteBuf apcibuf = allocator.buffer(4);
-        apcibuf.writeBytes(iFrame.getApciMessageDetail().getIEC104_controlField());
+        apcibuf.writeShort(iFrame.getApciMessageDetail().getSendOrdinal());
+        apcibuf.writeShort(iFrame.getApciMessageDetail().getRecvOrdinal());
 
         // ASDU 头部字段（4 字节：Type ID + VSQ + Transfer Reason + Sender Address）
         ByteBuf asduHeader = allocator.buffer(4);
@@ -146,7 +147,7 @@ public class IEC104_IFrameTaskManager {
             } catch (Exception e) {
                 log.error("执行超时任务异常", e);
             }
-        }, Long.parseLong(config.getT1()), TimeUnit.SECONDS);
+        }, t1, TimeUnit.SECONDS);
 
         // 使用 CAS乐观锁非阻塞更新
         interrogationCommandTask.compareAndSet(currentTask, newTask);

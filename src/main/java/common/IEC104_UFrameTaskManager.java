@@ -13,10 +13,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class IEC104_UFrameTaskManager {
+    private final long t1;
+    private final long t3;
     private final IEC104_ScheduledTaskPool parent;
     private final ChannelHandlerContext ctx;
     private final ScheduledExecutorService executor;
-    private final Piec104Config config;
     private final AtomicReference<ScheduledFuture<?>> startTask = new AtomicReference<>();
     private final AtomicReference<ScheduledFuture<?>> t3Task = new AtomicReference<>();
     private static final Logger log = LogManager.getLogger(IEC104_UFrameTaskManager.class);
@@ -25,7 +26,8 @@ public class IEC104_UFrameTaskManager {
         this.parent = parent;
         this.ctx = ctx;
         this.executor = executor;
-        this.config = config;
+        this.t1 = Long.parseLong(config.getT1());
+        this.t3 = Long.parseLong(config.getT3());
     }
 
     /**
@@ -35,9 +37,8 @@ public class IEC104_UFrameTaskManager {
      * 超时时间为15秒，超时后将自动关闭连接
      */
     public void sendStartFrame() {
-
         // 通过原子引用获取当前任务
-        ScheduledFuture<?> currentTask = startTask.get();
+        ScheduledFuture<?> currentTask = startTask.getAndSet(null);
 
         // 防止重复发送，如果任务已完成或未提交过则跳过
         if (currentTask != null && !currentTask.isDone()) {
@@ -58,19 +59,19 @@ public class IEC104_UFrameTaskManager {
             } catch (Exception e) {
                 log.error("执行超时任务异常", e);
             }
-        }, Long.parseLong(config.getT1()), TimeUnit.SECONDS);
+        }, t1, TimeUnit.SECONDS);
 
         // 使用 CAS乐观锁非阻塞更新
         startTask.compareAndSet(currentTask, newTask);
     }
 
     public void onReceiveStartDTCon() {
-        IEC104Util.isCancel(startTask.get());
+        IEC104Util.isCancel(startTask.getAndSet(null));
     }
 
     public void sendTestFrame() {
         // 获取t3Task的原子引用
-        ScheduledFuture<?> currentTask = t3Task.get();
+        ScheduledFuture<?> currentTask = t3Task.getAndSet(null);
 
         // 检查是否有任务未完成，有则取消任务(重置T3)
         IEC104Util.isCancel(currentTask);
@@ -81,7 +82,7 @@ public class IEC104_UFrameTaskManager {
             ctx.writeAndFlush(IEC104_BasicInstructions.TESTFR_ACT.retain());
             // 开启 T1 计时器
             parent.startT1Timer();
-        }, Long.parseLong(config.getT3()), TimeUnit.SECONDS);
+        }, t3, TimeUnit.SECONDS);
         t3Task.compareAndSet(currentTask, newTask);
     }
 }

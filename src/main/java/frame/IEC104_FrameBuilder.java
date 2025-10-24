@@ -20,7 +20,7 @@ public class IEC104_FrameBuilder {
 
     public static class Builder {
         private final IEC104_ApciMessageDetail apciMessageDetail;
-        private IEC104_AsduMessageDetail asduMessageDetail;
+        private IEC104_AsduMessageDetail asduMessageDetail = null;
 
         public Builder(IEC104_ApciMessageDetail apciMessageDetail) {
             this.apciMessageDetail = apciMessageDetail;
