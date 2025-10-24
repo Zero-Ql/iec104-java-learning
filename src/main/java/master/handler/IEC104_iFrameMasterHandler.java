@@ -70,7 +70,7 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
                 // 解析总召响应
                 parserGeneralSummons(IOA);
             }
-            //
+            // TODO 如何解析总召的I帧和突变的I帧（总召I帧添加一个 flag ？）
             if (typeId == IEC104_TypeIdentifier.M_ME_NC_1.getValue() ||
                     typeId == IEC104_TypeIdentifier.M_ME_NA_1.getValue() ||
                     typeId == IEC104_TypeIdentifier.M_ME_NB_1.getValue() &&
