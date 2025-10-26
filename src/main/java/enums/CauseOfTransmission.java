@@ -13,6 +13,30 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public enum CauseOfTransmission {
 
+
+    /**
+     * 周期/循环
+     */
+    PER_CYC((short) 0x01),
+
+    /**
+     * 背景扫描
+     */
+    BACK((short) 0x02),
+
+    /**
+     * 突变
+     */
+    SPONT((short) 0x03),
+
+    /**
+     * 被请求
+     */
+    REQ((short) 0x05),
+
+
+
+    // 总召传送原因
     /**
      * 激活
      */
@@ -33,6 +57,9 @@ public enum CauseOfTransmission {
      * 激活终止
      */
     ACT_TERM((short) 0x0A),
+
+
+    // 公共传送原因
     /**
      * 响应总召唤
      */

@@ -1,9 +1,9 @@
 package slave.handler;
 
-import handler.IEC104_SeqManager;
+import handler.IEC104_seqManager;
 import io.netty.channel.ChannelHandlerContext;
 
-public class SlaveSeqManager extends IEC104_SeqManager {
+public class SlaveSeqManager extends IEC104_seqManager {
     /**
      * 更新本地接收序号
      *

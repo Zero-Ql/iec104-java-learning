@@ -58,23 +58,24 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
                     typeIdentifier, sq, numIx, test, negative, causeTx, senderAddress, publicAddress
             );
             log.info(headerLog);
+
             // 如果类型标识为总召(0x64)且传送原因为激活确认(0x07)
             // 如果无法解析类型标识或传送原因则抛出异常
-
             byte typeId = IEC104_TypeIdentifier.getIEC104TypeIdentifier(typeIdentifier)
                     .orElseThrow(() -> new NoSuchElementException("无法解析的类型标识：" + typeIdentifier))
                     .getValue();
-            if ( typeId == IEC104_TypeIdentifier.C_IC_NA_1.getValue() &&
-                    CauseOfTransmission.of(causeTx).orElseThrow(() -> new NoSuchElementException("无法解析的传送原因：" + causeTx))
-                            .getCot() == CauseOfTransmission.ACT_CON.getCot()) {
+            short cot = CauseOfTransmission.of(causeTx)
+                    .orElseThrow(() -> new NoSuchElementException("无法解析的传送原因：" + causeTx))
+                    .getCot();
+            if (typeId == IEC104_TypeIdentifier.C_IC_NA_1.getValue() && cot == CauseOfTransmission.ACT_CON.getCot()) {
                 // 解析总召响应
                 parserGeneralSummons(IOA);
             }
             // TODO 如何解析总召的I帧和突变的I帧（总召I帧添加一个 flag ？）
-            if (typeId == IEC104_TypeIdentifier.M_ME_NC_1.getValue() ||
-                    typeId == IEC104_TypeIdentifier.M_ME_NA_1.getValue() ||
-                    typeId == IEC104_TypeIdentifier.M_ME_NB_1.getValue() &&
-            ) {
+            if ((typeId == IEC104_TypeIdentifier.M_ME_NC_1.getValue()
+//                                    || typeId == IEC104_TypeIdentifier.M_ME_NA_1.getValue() ||
+//                                    typeId == IEC104_TypeIdentifier.M_ME_NB_1.getValue()
+            ) && (cot == CauseOfTransmission.SPONT.getCot() || cot == CauseOfTransmission.INTROGEN.getCot())) {
                 parserYc(IOA);
             }
         }

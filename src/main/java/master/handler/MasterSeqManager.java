@@ -1,10 +1,10 @@
 package master.handler;
 
 import core.scheduler.IEC104_ScheduledTaskPool;
-import handler.IEC104_SeqManager;
+import handler.IEC104_seqManager;
 import io.netty.channel.ChannelHandlerContext;
 
-public class MasterSeqManager extends IEC104_SeqManager {
+public class MasterSeqManager extends IEC104_seqManager {
     /**
      * 自定义任务
      * ChannelHandlerContext ctx 通道上下文

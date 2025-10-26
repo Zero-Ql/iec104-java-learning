@@ -12,7 +12,7 @@ import util.IEC104Util;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Log4j2
-public abstract class IEC104_SeqManager extends ChannelHandlerAdapter {
+public abstract class IEC104_seqManager extends ChannelHandlerAdapter {
 
     // 本地接收序号
     protected final AtomicInteger recvOrdinal = new AtomicInteger(0);
