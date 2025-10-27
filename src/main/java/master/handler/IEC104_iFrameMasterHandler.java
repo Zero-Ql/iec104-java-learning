@@ -11,6 +11,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.ReferenceCountUtil;
 import lombok.extern.log4j.Log4j2;
+import master.handler.parser.Parser;
+import master.handler.parser.ParserRouter;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -67,11 +69,18 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
             short cot = CauseOfTransmission.of(causeTx)
                     .orElseThrow(() -> new NoSuchElementException("无法解析的传送原因：" + causeTx))
                     .getCot();
+
+            // 获取接口路由实例
+            ParserRouter parserRouter = ParserRouter.getInstance();
+
+            parserRouter.lookup(typeId, cot).parser();
+
+
+
             if (typeId == IEC104_TypeIdentifier.C_IC_NA_1.getValue() && cot == CauseOfTransmission.ACT_CON.getCot()) {
                 // 解析总召响应
                 parserGeneralSummons(IOA);
             }
-            // TODO 如何解析总召的I帧和突变的I帧（总召I帧添加一个 flag ？）
             if ((typeId == IEC104_TypeIdentifier.M_ME_NC_1.getValue()
 //                                    || typeId == IEC104_TypeIdentifier.M_ME_NA_1.getValue() ||
 //                                    typeId == IEC104_TypeIdentifier.M_ME_NB_1.getValue()
