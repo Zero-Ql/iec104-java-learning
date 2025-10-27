@@ -2,17 +2,14 @@ package master.handler;
 
 import enums.CauseOfTransmission;
 import enums.IEC104_TypeIdentifier;
-import frame.IEC104_FrameBuilder;
 import frame.IEC104_MessageInfo;
 import frame.asdu.IEC104_AsduMessageDetail;
 import frame.asdu.IEC104_VSQ_COT_OA;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.util.ReferenceCountUtil;
 import lombok.extern.log4j.Log4j2;
-import master.handler.parser.Parser;
 import master.handler.parser.ParserRouter;
+import util.ByteBufResource;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -73,62 +70,8 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
             // 获取接口路由实例
             ParserRouter parserRouter = ParserRouter.getInstance();
 
-            parserRouter.lookup(typeId, cot).parser();
-
-
-
-            if (typeId == IEC104_TypeIdentifier.C_IC_NA_1.getValue() && cot == CauseOfTransmission.ACT_CON.getCot()) {
-                // 解析总召响应
-                parserGeneralSummons(IOA);
-            }
-            if ((typeId == IEC104_TypeIdentifier.M_ME_NC_1.getValue()
-//                                    || typeId == IEC104_TypeIdentifier.M_ME_NA_1.getValue() ||
-//                                    typeId == IEC104_TypeIdentifier.M_ME_NB_1.getValue()
-            ) && (cot == CauseOfTransmission.SPONT.getCot() || cot == CauseOfTransmission.INTROGEN.getCot())) {
-                parserYc(IOA);
-            }
-        }
-    }
-
-    /**
-     * 解析总召
-     *
-     * @param IOA 遥测IOA列表
-     */
-    private void parserGeneralSummons(List<IEC104_MessageInfo> IOA) {
-        if (IOA == null || IOA.isEmpty()) return;
-        // 获取第一个元素
-        final IEC104_MessageInfo messageInfo = IOA.getFirst();
-        try {
-            log.info("IOA：{}    QualityDescriptors：{} ",
-                    messageInfo.getMessageAddress(),
-                    messageInfo.getQualityDescriptors());
-        } finally {
-            // 使用 releaseLater 确保资源在适当时候被释放
-            // 总召的 value 为空的 ByteBuf 缓冲区
-            ReferenceCountUtil.releaseLater(messageInfo.getValue());
-        }
-    }
-
-    /**
-     * 解析遥测
-     *
-     * @param IOA 遥测IOA列表
-     */
-    private void parserYc(List<IEC104_MessageInfo> IOA) {
-        if (IOA == null) return;
-        for (IEC104_MessageInfo messageInfo : IOA) {
-            try {
-                final ByteBuf value = messageInfo.getValue();
-                if (value != null)
-                    log.info("IOA：{}    Value：{}    QualityDescriptors：{} ",
-                            messageInfo.getMessageAddress(),
-                            value.readFloat(),
-                            messageInfo.getQualityDescriptors());
-            } finally {
-                // 使用 releaseLater 确保资源在适当时候被释放
-                ReferenceCountUtil.releaseLater(messageInfo.getValue());
-            }
+            // 通过类型标识和传送原因组合为一个唯一键，这个键对应一个唯一的IOA结构
+            IOA.forEach(info -> parserRouter.lookup(typeId, cot).parser(info.getMessageAddress(), ByteBufResource.of(info.getValue()), info.getQualityDescriptors(), ctx));
         }
     }
 }
