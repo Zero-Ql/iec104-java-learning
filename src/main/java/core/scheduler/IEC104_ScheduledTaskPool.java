@@ -84,7 +84,7 @@ public class IEC104_ScheduledTaskPool {
         this.uFrameTaskManager = new IEC104_UFrameTaskManager(this, ctx, executor, piec104Config);
         this.timeOutTaskManager = new IEC104_TimeOutTaskManager(ctx, executor, piec104Config);
         this.sFrameTaskManager = new IEC104_SFrameTaskManager(ctx, executor, piec104Config);
-        this.iFrameTaskManager = new IEC104_IFrameTaskManager(ctx, executor, piec104Config);
+        this.iFrameTaskManager = new IEC104_IFrameTaskManager(this, ctx);
     }
 
 
@@ -106,7 +106,7 @@ public class IEC104_ScheduledTaskPool {
         started = true;
     }
 
-    public void sendSFrame(short recvOrdinal){
+    public void sendSFrame(short recvOrdinal) {
         sFrameTaskManager.sendSFrame(recvOrdinal);
     }
 
@@ -153,6 +153,10 @@ public class IEC104_ScheduledTaskPool {
      */
     public void startT1Timer() {
         timeOutTaskManager.startT1Timer();
+    }
+
+    public void onReceiveT1Timer() {
+        timeOutTaskManager.cancelT1Timer();
     }
 
 

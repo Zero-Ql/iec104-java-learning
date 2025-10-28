@@ -33,8 +33,10 @@ public class IEC104_TimeOutTaskManager {
         IEC104Util.isCancel(task);
         ScheduledFuture<?> newTask = executor.schedule(() -> {
             try {
-                log.warn("T1超时，关闭连接");
-                ctx.close();
+                if (ctx.channel().isActive()) {
+                    log.warn("T1超时，关闭连接");
+                    ctx.close();
+                }
             } catch (Exception e) {
                 log.error("执行超时任务异常", e);
             }

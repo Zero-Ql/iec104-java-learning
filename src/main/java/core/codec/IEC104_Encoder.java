@@ -1,5 +1,6 @@
 package core.codec;
 
+import core.scheduler.IEC104_ScheduledTaskPool;
 import frame.IEC104_FrameBuilder;
 import frame.IEC104_MessageInfo;
 import frame.apci.IEC104_ApciMessageDetail;
@@ -38,43 +39,64 @@ public class IEC104_Encoder extends MessageToByteEncoder<IEC104_FrameBuilder> {
         // APCI 字段（控制字段为 4 字节）
         ByteBuf apcibuf = allocator.buffer(4);
 
-        if (iEC104_FrameBuilder.getAsduMessageDetail() != null) {
-
-            IEC104_AsduMessageDetail asduMessageDetail = iEC104_FrameBuilder.getAsduMessageDetail();
-
-            List<IEC104_MessageInfo> IOA = asduMessageDetail.getIOA();
-
-            // TODO 将 IOA 列表序列化为字节流
-
-            // ASDU 头部字段（4 字节：Type ID + VSQ + Transfer Reason + Sender Address）
-            ByteBuf asduHeader = allocator.buffer(4);
-            // 公共地址（2 字节：Public Address 2 字节）
-            ByteBuf commonInfo = allocator.buffer(2);
-            // IOA 地址（3 字节：使用 writeMedium 写入 3 字节整数）
-            ByteBuf ioaAddress = allocator.buffer(3);
-            // QOI（1 字节：QualityDescriptors）
-            ByteBuf qoi = allocator.buffer(1);
-
-            asduHeader.writeByte(asduMessageDetail.getTypeIdentifier());
-            asduHeader.writeByte(asduMessageDetail.getVariableStructureQualifiers());
-            asduHeader.writeByte(asduMessageDetail.getTransferReason());
-            asduHeader.writeByte(asduMessageDetail.getSenderAddress());
-
-            byte[] byteAddress = ByteUtil.shortToByte(asduMessageDetail.getPublicAddress());
-            // 将 short 转为字节数组后转为 小端序 写入
-            commonInfo.writeByte(byteAddress[1]);
-            commonInfo.writeByte(byteAddress[0]);
-
-            ioaAddress.writeMedium(asduMessageDetail.getIOA().getFirst().getMessageAddress());
-            qoi.writeByte(asduMessageDetail.getIOA().getFirst().getQualityDescriptors());
-        }
-
         IEC104_ApciMessageDetail apciMessageDetail = iEC104_FrameBuilder.getApciMessageDetail();
         apcibuf.writeShort(apciMessageDetail.getSendOrdinal());
         apcibuf.writeShort(apciMessageDetail.getRecvOrdinal());
 
         composite.addComponent(apcibuf);
 
+        if (iEC104_FrameBuilder.getAsduMessageDetail() != null) {
 
+            IEC104_AsduMessageDetail asduMessageDetail = iEC104_FrameBuilder.getAsduMessageDetail();
+
+            List<IEC104_MessageInfo> IOA = asduMessageDetail.getIOA();
+
+            // 将 IOA 列表序列化为字节流
+
+            // ASDU 头部字段（4 字节：Type ID + VSQ + Transfer Reason + Sender Address）
+            // 公共地址（2 字节：Public Address 2 字节）
+            // IOA 地址（3 字节：使用 writeMedium 写入 3 字节整数）
+            ByteBuf asdu = allocator.buffer(9);
+
+            boolean isContinuous = (asduMessageDetail.getVariableStructureQualifiers() & 0x80) != 0;
+
+            // 值 & 质量码（可变长度）
+            ByteBuf value = allocator.buffer();
+
+            asdu.writeByte(asduMessageDetail.getTypeIdentifier());
+            asdu.writeByte(asduMessageDetail.getVariableStructureQualifiers());
+            asdu.writeByte(asduMessageDetail.getTransferReason());
+            asdu.writeByte(asduMessageDetail.getSenderAddress());
+
+            byte[] byteAddress = ByteUtil.shortToByte(asduMessageDetail.getPublicAddress());
+            // 将 short 转为字节数组后转为 小端序 写入
+            asdu.writeByte(byteAddress[1]);
+            asdu.writeByte(byteAddress[0]);
+
+            // true 连续; false 不连续
+            if (isContinuous) {
+                IOA.forEach(info -> {
+                    asdu.writeMedium(info.getMessageAddress());
+                    value.writeBytes(info.getValue());
+                    value.writeByte(info.getQualityDescriptors());
+                });
+            } else {
+                asdu.writeMedium(IOA.getFirst().getMessageAddress());
+                IOA.forEach(info -> {
+                    value.writeBytes(info.getValue());
+                    value.writeByte(info.getQualityDescriptors());
+                });
+            }
+
+            composite.addComponent(asdu);
+            composite.addComponent(value);
+        }
+
+//        composite.writerIndex(composite.capacity());
+
+        ctx.write(composite, ctx.voidPromise());
+
+        // 启动 T1 定时器
+        IEC104_ScheduledTaskPool.getFromChannel(ctx).startT1Timer();
     }
 }
