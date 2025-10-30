@@ -8,7 +8,7 @@ public class IEC104_ApciMessageDetail {
     /**
      * APDU 长度
      */
-    private int apduLen = 0;
+//    private int apduLen = 0;
 
     /**
      * 控制域 固定 四字节

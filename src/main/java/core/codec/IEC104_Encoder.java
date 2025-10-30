@@ -7,96 +7,84 @@ import frame.apci.IEC104_ApciMessageDetail;
 import frame.asdu.IEC104_AsduMessageDetail;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import lombok.extern.log4j.Log4j2;
 import util.ByteUtil;
 
 import java.util.List;
 
+@Log4j2
 public class IEC104_Encoder extends MessageToByteEncoder<IEC104_FrameBuilder> {
 
-    /**
-     * 起始字节 固定 一字节
-     */
-    private static final byte start = 0x68;
+    private static final byte START_BYTE = 0x68;
 
-    /**
-     * 将 IEC104_FrameBuilder 对象编码为IEC104协议格式的字节流
-     *
-     * @param ctx                 通道处理上下文
-     * @param iEC104_FrameBuilder IEC104帧对象
-     * @param byteBuf             用于写入编码后字节的缓冲区
-     * @throws Exception 编码过程中可能抛出的异常
-     */
     @Override
-    protected void encode(ChannelHandlerContext ctx, IEC104_FrameBuilder iEC104_FrameBuilder, ByteBuf byteBuf) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, IEC104_FrameBuilder frame, ByteBuf out) throws Exception {
         ByteBufAllocator allocator = ctx.alloc();
-
-        // 使用 CompositeByteBuf 拼接
         CompositeByteBuf composite = allocator.compositeBuffer();
+        // 编码 APCI
+        ByteBuf apciBuf = encodeApci(allocator, frame.getApciMessageDetail());
+        composite.addComponent(apciBuf);
 
-        // APCI 字段（控制字段为 4 字节）
-        ByteBuf apcibuf = allocator.buffer(4);
-
-        IEC104_ApciMessageDetail apciMessageDetail = iEC104_FrameBuilder.getApciMessageDetail();
-        apcibuf.writeShort(apciMessageDetail.getSendOrdinal());
-        apcibuf.writeShort(apciMessageDetail.getRecvOrdinal());
-
-        composite.addComponent(apcibuf);
-
-        if (iEC104_FrameBuilder.getAsduMessageDetail() != null) {
-
-            IEC104_AsduMessageDetail asduMessageDetail = iEC104_FrameBuilder.getAsduMessageDetail();
-
-            List<IEC104_MessageInfo> IOA = asduMessageDetail.getIOA();
-
-            // 将 IOA 列表序列化为字节流
-
-            // ASDU 头部字段（4 字节：Type ID + VSQ + Transfer Reason + Sender Address）
-            // 公共地址（2 字节：Public Address 2 字节）
-            // IOA 地址（3 字节：使用 writeMedium 写入 3 字节整数）
-            ByteBuf asdu = allocator.buffer(9);
-
-            boolean isContinuous = (asduMessageDetail.getVariableStructureQualifiers() & 0x80) != 0;
-
-            // 值 & 质量码（可变长度）
-            ByteBuf value = allocator.buffer();
-
-            asdu.writeByte(asduMessageDetail.getTypeIdentifier());
-            asdu.writeByte(asduMessageDetail.getVariableStructureQualifiers());
-            asdu.writeByte(asduMessageDetail.getTransferReason());
-            asdu.writeByte(asduMessageDetail.getSenderAddress());
-
-            byte[] byteAddress = ByteUtil.shortToByte(asduMessageDetail.getPublicAddress());
-            // 将 short 转为字节数组后转为 小端序 写入
-            asdu.writeByte(byteAddress[1]);
-            asdu.writeByte(byteAddress[0]);
-
-            // true 连续; false 不连续
-            if (isContinuous) {
-                IOA.forEach(info -> {
-                    asdu.writeMedium(info.getMessageAddress());
-                    value.writeBytes(info.getValue());
-                    value.writeByte(info.getQualityDescriptors());
-                });
-            } else {
-                asdu.writeMedium(IOA.getFirst().getMessageAddress());
-                IOA.forEach(info -> {
-                    value.writeBytes(info.getValue());
-                    value.writeByte(info.getQualityDescriptors());
-                });
-            }
-
-            composite.addComponent(asdu);
-            composite.addComponent(value);
+        // 编码 ASDU（如果有）
+        if (frame.getAsduMessageDetail() != null) {
+            ByteBuf asduBuf = encodeAsdu(allocator, frame.getAsduMessageDetail());
+            composite.addComponent(asduBuf);
         }
 
-//        composite.writerIndex(composite.capacity());
+        int len = composite.capacity();
 
-        ctx.write(composite, ctx.voidPromise());
+        ByteBuf header = allocator.buffer(2).writeByte(START_BYTE).writeByte(len);
 
-        // 启动 T1 定时器
-        IEC104_ScheduledTaskPool.getFromChannel(ctx).startT1Timer();
+        composite.addComponent(0, header);
+
+        composite.writerIndex(composite.capacity());
+
+        log.debug("Encoded IEC104 frame: {}", ByteBufUtil.hexDump(composite));
+
+        ctx.writeAndFlush(composite);
+
+    }
+
+    private ByteBuf encodeApci(ByteBufAllocator allocator, IEC104_ApciMessageDetail apci) {
+        ByteBuf buf = allocator.buffer(4);
+        buf.writeShort(apci.getSendOrdinal());
+        buf.writeShort(apci.getRecvOrdinal());
+        return buf;
+    }
+
+    private ByteBuf encodeAsdu(ByteBufAllocator allocator, IEC104_AsduMessageDetail asdu) {
+        ByteBuf buffer = allocator.buffer();
+        boolean isContinuous = (asdu.getVariableStructureQualifiers() & 0x80) != 0;
+        List<IEC104_MessageInfo> ioaList = asdu.getIOA();
+
+        // 写入 ASDU 头部
+        buffer.writeByte(asdu.getTypeIdentifier());
+        buffer.writeByte(asdu.getVariableStructureQualifiers());
+        buffer.writeByte(asdu.getTransferReason());
+        buffer.writeByte(asdu.getSenderAddress());
+
+        byte[] publicAddrBytes = ByteUtil.shortToByte(asdu.getPublicAddress());
+        buffer.writeByte(publicAddrBytes[1]); // 小端序
+        buffer.writeByte(publicAddrBytes[0]);
+
+        if (isContinuous) {
+            for (IEC104_MessageInfo info : ioaList) {
+                buffer.writeMedium(info.getMessageAddress());
+                buffer.writeBytes(info.getValue());
+                buffer.writeByte(info.getQualityDescriptors());
+            }
+        } else {
+            buffer.writeMedium(ioaList.getFirst().getMessageAddress());
+            for (IEC104_MessageInfo info : ioaList) {
+                buffer.writeBytes(info.getValue());
+                buffer.writeByte(info.getQualityDescriptors());
+            }
+        }
+
+        return buffer;
     }
 }

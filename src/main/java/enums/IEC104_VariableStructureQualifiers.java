@@ -2,12 +2,18 @@ package enums;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Getter
 public enum IEC104_VariableStructureQualifiers {
     /**
      * 总召可变结构限定词
      */
     C_IC_NA_1_QUALIFIER(IEC104_TypeIdentifier.C_IC_NA_1, 0x14),
+
 
     /**
      * 遥测、遥调可变结构限定词
@@ -23,6 +29,10 @@ public enum IEC104_VariableStructureQualifiers {
 
     private final IEC104_TypeIdentifier typeIdentifier;
     private final byte qualityDescriptors;
+
+    private static final Map<IEC104_TypeIdentifier, Map<Byte, IEC104_VariableStructureQualifiers>> QUALIFIERS_MAP =
+            Arrays.stream(values()).collect(Collectors.groupingBy(IEC104_VariableStructureQualifiers::getTypeIdentifier,
+                    Collectors.toMap(IEC104_VariableStructureQualifiers::getQualityDescriptors, Function.identity())));
 
     IEC104_VariableStructureQualifiers(IEC104_TypeIdentifier typeIdentifier, int qualityDescriptors) {
         this.typeIdentifier = typeIdentifier;

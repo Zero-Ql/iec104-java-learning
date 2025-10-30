@@ -17,7 +17,7 @@
         <dependency>
             <groupId>org.ini4j</groupId>
             <artifactId>ini4j</artifactId>
-            <version>RELEASE</version>
+            <version>0.5.4</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>

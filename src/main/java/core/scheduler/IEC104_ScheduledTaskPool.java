@@ -82,7 +82,7 @@ public class IEC104_ScheduledTaskPool {
      */
     public IEC104_ScheduledTaskPool(ChannelHandlerContext ctx) {
         this.uFrameTaskManager = new IEC104_UFrameTaskManager(this, ctx, executor, piec104Config);
-        this.timeOutTaskManager = new IEC104_TimeOutTaskManager(ctx, executor, piec104Config);
+        this.timeOutTaskManager = new IEC104_TimeOutTaskManager(this, ctx, executor, piec104Config);
         this.sFrameTaskManager = new IEC104_SFrameTaskManager(ctx, executor, piec104Config);
         this.iFrameTaskManager = new IEC104_IFrameTaskManager(this, ctx);
     }

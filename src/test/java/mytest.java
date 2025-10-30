@@ -1,4 +1,4 @@
-
+import org.junit.Test;//
 import config.Piec104Config;
 import enums.IEC104_TypeIdentifier;
 import enums.IEC104_VariableStructureQualifiers;
@@ -10,15 +10,16 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
 import org.ini4j.Ini;
-import org.junit.Test;
 import util.ByteUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 public class mytest {
     @Test
@@ -147,22 +148,15 @@ public class mytest {
         buf.release();
         System.out.println("after 2nd release: " + a.refCnt()); // 0 → 内存已回收
     }
+
+    @Test
+    public void demo8() throws IOException {
+        Piec104Config cfg = Piec104Config.getInstance();
+        System.out.println(cfg.getT0());
+        System.out.println(cfg.getT1());
+        System.out.println(cfg.getT2());
+        System.out.println(cfg.getT3());
+        System.out.println(cfg.getK());
+        System.out.println(cfg.getW());
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

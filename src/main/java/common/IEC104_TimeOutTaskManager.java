@@ -1,6 +1,7 @@
 package common;
 
 import config.Piec104Config;
+import core.scheduler.IEC104_ScheduledTaskPool;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class IEC104_TimeOutTaskManager {
+    private final IEC104_ScheduledTaskPool parent;
     private final ChannelHandlerContext ctx;
     private final ScheduledExecutorService executor;
     private final long t1;
@@ -19,7 +21,8 @@ public class IEC104_TimeOutTaskManager {
 
     private static final Logger log = LogManager.getLogger(IEC104_TimeOutTaskManager.class);
 
-    public IEC104_TimeOutTaskManager(ChannelHandlerContext ctx, ScheduledExecutorService executor, Piec104Config config) {
+    public IEC104_TimeOutTaskManager(IEC104_ScheduledTaskPool parent, ChannelHandlerContext ctx, ScheduledExecutorService executor, Piec104Config config) {
+        this.parent = parent;
         this.ctx = ctx;
         this.executor = executor;
         this.t1 = Long.parseLong(config.getT1());

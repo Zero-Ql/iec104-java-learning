@@ -1,6 +1,7 @@
 package master;
 
 import core.codec.IEC104_Decoder;
+import core.codec.IEC104_Encoder;
 import handler.IEC104_uFrameHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -50,6 +51,7 @@ public class IEC104_Client {
 
                             ch.pipeline().addLast("decoder", new IEC104_Decoder());
 
+                            ch.pipeline().addLast("encoder", new IEC104_Encoder());
 
                             ch.pipeline().addLast("masterSeqManager", new MasterSeqManager());
 

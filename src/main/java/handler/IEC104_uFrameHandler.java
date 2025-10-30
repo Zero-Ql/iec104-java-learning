@@ -21,13 +21,15 @@ public class IEC104_uFrameHandler extends ChannelHandlerAdapter {
             var iec = IEC104_ScheduledTaskPool.getFromChannel(ctx);
             if (iec == null) return;
             if (!e.isStart() && e.isStart_con()) {
+                log.debug("收到启动确认");
                 iec.onReceiveStartDTCon();
                 // 发送总召
-                iec.sendInterrogationCommand();
+//                iec.sendInterrogationCommand();
                 // 取消T1，重置T3
                 iec.onReceiveTestFRCon();
             }
             if (!e.isTest() && e.isTest_con()) {
+                log.debug("收到测试确认");
                 // 取消T1，重置T3
                 iec.onReceiveTestFRCon();
             }

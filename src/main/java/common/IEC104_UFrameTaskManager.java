@@ -4,6 +4,8 @@ import config.Piec104Config;
 import core.scheduler.IEC104_ScheduledTaskPool;
 import frame.IEC104_FrameBuilder;
 import frame.apci.IEC104_ApciMessageDetail;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,16 +41,36 @@ public class IEC104_UFrameTaskManager {
      * 超时时间为15秒，超时后将自动关闭连接
      */
     public void sendStartFrame() {
+        ScheduledFuture<?> currentTask = startTask.getAndSet(null);
 
-        log.info("发送 {} 启动帧", IEC104_BasicInstructions.STARTDT_ACT);
+        if (currentTask != null && !currentTask.isDone()) {
+            return;
+        }
+
+        log.info("发送 {} 启动帧", ByteBufUtil.hexDump(IEC104_BasicInstructions.STARTDT_ACT));
 
         IEC104_FrameBuilder frameBuilder = new IEC104_FrameBuilder.Builder(
-                new IEC104_ApciMessageDetail(IEC104_BasicInstructions.STARTDT_ACT.readShort(), IEC104_BasicInstructions.STARTDT_ACT.readShort()))
+                new IEC104_ApciMessageDetail(IEC104_BasicInstructions.STARTDT_ACT.getShort(0), IEC104_BasicInstructions.STARTDT_ACT.getShort(2)))
                 .build();
 
         IEC104_BasicInstructions.STARTDT_ACT.retain();
         // 在handler中发送启动帧
         ctx.write(frameBuilder);
+
+        // 提交任务并开启 T1 计时器
+        ScheduledFuture<?> newTask = executor.schedule(() -> {
+            try {
+                if (ctx.channel().isActive()) {
+                    log.warn("STARTDT 超时，关闭连接");
+                    ctx.close();
+                }
+            } catch (Exception e) {
+                log.error("执行超时任务异常", e);
+            }
+        }, t1, TimeUnit.SECONDS);
+
+        // 使用 CAS乐观锁非阻塞更新
+        startTask.compareAndSet(currentTask, newTask);
     }
 
     public void onReceiveStartDTCon() {
@@ -63,10 +85,10 @@ public class IEC104_UFrameTaskManager {
         IEC104Util.isCancel(currentTask);
 
         ScheduledFuture<?> newTask = executor.schedule(() -> {
-            log.info("发送 {} 测试帧", IEC104_BasicInstructions.TESTFR_ACT);
+            log.info("发送 {} 测试帧", ByteBufUtil.hexDump(IEC104_BasicInstructions.TESTFR_ACT));
             // 经过 T3 时间没有报文交互，发送 TESTFR_ACT U测试帧
             IEC104_FrameBuilder frameBuilder = new IEC104_FrameBuilder.Builder(
-                    new IEC104_ApciMessageDetail(IEC104_BasicInstructions.TESTFR_ACT.readShort(), IEC104_BasicInstructions.TESTFR_ACT.readShort()))
+                    new IEC104_ApciMessageDetail(IEC104_BasicInstructions.TESTFR_ACT.getShort(0), IEC104_BasicInstructions.TESTFR_ACT.getShort(2)))
                     .build();
             IEC104_BasicInstructions.TESTFR_ACT.retain();
             ctx.write(frameBuilder);
