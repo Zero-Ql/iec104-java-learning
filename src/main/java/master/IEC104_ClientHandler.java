@@ -36,6 +36,8 @@ public class IEC104_ClientHandler extends ChannelHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         log.warn("连接已断开");
+        IEC104_ScheduledTaskPool pool = IEC104_ScheduledTaskPool.getFromChannel(ctx);
+        if (pool != null) pool.shutdown();
         super.channelInactive(ctx);
     }
 

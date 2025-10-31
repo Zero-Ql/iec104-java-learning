@@ -38,6 +38,7 @@ public class IEC104_TimeOutTaskManager {
             try {
                 if (ctx.channel().isActive()) {
                     log.warn("T1超时，关闭连接");
+                    IEC104_ScheduledTaskPool.getFromChannel(ctx).shutdown();
                     ctx.close();
                 }
             } catch (Exception e) {

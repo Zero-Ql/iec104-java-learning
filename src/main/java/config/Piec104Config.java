@@ -66,11 +66,8 @@ public final class Piec104Config {
                 log.warn("ini 中未找到 section [{}]，全部使用默认值", SECTION);
                 return prop;
             }
-            // 把 section 下的 key=value 拷进 Properties，并带上前缀 "0."
-            sec.forEach((k, v) -> {
-                log.debug("{} = {}", k, v);
-                prop.setProperty(k, v);
-            });
+            // 把 section 下的 key=value 拷进 Properties
+            sec.forEach(prop::setProperty);
         } catch (IOException e) {
             log.warn("读取 ini 失败，使用默认值。异常：{}", e.getMessage());
         }

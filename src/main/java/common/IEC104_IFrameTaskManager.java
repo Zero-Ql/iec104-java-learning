@@ -55,7 +55,7 @@ public class IEC104_IFrameTaskManager {
                                 ca,
                                 ioa).build())
                 .build();
-        log.info("发送 {} 启动帧", iFrame);
+        log.info("发送总召：{}", iFrame);
         // 发送总召
         ctx.write(iFrame);
     }

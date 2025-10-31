@@ -151,12 +151,7 @@ public class mytest {
 
     @Test
     public void demo8() throws IOException {
-        Piec104Config cfg = Piec104Config.getInstance();
-        System.out.println(cfg.getT0());
-        System.out.println(cfg.getT1());
-        System.out.println(cfg.getT2());
-        System.out.println(cfg.getT3());
-        System.out.println(cfg.getK());
-        System.out.println(cfg.getW());
+        var a = new IEC104_MessageInfo(0, (byte) 0x14);
+        System.out.println(a.getValue());
     }
 }

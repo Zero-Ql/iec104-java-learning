@@ -18,7 +18,6 @@ public class IEC104_MessageInfo {
     /**
      * 值
      */
-    @Setter
     private ByteBuf value;
 
     /**

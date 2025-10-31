@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn" name="Colorful">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <!-- 时间亮蓝 | 级别高亮（DEBUG=亮紫） | 线程亮黄 | 类亮绿 -->
+            <PatternLayout
+                    pattern="%style{%d{yyyy-MM-dd HH:mm:ss.SSS}}{bright,blue} %highlight{%-5level}{DEBUG=bright magenta} %style{[%t]}{bright,yellow} %style{%c{1.}}{bright,green} - %msg%n%style{%throwable}{red}"
+                    disableAnsi="false"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="debug">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

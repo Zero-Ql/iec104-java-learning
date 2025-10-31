@@ -53,7 +53,7 @@ public class IEC104_UFrameTaskManager {
                 new IEC104_ApciMessageDetail(IEC104_BasicInstructions.STARTDT_ACT.getShort(0), IEC104_BasicInstructions.STARTDT_ACT.getShort(2)))
                 .build();
 
-        IEC104_BasicInstructions.STARTDT_ACT.retain();
+//        IEC104_BasicInstructions.STARTDT_ACT.retain();
         // 在handler中发送启动帧
         ctx.write(frameBuilder);
 

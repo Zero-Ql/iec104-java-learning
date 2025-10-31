@@ -23,6 +23,7 @@ public class IEC104_Encoder extends MessageToByteEncoder<IEC104_FrameBuilder> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, IEC104_FrameBuilder frame, ByteBuf out) throws Exception {
+
         ByteBufAllocator allocator = ctx.alloc();
         CompositeByteBuf composite = allocator.compositeBuffer();
         // 编码 APCI
@@ -33,6 +34,7 @@ public class IEC104_Encoder extends MessageToByteEncoder<IEC104_FrameBuilder> {
         if (frame.getAsduMessageDetail() != null) {
             ByteBuf asduBuf = encodeAsdu(allocator, frame.getAsduMessageDetail());
             composite.addComponent(asduBuf);
+
         }
 
         int len = composite.capacity();
@@ -43,9 +45,10 @@ public class IEC104_Encoder extends MessageToByteEncoder<IEC104_FrameBuilder> {
 
         composite.writerIndex(composite.capacity());
 
-        log.debug("Encoded IEC104 frame: {}", ByteBufUtil.hexDump(composite));
+        log.info("编码 IEC104 frame: {}", ByteBufUtil.hexDump(composite));
 
         ctx.writeAndFlush(composite);
+
 
     }
 
@@ -78,10 +81,15 @@ public class IEC104_Encoder extends MessageToByteEncoder<IEC104_FrameBuilder> {
                 buffer.writeByte(info.getQualityDescriptors());
             }
         } else {
-            buffer.writeMedium(ioaList.getFirst().getMessageAddress());
-            for (IEC104_MessageInfo info : ioaList) {
-                buffer.writeBytes(info.getValue());
-                buffer.writeByte(info.getQualityDescriptors());
+            try {
+                buffer.writeMedium(ioaList.getFirst().getMessageAddress());
+                for (IEC104_MessageInfo info : ioaList) {
+                    if (info.getValue() != null)
+                        buffer.writeBytes(info.getValue());
+                    buffer.writeByte(info.getQualityDescriptors());
+                }
+            } catch (Exception e) {
+                log.error(e);
             }
         }
 
