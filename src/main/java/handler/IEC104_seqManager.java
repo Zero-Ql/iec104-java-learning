@@ -60,8 +60,17 @@ public abstract class IEC104_seqManager extends ChannelHandlerAdapter {
             }
 
             if (ByteUtil.isTypeI(flag)) {
-                int sendOrdinal = frame.readUnsignedShort() & 0x7FFF;
-                int recvOrdinal = frame.readUnsignedShort() & 0x7FFF;
+
+//                byte[] senderAddress = ByteUtil.intToByte(frame.readUnsignedShort() & 0x7FFF);
+//                byte[] receiverAddress = ByteUtil.intToByte(frame.readUnsignedShort() & 0x7FFF);
+//                int sendOrdinal = ByteUtil.swapShort(ByteUtil.byteToShort(ByteUtil.subBytes(senderAddress, 2, 2)));
+//                int recvOrdinal = ByteUtil.swapShort(ByteUtil.byteToShort(ByteUtil.subBytes(receiverAddress, 2, 2)));
+
+                int sendOrdinal = Short.reverseBytes((short) (frame.readUnsignedShort() & 0x7FFF));
+                int recvOrdinal = Short.reverseBytes((short) (frame.readUnsignedShort() & 0x7FFF));
+
+                log.debug("发送序号：{}, 接受序号：{}", sendOrdinal, recvOrdinal);
+                log.debug("本地发送序号：{}, 本地接受序号：{}", this.sendOrdinal.get(), this.recvOrdinal.get());
 
                 if (sendOrdinal != this.recvOrdinal.get()) {
                     log.error("接收到的I帧发送序号与本地接收序号不一致，关闭通道");

@@ -1,25 +1,11 @@
 import org.junit.Test;//
 import config.Piec104Config;
-import enums.IEC104_TypeIdentifier;
-import enums.IEC104_VariableStructureQualifiers;
-import frame.IEC104_FrameBuilder;
-import frame.IEC104_MessageInfo;
-import frame.apci.IEC104_ApciMessageDetail;
-import frame.asdu.IEC104_AsduMessageDetail;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
-import org.ini4j.Ini;
-import util.ByteUtil;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
 
 public class mytest {
     @Test
@@ -151,7 +137,6 @@ public class mytest {
 
     @Test
     public void demo8() throws IOException {
-        var a = new IEC104_MessageInfo(0, (byte) 0x14);
-        System.out.println(a.getValue());
+        System.out.println((short) ((byte) 0x81 & (byte) 0x80));
     }
 }

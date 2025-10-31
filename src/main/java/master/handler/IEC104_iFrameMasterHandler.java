@@ -58,11 +58,7 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
             );
             log.info(headerLog);
 
-            // 如果类型标识为总召(0x64)且传送原因为激活确认(0x07)
-            // 如果无法解析类型标识或传送原因则抛出异常
-            byte typeId = IEC104_TypeIdentifier.getIEC104TypeIdentifier(typeIdentifier)
-                    .orElseThrow(() -> new NoSuchElementException("无法解析的类型标识：" + typeIdentifier))
-                    .getValue();
+            // 如果无法解析传送原因则抛出异常
             short cot = CauseOfTransmission.of(causeTx)
                     .orElseThrow(() -> new NoSuchElementException("无法解析的传送原因：" + causeTx))
                     .getCot();
@@ -70,8 +66,13 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
             // 获取接口路由实例
             ParserRouter parserRouter = ParserRouter.getInstance();
 
-            // 通过类型标识和传送原因组合为一个唯一键，这个键对应一个唯一的IOA结构
-            IOA.forEach(info -> parserRouter.lookup(typeId, cot).parser(info.getMessageAddress(), ByteBufResource.of(info.getValue()), info.getQualityDescriptors(), ctx));
+            try {
+                // 通过类型标识和传送原因组合为一个唯一键，这个键对应一个唯一的IOA结构
+                // 通过键获取对应的解析器
+                IOA.forEach(info -> parserRouter.lookup(typeIdentifier, cot).parser(info.getMessageAddress(), ByteBufResource.of(info.getValue()), info.getQualityDescriptors(), ctx));
+            } catch (NullPointerException e) {
+                log.error("无法解析的I帧(未找到对应解析器)：{}", payload);
+            }
         }
     }
 }

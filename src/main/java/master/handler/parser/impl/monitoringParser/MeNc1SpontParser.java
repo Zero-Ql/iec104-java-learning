@@ -1,11 +1,14 @@
-package master.handler.parser.impl;
+package master.handler.parser.impl.monitoringParser;
 
 import com.google.auto.service.AutoService;
+import enums.monitoringDirections.QualityBit;
 import master.handler.parser.Parser;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.log4j.Log4j2;
 import master.handler.parser.ParserMeta;
 import util.ByteBufResource;
+
+import java.nio.ByteOrder;
 
 /**
  * MeNc1SpontParser类用于解析遥测数据 spontaneous 报文
@@ -29,9 +32,14 @@ public class MeNc1SpontParser implements Parser {
     public void parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx) {
         try (ByteBufResource valueResource = value) {
             // 从缓冲区中读取浮点数值
-            float v = valueResource.byteBuf().readFloat();
+            float v = valueResource.byteBuf().order(ByteOrder.LITTLE_ENDIAN).readFloat();
             // 记录遥测数据解析日志
-            log.info("YC  IOA：{}  Value：{}  QualityDescriptors：{} ", ioa, v, qualityDescriptors);
+            log.info("YC 突变  IOA：{}  Value：{}  IV：{}  NT：{}  SB：{}  BL：{}  OV：{}", ioa, v,
+                    QualityBit.isSet(qualityDescriptors, QualityBit.INVALID),
+                    QualityBit.isSet(qualityDescriptors, QualityBit.NOT_CURRENT),
+                    QualityBit.isSet(qualityDescriptors, QualityBit.SUBSTITUTED),
+                    QualityBit.isSet(qualityDescriptors, QualityBit.BLOCKED),
+                    QualityBit.isSet(qualityDescriptors, QualityBit.OVERFLOW));
         }
     }
 }

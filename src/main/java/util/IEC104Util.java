@@ -1,18 +1,18 @@
 package util;
 
 import enums.IEC104_TypeIdentifier;
-import enums.IEC104_VariableStructureQualifiers;
 import frame.IEC104_MessageInfo;
 import frame.asdu.IEC104_AsduMessageDetail;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.CorruptedFrameException;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 
+@Log4j2
 public class IEC104Util {
     /**
      * 取消指定的定时任务
@@ -42,15 +42,16 @@ public class IEC104Util {
 
         // 获取 SQ 值
         boolean sq = (variableStructureQualifiers & 0x80) != 0;
+
         // 获取信息体对象数量
-        short NumIx = (short) (variableStructureQualifiers & (~(1 << 7)));
+        short NumIx = (short) (variableStructureQualifiers & 0x7F);
 
         // 传送原因
         byte transferReason = payload.readByte();
         // 发送方地址
         byte senderAddress = payload.readByte();
         // 公共地址
-        short publicAddress = payload.readShort();
+        short publicAddress = Short.reverseBytes(payload.readShort());
 
         // 切割剩余字节（当前版本 slice 不会增加引用计数）
         ByteBuf IOAList = payload.slice();
@@ -103,14 +104,7 @@ public class IEC104Util {
             // sq 为 true 连续
             if (sq) {
                 // 读取第一个点号(3字节)
-                int messageAddress = ioaList.readUnsignedMedium();
-                if (messageAddress > Integer.MAX_VALUE - num) {
-                    throw new CorruptedFrameException("""
-                                IOA地址长度溢出：
-                                    IOA地址：%d
-                                    Integer上限：%d
-                            """.formatted(messageAddress, Integer.MAX_VALUE - num));
-                }
+                int messageAddress = Short.reverseBytes((short) ioaList.readUnsignedShort()) + ioaList.readByte();
                 for (int offset = messageAddress; offset < messageAddress + num; offset++) {
                     if (ioaList.readableBytes() < messageObject.getMsgLen() + 1) {
 
@@ -123,6 +117,7 @@ public class IEC104Util {
                     }
                     // 读取信息对象值
                     ByteBuf value = ioaList.readBytes(messageObject.getMsgLen());
+
                     // 读取质量描述符
                     byte qualityDescriptors = ioaList.readByte();
                     meslist.add(createInfo(offset, value, qualityDescriptors, messageObject));
@@ -137,7 +132,7 @@ public class IEC104Util {
                                     完整报文：%s
                                 """.formatted(ioaList.readableBytes(), messageObject.getMsgLen() + 4, ioaList.getBytes(ioaList.readerIndex(), new byte[ioaList.readableBytes()])));
                     }
-                    int messageAddress = ioaList.readUnsignedMedium();
+                    int messageAddress = Short.reverseBytes((short) ioaList.readUnsignedShort()) + ioaList.readByte();
                     // 根据 typeId(类型标识) 获取对应的 value 长度; readBytes 传入 0 则什么都不做
                     ByteBuf value = ioaList.readBytes(messageObject.getMsgLen());
                     byte qualityDescriptors = ioaList.readByte();
@@ -163,8 +158,7 @@ public class IEC104Util {
         try {
             IEC104_MessageInfo info = new IEC104_MessageInfo(
                     messageAddressAuto,
-                    // 通过读取的 typeId 获取对应的信息对象，通过读取的 qualityDescriptors 及信息对象获取对应质量描述符
-                    IEC104_VariableStructureQualifiers.getQualifiers(messageObject, qualityDescriptors).getQualityDescriptors()
+                    qualityDescriptors
             );
             info.setValue(value);
             return info;

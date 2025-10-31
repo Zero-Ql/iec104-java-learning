@@ -32,11 +32,21 @@ public class ByteUtil {
         return (bytes & iControlFrame) == 0;
     }
 
+    /**
+     * 从指定的字节数组中截取子数组
+     *
+     * @param source 原始字节数组
+     * @param startIndex 截取开始位置的索引
+     * @param offset 要截取的字节长度
+     * @return 截取后的新字节数组
+     */
     public static byte[] subBytes(byte[] source, int startIndex, int offset) {
+        // 创建结果数组并复制指定范围的字节数据
         byte[] result = new byte[offset];
         System.arraycopy(source, startIndex, result, 0, offset);
         return result;
     }
+
 
     public static int byteToInt(byte[] bytes) {
         int value = 0;
@@ -63,6 +73,13 @@ public class ByteUtil {
             value += (bytes[i] & 0xFF) << shift;
         }
         return value;
+    }
+
+    // 将 short 的字节序反转（大端 ↔ 小端）
+    public static short swapShort(short value) {
+        int b1 = (value >> 8) & 0xFF;
+        int b2 = (value >> 0) & 0xFF;
+        return (short) ((b2 << 8) | b1);
     }
 
     public static byte[] shortToByte(short value) {

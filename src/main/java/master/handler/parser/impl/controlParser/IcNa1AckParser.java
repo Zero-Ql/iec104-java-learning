@@ -1,15 +1,12 @@
-package master.handler.parser.impl;
+package master.handler.parser.impl.controlParser;
 
 import com.google.auto.service.AutoService;
-import frame.IEC104_MessageInfo;
-import io.netty.buffer.ByteBuf;
+import enums.QOI;
 import master.handler.parser.Parser;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.log4j.Log4j2;
 import master.handler.parser.ParserMeta;
 import util.ByteBufResource;
-
-import java.util.List;
 
 /**
  * GeneralCallAckParser类用于解析通用调用确认消息
@@ -19,7 +16,7 @@ import java.util.List;
 @Log4j2
 @AutoService(Parser.class)
 @ParserMeta(typeIdentifier = 0x64, causeTx = 0x07)
-public class GeneralCallAckParser implements Parser {
+public class IcNa1AckParser implements Parser {
 
     /**
      * 解析通用调用确认消息
@@ -31,9 +28,15 @@ public class GeneralCallAckParser implements Parser {
      */
     @Override
     public void parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx) {
+        // 创建一个try-with-resources块，用于自动释放valueResource
         try (ByteBufResource valueResource = value) {
-            // 记录通用调用确认的IOA和质量描述符信息
-            log.info("GeneralCallAck  IOA：{}  QualityDescriptors：{}", ioa, qualityDescriptors);
+            // 记录总召确认的IOA和质量描述符信息
+            QOI qoi = QOI.of(qualityDescriptors);
+            if (qoi.isGlobal()) {
+                log.info("确认  IOA：{}  {}", ioa, qoi.toString());
+            } else if (qoi.isGroup()) {
+                log.info(qoi.toString());
+            }
         }
     }
 }

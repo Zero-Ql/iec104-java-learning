@@ -70,9 +70,7 @@ public class IEC104_Encoder extends MessageToByteEncoder<IEC104_FrameBuilder> {
         buffer.writeByte(asdu.getTransferReason());
         buffer.writeByte(asdu.getSenderAddress());
 
-        byte[] publicAddrBytes = ByteUtil.shortToByte(asdu.getPublicAddress());
-        buffer.writeByte(publicAddrBytes[1]); // 小端序
-        buffer.writeByte(publicAddrBytes[0]);
+        buffer.writeShort(Short.reverseBytes(asdu.getPublicAddress()));
 
         if (isContinuous) {
             for (IEC104_MessageInfo info : ioaList) {

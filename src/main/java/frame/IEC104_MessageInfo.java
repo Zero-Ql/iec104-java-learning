@@ -1,10 +1,7 @@
 package frame;
 
-import enums.IEC104_VariableStructureQualifiers;
 import io.netty.buffer.ByteBuf;
-import lombok.Builder;
 import lombok.Data;
-import lombok.Setter;
 
 @Data
 public class IEC104_MessageInfo {
