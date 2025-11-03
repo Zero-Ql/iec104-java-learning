@@ -6,6 +6,12 @@ import io.netty.buffer.PooledByteBufAllocator;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class mytest {
     @Test
@@ -138,5 +144,20 @@ public class mytest {
     @Test
     public void demo8() throws IOException {
         System.out.println((short) ((byte) 0x81 & (byte) 0x80));
+    }
+
+    @Test
+    public void demo9() {
+        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
+        final AtomicReference<ScheduledFuture<?>> a = new AtomicReference<>();
+        final AtomicReference<ScheduledFuture<?>> b = new AtomicReference<>();
+
+        ScheduledFuture<?> task = executorService.schedule(() -> {
+            System.out.println("task");
+        }, 1, TimeUnit.SECONDS);
+
+        b.set(task);
+
+        System.out.println(!a.compareAndSet(null, b.get()));
     }
 }

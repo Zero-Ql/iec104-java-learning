@@ -45,7 +45,7 @@ public class IEC104_Encoder extends MessageToByteEncoder<IEC104_FrameBuilder> {
 
         composite.writerIndex(composite.capacity());
 
-        log.info("编码 IEC104 frame: {}", ByteBufUtil.hexDump(composite));
+//        log.info("编码 IEC104 frame: {}", ByteBufUtil.hexDump(composite));
 
         ctx.writeAndFlush(composite);
 

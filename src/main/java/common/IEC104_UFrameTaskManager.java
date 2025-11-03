@@ -93,6 +93,7 @@ public class IEC104_UFrameTaskManager {
             IEC104_BasicInstructions.TESTFR_ACT.retain();
             ctx.write(frameBuilder);
             // 开启 T1 计时器
+            log.debug("开启T1计时器");
             parent.startT1Timer();
         }, t3, TimeUnit.SECONDS);
         t3Task.compareAndSet(currentTask, newTask);

@@ -73,6 +73,8 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
             } catch (NullPointerException e) {
                 log.error("无法解析的I帧(未找到对应解析器)：{}", payload);
             }
+
+
         }
     }
 }
