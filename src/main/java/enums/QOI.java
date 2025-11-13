@@ -54,8 +54,6 @@ public enum QOI {
         return MAP.getOrDefault(value, UNKNOWN);
     }
 
-    /* ---------- 业务工具 ---------- */
-
     /** 是否总召唤 */
     public boolean isGlobal() {
         return this == GLOBAL_STATION;

@@ -1,4 +1,4 @@
-package master.handler.parser.impl.controlParser;
+package master.handler.parser.impl.controlParser.cIcNa1;
 
 import com.google.auto.service.AutoService;
 import enums.QOI;
@@ -8,10 +8,21 @@ import master.handler.parser.Parser;
 import master.handler.parser.ParserMeta;
 import util.ByteBufResource;
 
+/**
+ * IcNa1ActTermParser类用于解析总召终止
+ */
 @Log4j2
 @AutoService(Parser.class)
 @ParserMeta(typeIdentifier = 0x64, causeTx = 0x0A)
 public class IcNa1ActTermParser implements Parser {
+
+    /**
+     * 解析总召终止报文
+     * @param ioa 信息对象地址
+     * @param value 报文数据缓冲区资源
+     * @param qualityDescriptors 质量描述符字节
+     * @param ctx 通道处理上下文
+     */
     @Override
     public void parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx) {
         try (ByteBufResource valueResource = value) {
@@ -25,3 +36,4 @@ public class IcNa1ActTermParser implements Parser {
         }
     }
 }
+

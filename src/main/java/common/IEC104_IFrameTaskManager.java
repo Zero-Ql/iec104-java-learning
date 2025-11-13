@@ -58,5 +58,6 @@ public class IEC104_IFrameTaskManager {
         log.info("发送总召：{}", iFrame);
         // 发送总召
         ctx.write(iFrame);
+        parent.startT1Timer();
     }
 }

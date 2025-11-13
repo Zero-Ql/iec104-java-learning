@@ -137,12 +137,14 @@ public class IEC104_ScheduledTaskPool {
      * 当收到TESTFR_CON确认帧时调用此方法，取消T1，重置T3
      */
     public void onReceiveTestFRCon() {
-        timeOutTaskManager.cancelT1Timer();
-        sendTestFrame();
-        // 记录日志，表示链路已激活
-        log.info("收到 TESTFR_CON，链路正常");
+        // 取消T1
+        onReceiveT1Timer();
+        // 取消T3
+        uFrameTaskManager.onReceiveTestFRCon();
         // 设置test发送状态为true
         tested = true;
+        // 重启T3
+        sendTestFrame();
     }
 
     /**

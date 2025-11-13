@@ -17,6 +17,7 @@ public class IEC104_TimeOutTaskManager {
     private final ChannelHandlerContext ctx;
     private final ScheduledExecutorService executor;
     private final long t1;
+    private final AtomicReference<ScheduledFuture<?>> holder = new AtomicReference<>();
     private final AtomicReference<ScheduledFuture<?>> t1Task = new AtomicReference<>();
 
     private static final Logger log = LogManager.getLogger(IEC104_TimeOutTaskManager.class);
@@ -32,8 +33,6 @@ public class IEC104_TimeOutTaskManager {
      * 启动 T1 任务
      */
     public void startT1Timer() {
-        ScheduledFuture<?> task = t1Task.getAndSet(null);
-        IEC104Util.isCancel(task);
         ScheduledFuture<?> newTask = executor.schedule(() -> {
             try {
                 if (ctx.channel().isActive()) {
@@ -45,14 +44,24 @@ public class IEC104_TimeOutTaskManager {
                 log.error("执行超时任务异常", e);
             }
         }, t1, TimeUnit.SECONDS);
-        // 使用 CAS乐观锁非阻塞更新
-        t1Task.compareAndSet(task, newTask);
+
+        if (!t1Task.compareAndSet(null, newTask)) {
+            IEC104Util.isCancel(newTask);
+            return;
+        }
+
+//        log.debug("task run: t1Holder.get()={}, id={}", newTask, newTask == null ? null : System.identityHashCode(newTask));
+        holder.set(newTask);
     }
 
     /**
      * 取消 T1 任务
      */
     public void cancelT1Timer() {
-        IEC104Util.isCancel(t1Task.getAndSet(null));
+        ScheduledFuture<?> self = holder.get();
+        if (self != null && t1Task.compareAndSet(self, null)) {
+//            log.debug("task cancel: t1Holder.get()={}, id={}", self, self == null ? null : System.identityHashCode(self));
+            IEC104Util.isCancel(self);
+        }
     }
 }

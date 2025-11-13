@@ -77,6 +77,7 @@ public class IEC104Util {
      */
     private static List<IEC104_MessageInfo> decoderIoa(byte typeIdentifier, boolean sq, short num, ByteBuf ioaList) {
 
+        int ioaLen;
         List<IEC104_MessageInfo> meslist = new ArrayList<>();
 
         try {
@@ -84,13 +85,18 @@ public class IEC104Util {
             // 获取信息对象
             IEC104_TypeIdentifier messageObject = IEC104_TypeIdentifier.getIEC104TypeIdentifier(typeIdentifier)
                     .orElseThrow(() -> new NoSuchElementException("无法解析的类型标识：" + typeIdentifier));
+
             /*
               获取计算信息对象理论长度
               计算公式：
                   sq=true(连续)：3字节IOA头 + 读取的数量 x (理论信息对象值长度 + 质量码)
                   sq=false(不连续)：读取的数量 x (IOA地址 + 理论信息对象值长度 + 质量码)
              */
-            int ioaLen = sq ? 3 + num * (messageObject.getMsgLen() + 1) : num * (messageObject.getMsgLen() + 4);
+            if (messageObject.isHasQuality()) {
+                ioaLen = sq ? 3 + num * (messageObject.getMsgLen() + 1) : num * (messageObject.getMsgLen() + 4);
+            } else {
+                ioaLen = sq ? 3 + num * (messageObject.getMsgLen()) : num * (messageObject.getMsgLen() + 3);
+            }
 
             // 实际读取长度如果不等于理论计算的长度
             if (ioaList.readableBytes() != ioaLen) {

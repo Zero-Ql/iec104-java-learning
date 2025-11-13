@@ -24,10 +24,9 @@ public class IEC104_uFrameHandler extends ChannelHandlerAdapter {
                 iec.onReceiveStartDTCon();
                 // 发送总召
                 iec.sendInterrogationCommand();
-                // 取消T1，重置T3
-                iec.onReceiveTestFRCon();
             }
             if (!e.isTest() && e.isTest_con()) {
+                log.info("收到 TESTFR_CON，链路正常");
                 // 取消T1，重置T3
                 iec.onReceiveTestFRCon();
             }

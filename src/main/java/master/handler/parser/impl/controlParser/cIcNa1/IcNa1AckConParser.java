@@ -1,4 +1,4 @@
-package master.handler.parser.impl.controlParser;
+package master.handler.parser.impl.controlParser.cIcNa1;
 
 import com.google.auto.service.AutoService;
 import enums.QOI;
@@ -9,14 +9,13 @@ import master.handler.parser.ParserMeta;
 import util.ByteBufResource;
 
 /**
- * GeneralCallAckParser类用于解析通用调用确认消息
- * 该类实现了Parser接口，专门处理类型标识符为0x64，传输原因码为0x07的通用调用确认帧
+ * IcNa1AckConParser类用于解析总召确认
  * <p><b>所有权转移：</b>调用者不再持有资源，本方法负责关闭。</p>
  */
 @Log4j2
 @AutoService(Parser.class)
 @ParserMeta(typeIdentifier = 0x64, causeTx = 0x07)
-public class IcNa1AckParser implements Parser {
+public class IcNa1AckConParser implements Parser {
 
     /**
      * 解析通用调用确认消息

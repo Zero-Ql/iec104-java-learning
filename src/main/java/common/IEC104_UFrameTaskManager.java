@@ -5,7 +5,9 @@ import core.scheduler.IEC104_ScheduledTaskPool;
 import frame.IEC104_FrameBuilder;
 import frame.apci.IEC104_ApciMessageDetail;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.CompositeByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +25,8 @@ public class IEC104_UFrameTaskManager {
     private final ChannelHandlerContext ctx;
     private final ScheduledExecutorService executor;
     private final AtomicReference<ScheduledFuture<?>> startTask = new AtomicReference<>();
+    private final AtomicReference<ScheduledFuture<?>> startHolder = new AtomicReference<>();
+    private final AtomicReference<ScheduledFuture<?>> testHolder = new AtomicReference<>();
     private final AtomicReference<ScheduledFuture<?>> t3Task = new AtomicReference<>();
     private static final Logger log = LogManager.getLogger(IEC104_UFrameTaskManager.class);
 
@@ -41,21 +45,12 @@ public class IEC104_UFrameTaskManager {
      * 超时时间为15秒，超时后将自动关闭连接
      */
     public void sendStartFrame() {
-        ScheduledFuture<?> currentTask = startTask.getAndSet(null);
-
-        if (currentTask != null && !currentTask.isDone()) {
-            return;
-        }
 
         log.info("发送 {} 启动帧", ByteBufUtil.hexDump(IEC104_BasicInstructions.STARTDT_ACT));
 
         IEC104_FrameBuilder frameBuilder = new IEC104_FrameBuilder.Builder(
                 new IEC104_ApciMessageDetail(IEC104_BasicInstructions.STARTDT_ACT.getShort(0), IEC104_BasicInstructions.STARTDT_ACT.getShort(2)))
                 .build();
-
-//        IEC104_BasicInstructions.STARTDT_ACT.retain();
-        // 在handler中发送启动帧
-        ctx.write(frameBuilder);
 
         // 提交任务并开启 T1 计时器
         ScheduledFuture<?> newTask = executor.schedule(() -> {
@@ -69,33 +64,76 @@ public class IEC104_UFrameTaskManager {
             }
         }, t1, TimeUnit.SECONDS);
 
-        // 使用 CAS乐观锁非阻塞更新
-        startTask.compareAndSet(currentTask, newTask);
+        if (!startTask.compareAndSet(null, newTask)) {
+            IEC104Util.isCancel(newTask);
+            return;
+        }
+
+        // 更新 holder 为当前线程新建的任务
+        startHolder.set(newTask);
+
+        // 获取新创建的任务
+        ScheduledFuture<?> self = startHolder.get();
+        // 如果 startTask 等于 self 则将 startTask 更新为 null
+        if (self != null && startTask.compareAndSet(self, null)) {
+            ctx.write(frameBuilder);
+        }
     }
 
+    /**
+     * 取消启动持有者线程的任务
+     */
     public void onReceiveStartDTCon() {
-        IEC104Util.isCancel(startTask.getAndSet(null));
+        // 获取持有者任务
+        ScheduledFuture<?> self = startHolder.get();
+//        log.debug("task cancel: startHolder.get()={}, id={}", self, self == null ? null : System.identityHashCode(self));
+        // ScheduledFuture<?> current = startTask.get();
+        // log.debug("task run: t2Task.get()={}, id={}", current, current == null ? null : System.identityHashCode(current));
+
+        // 检查引用相等
+        // log.debug("引用相等? {}", self == current);
+
+        IEC104Util.isCancel(self);
     }
 
     public void sendTestFrame() {
-        // 获取t3Task的原子引用
-        ScheduledFuture<?> currentTask = t3Task.getAndSet(null);
-
-        // 检查是否有任务未完成，有则取消任务(重置T3)
-        IEC104Util.isCancel(currentTask);
 
         ScheduledFuture<?> newTask = executor.schedule(() -> {
             log.info("发送 {} 测试帧", ByteBufUtil.hexDump(IEC104_BasicInstructions.TESTFR_ACT));
             // 经过 T3 时间没有报文交互，发送 TESTFR_ACT U测试帧
-            IEC104_FrameBuilder frameBuilder = new IEC104_FrameBuilder.Builder(
-                    new IEC104_ApciMessageDetail(IEC104_BasicInstructions.TESTFR_ACT.getShort(0), IEC104_BasicInstructions.TESTFR_ACT.getShort(2)))
-                    .build();
             IEC104_BasicInstructions.TESTFR_ACT.retain();
-            ctx.write(frameBuilder);
-            // 开启 T1 计时器
-            log.debug("开启T1计时器");
+            ByteBufAllocator allocator = ctx.alloc();
+            CompositeByteBuf compositeByteBuf = allocator.compositeBuffer();
+            ByteBuf frame = allocator.buffer(6)
+                    .writeByte(0x68)
+                    .writeByte(0x04)
+                    .writeShort(IEC104_BasicInstructions.TESTFR_ACT.getShort(0))
+                    .writeShort(IEC104_BasicInstructions.TESTFR_ACT.getShort(2));
+            compositeByteBuf.addComponent(frame);
+            compositeByteBuf.writerIndex(compositeByteBuf.capacity());
+            ScheduledFuture<?> self = testHolder.get();
+            if (self != null && t3Task.compareAndSet(self, null)) {
+                ctx.writeAndFlush(compositeByteBuf);
+            }
             parent.startT1Timer();
         }, t3, TimeUnit.SECONDS);
-        t3Task.compareAndSet(currentTask, newTask);
+
+        if (!t3Task.compareAndSet(null, newTask)) {
+            IEC104Util.isCancel(newTask);
+            return;
+        }
+//        log.debug("task run: testHolder.get()={}, id={}", newTask, newTask == null ? null : System.identityHashCode(newTask));
+        testHolder.set(newTask);
+    }
+
+    /**
+     * 取消测试持有者任务
+     */
+    public void onReceiveTestFRCon() {
+        ScheduledFuture<?> self = testHolder.get();
+        if (self != null && t3Task.compareAndSet(self, null)) {
+//            log.debug("task cancel: testHolder.get()={}, id={}", self, self == null ? null : System.identityHashCode(self));
+            IEC104Util.isCancel(self);
+        }
     }
 }

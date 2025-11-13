@@ -22,7 +22,6 @@ public class IEC104_ClientHandler extends ChannelHandlerAdapter {
         IEC104_ScheduledTaskPool.bindToChannel(ctx);
         // 获取 IEC104_ScheduledTaskPool 并调用 sendStartFrame() 发送启动帧
         IEC104_ScheduledTaskPool.getFromChannel(ctx).sendStartFrame();
-        IEC104_ScheduledTaskPool.getFromChannel(ctx).sendTestFrame();
     }
 
     /**

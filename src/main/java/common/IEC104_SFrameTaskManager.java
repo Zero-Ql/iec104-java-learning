@@ -74,6 +74,7 @@ public class IEC104_SFrameTaskManager {
                 sendSFrameNow();
             }
         }, t2, TimeUnit.SECONDS);
+
         // 如果 t2Task 不为 null 则取消新创建的任务并返回(防止holder指向被取消的任务)
         if (!t2Task.compareAndSet(null, newTask)) {
             IEC104Util.isCancel(newTask);

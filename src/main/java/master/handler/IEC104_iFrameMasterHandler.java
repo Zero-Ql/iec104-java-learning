@@ -1,5 +1,6 @@
 package master.handler;
 
+import core.scheduler.IEC104_ScheduledTaskPool;
 import enums.CauseOfTransmission;
 import enums.IEC104_TypeIdentifier;
 import frame.IEC104_MessageInfo;
@@ -13,6 +14,7 @@ import util.ByteBufResource;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Log4j2
 public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC104_AsduMessageDetail> {
@@ -43,7 +45,6 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
                 log.warn("IOA列表为空");
                 return;
             }
-            log.info("接收到I帧：{}", payload);
             String headerLog = String.format(
                     """
                             类型标识：%s
@@ -69,12 +70,15 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
             try {
                 // 通过类型标识和传送原因组合为一个唯一键，这个键对应一个唯一的IOA结构
                 // 通过键获取对应的解析器
-                IOA.forEach(info -> parserRouter.lookup(typeIdentifier, cot).parser(info.getMessageAddress(), ByteBufResource.of(info.getValue()), info.getQualityDescriptors(), ctx));
+                IOA.forEach(info -> {
+                    parserRouter.lookup(typeIdentifier, cot)
+                            .parser(info.getMessageAddress(), ByteBufResource.of(info.getValue()), info.getQualityDescriptors(), ctx);
+                    // 收到I帧，取消T1，重置T3
+                    IEC104_ScheduledTaskPool.getFromChannel(ctx).onReceiveTestFRCon();
+                });
             } catch (NullPointerException e) {
                 log.error("无法解析的I帧(未找到对应解析器)：{}", payload);
             }
-
-
         }
     }
 }

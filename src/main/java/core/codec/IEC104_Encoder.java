@@ -29,12 +29,10 @@ public class IEC104_Encoder extends MessageToByteEncoder<IEC104_FrameBuilder> {
         // 编码 APCI
         ByteBuf apciBuf = encodeApci(allocator, frame.getApciMessageDetail());
         composite.addComponent(apciBuf);
-
         // 编码 ASDU（如果有）
         if (frame.getAsduMessageDetail() != null) {
             ByteBuf asduBuf = encodeAsdu(allocator, frame.getAsduMessageDetail());
             composite.addComponent(asduBuf);
-
         }
 
         int len = composite.capacity();

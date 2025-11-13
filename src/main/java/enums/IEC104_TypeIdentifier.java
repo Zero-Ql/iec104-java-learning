@@ -16,7 +16,7 @@ public enum IEC104_TypeIdentifier {
     /**
      * 单点遥信
      */
-    M_SP_NA_1((byte) 0x01, 1, true),
+    M_SP_NA_1((byte) 0x01, 0, true),
 
     /**
      * 带时标的单点遥信
@@ -26,7 +26,7 @@ public enum IEC104_TypeIdentifier {
     /**
      * 双点遥信
      */
-    M_DP_NA_1((byte) 0x03, 1, true),
+    M_DP_NA_1((byte) 0x03, 0, true),
 
     /**
      * 带时标的双点遥信
@@ -116,12 +116,12 @@ public enum IEC104_TypeIdentifier {
     /**
      * 总召唤
      */
-    C_IC_NA_1((byte) 0x64, 0, false),
+    C_IC_NA_1((byte) 0x64, 0, true),
 
     /**
      * 时钟同步命令
      */
-    C_CS_NA_1((byte) 0x67, 1, false),
+    C_CS_NA_1((byte) 0x67, 7, false),
 
     /**
      * 复位进程命令

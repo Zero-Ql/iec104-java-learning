@@ -1,4 +1,4 @@
-package master.handler.parser.impl.controlParser;
+package master.handler.parser.impl.controlParser.cIcNa1;
 
 import com.google.auto.service.AutoService;
 import enums.monitoringDirections.QualityBit;
@@ -10,10 +10,21 @@ import util.ByteBufResource;
 
 import java.nio.ByteOrder;
 
+/**
+ * MeNc1IntrogenParser类用于解析总召遥测
+ */
 @Log4j2
 @AutoService(Parser.class)
 @ParserMeta(typeIdentifier = 0x0D, causeTx = 0x14)
-public class IcNa1IntrogenParser implements Parser {
+public class MeNc1IntrogenParser implements Parser {
+
+    /**
+     * 解析总召响应数据
+     * @param ioa 信息对象地址
+     * @param value 数据值缓冲区资源
+     * @param qualityDescriptors 质量描述符字节
+     * @param ctx 通道处理上下文
+     */
     @Override
     public void parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx) {
         // 创建一个try-with-resources块，用于自动释放valueResource
@@ -29,3 +40,4 @@ public class IcNa1IntrogenParser implements Parser {
         }
     }
 }
+
