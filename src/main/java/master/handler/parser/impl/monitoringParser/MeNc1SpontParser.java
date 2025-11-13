@@ -2,9 +2,9 @@ package master.handler.parser.impl.monitoringParser;
 
 import com.google.auto.service.AutoService;
 import enums.monitoringDirections.QualityBit;
-import master.handler.parser.Parser;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.log4j.Log4j2;
+import master.handler.parser.Parser;
 import master.handler.parser.ParserMeta;
 import util.ByteBufResource;
 

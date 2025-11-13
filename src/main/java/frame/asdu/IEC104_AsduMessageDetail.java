@@ -1,9 +1,7 @@
 package frame.asdu;
 
 import frame.IEC104_MessageInfo;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.ToString;
 
 import java.util.List;
 

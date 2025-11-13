@@ -5,8 +5,6 @@ import common.IEC104_SFrameTaskManager;
 import common.IEC104_TimeOutTaskManager;
 import common.IEC104_UFrameTaskManager;
 import config.Piec104Config;
-import frame.IEC104_FrameBuilder;
-import frame.apci.IEC104_ApciMessageDetail;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.AttributeKey;
 import org.apache.logging.log4j.LogManager;
@@ -15,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 定时任务池管理类

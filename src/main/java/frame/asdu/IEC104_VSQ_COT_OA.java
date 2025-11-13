@@ -1,7 +1,6 @@
 package frame.asdu;
 
 import lombok.Data;
-import lombok.Setter;
 
 @Data
 public class IEC104_VSQ_COT_OA {

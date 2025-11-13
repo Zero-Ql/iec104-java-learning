@@ -15,7 +15,5 @@ public class MasterSeqManager extends IEC104_seqManager {
         // 发送 S 帧
         IEC104_ScheduledTaskPool.getFromChannel(ctx).sendSFrame((short) super.recvOrdinal.get());
 
-        // 取消 T1 定时器
-//        IEC104_ScheduledTaskPool.getFromChannel(ctx).onReceiveT1Timer();
     }
 }

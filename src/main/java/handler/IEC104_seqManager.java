@@ -3,7 +3,6 @@ package handler;
 import frame.apci.event.UFrameEvent;
 import frame.asdu.IEC104_AsduMessageDetail;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.log4j.Log4j2;
