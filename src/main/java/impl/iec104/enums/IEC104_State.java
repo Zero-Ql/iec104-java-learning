@@ -12,15 +12,39 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package master.handler.parser;
+package impl.iec104.enums;
 
-import io.netty.channel.ChannelHandlerContext;
-import impl.iec104.util.ByteBufResource;
-
-/**
- * 解析器接口，定义了解析数据的方法规范
- */
-public interface Parser {
-    void parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx);
+public enum IEC104_State {
+    /**
+     * 断开
+     */
+    DISCONNECTED,
+    /**
+     * 正在连接
+     */
+    CONNECTING,
+    /**
+     * 等待启动链路帧确认
+     */
+    WAIT_STARTED_CON,
+    /**
+     * 链路已建立
+     */
+    LINK_ESTABLISHED,
+    /**
+     * 正在总召
+     */
+    GENERAL_CALL,
+    /**
+     * 数据交互中
+     */
+    DATA_EXCHANGE,
+    /**
+     * 仅维持心跳
+     */
+    HEARTBEAT_ONLY,
+    /**
+     * 正在重连
+     */
+    RECONNECTING
 }
-

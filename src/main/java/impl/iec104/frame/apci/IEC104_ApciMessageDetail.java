@@ -12,15 +12,31 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package master.handler.parser;
+package impl.iec104.frame.apci;
 
-import io.netty.channel.ChannelHandlerContext;
-import impl.iec104.util.ByteBufResource;
+import lombok.Data;
 
-/**
- * 解析器接口，定义了解析数据的方法规范
- */
-public interface Parser {
-    void parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx);
+@Data
+public class IEC104_ApciMessageDetail {
+
+    /**
+     * APDU 长度
+     */
+//    private int apduLen = 0;
+
+    /**
+     * 控制域 固定 四字节
+     * 发送 两字节
+     */
+    private short sendOrdinal;
+
+    /**
+     * 接收 两字节
+     */
+    private short recvOrdinal;
+
+    public IEC104_ApciMessageDetail(short sendOrdinal, short recvOrdinal){
+        this.sendOrdinal = sendOrdinal;
+        this.recvOrdinal = recvOrdinal;
+    }
 }
-

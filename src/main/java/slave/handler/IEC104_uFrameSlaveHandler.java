@@ -14,8 +14,8 @@
  */
 //package slave.handler;
 //
-//import common.IEC104_BasicInstructions;
-//import handler.IEC104_uFrameHandler;
+//import impl.iec104.common.IEC104_BasicInstructions;
+//import impl.iec104.handler.IEC104_uFrameHandler;
 //import enums.IEC104_UFrameType;
 //import io.netty.buffer.ByteBuf;
 //import io.netty.channel.ChannelFutureListener;

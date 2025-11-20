@@ -14,12 +14,12 @@
  */
 //package slave;
 //
-//import core.codec.IEC104_Decoder;
+//import impl.iec104.codec.core.IEC104_Decoder;
 //import io.netty.channel.ChannelInitializer;
 //import io.netty.channel.socket.SocketChannel;
 //import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 //import io.netty.handler.codec.LengthFieldPrepender;
-//import core.codec.IEC104_Encoder;
+//import impl.iec104.codec.core.IEC104_Encoder;
 //import slave.handler.IEC104_uFrameSlaveHandler;
 //
 //public class IEC104_ServerInitializer extends ChannelInitializer<SocketChannel> {

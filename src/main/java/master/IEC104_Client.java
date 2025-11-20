@@ -14,9 +14,9 @@
  */
 package master;
 
-import core.codec.IEC104_Decoder;
-import core.codec.IEC104_Encoder;
-import handler.IEC104_uFrameHandler;
+import impl.iec104.core.codec.IEC104_Decoder;
+import impl.iec104.core.codec.IEC104_Encoder;
+import impl.iec104.handler.IEC104_uFrameHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -28,7 +28,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -136,20 +135,5 @@ public class IEC104_Client {
                 executor.shutdown();
             }
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        // 单个客户端连接示例
-        // String host = "127.0.0.1";
-        // int port = 2555;
-        // new IEC104_Client(host, port).run();
-
-        // 多个客户端连接示例
-        Map<String, Integer> servers = new HashMap<>();
-        servers.put("127.0.0.1", 2555);
-//        servers.put("127.0.0.1", 2556);
-//        servers.put("127.0.0.1", 2557);
-
-        runMultipleClients(servers);
     }
 }

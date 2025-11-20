@@ -15,12 +15,12 @@
 package master.handler.parser.impl.controlParser.cIcNa1;
 
 import com.google.auto.service.AutoService;
-import enums.monitoringDirections.QualityBit;
+import impl.iec104.enums.monitoringDirections.QualityBit;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.log4j.Log4j2;
 import master.handler.parser.Parser;
 import master.handler.parser.ParserMeta;
-import util.ByteBufResource;
+import impl.iec104.util.ByteBufResource;
 
 /**
  * SpNa1IntrogenParser类用于解析总召遥信

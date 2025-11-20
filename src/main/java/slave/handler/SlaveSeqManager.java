@@ -14,7 +14,7 @@
  */
 package slave.handler;
 
-import handler.IEC104_seqManager;
+import impl.iec104.handler.IEC104_seqManager;
 import io.netty.channel.ChannelHandlerContext;
 
 public class SlaveSeqManager extends IEC104_seqManager {

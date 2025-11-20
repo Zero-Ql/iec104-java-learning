@@ -14,8 +14,8 @@
  */
 package master.handler;
 
-import core.scheduler.IEC104_ScheduledTaskPool;
-import handler.IEC104_seqManager;
+import impl.iec104.core.scheduler.IEC104_ScheduledTaskPool;
+import impl.iec104.handler.IEC104_seqManager;
 import io.netty.channel.ChannelHandlerContext;
 
 public class MasterSeqManager extends IEC104_seqManager {

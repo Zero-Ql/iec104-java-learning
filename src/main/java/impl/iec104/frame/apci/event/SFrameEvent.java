@@ -12,15 +12,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package master.handler.parser;
+package impl.iec104.frame.apci.event;
 
-import io.netty.channel.ChannelHandlerContext;
-import impl.iec104.util.ByteBufResource;
+import lombok.Value;
 
-/**
- * 解析器接口，定义了解析数据的方法规范
- */
-public interface Parser {
-    void parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx);
+@Value(staticConstructor = "of")
+public class SFrameEvent {
+    int recvOrdinal;
 }
-

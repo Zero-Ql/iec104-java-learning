@@ -14,7 +14,7 @@
  */
 package master;
 
-import core.scheduler.IEC104_ScheduledTaskPool;
+import impl.iec104.core.scheduler.IEC104_ScheduledTaskPool;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.logging.log4j.LogManager;
