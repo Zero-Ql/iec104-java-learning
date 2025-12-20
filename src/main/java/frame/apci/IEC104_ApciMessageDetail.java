@@ -12,22 +12,31 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package master.handler;
+package frame.apci;
 
-import core.scheduler.IEC104_ScheduledTaskPool;
-import handler.IEC104_seqManager;
-import io.netty.channel.ChannelHandlerContext;
+import lombok.Data;
 
-public class MasterSeqManager extends IEC104_seqManager {
+@Data
+public class IEC104_ApciMessageDetail {
+
     /**
-     * 自定义任务
-     * ChannelHandlerContext ctx 通道上下文
-     * AtomicInteger recvOrdinal 本地接收序号的原子引用
+     * APDU 长度
      */
-    @Override
-    public void customTasks(ChannelHandlerContext ctx, int recvOrdinal) {
-        // 发送 S 帧
-        IEC104_ScheduledTaskPool.getFromChannel(ctx).sendSFrame((short) super.recvOrdinal.get());
+//    private int apduLen = 0;
 
+    /**
+     * 控制域 固定 四字节
+     * 发送 两字节
+     */
+    private short sendOrdinal;
+
+    /**
+     * 接收 两字节
+     */
+    private short recvOrdinal;
+
+    public IEC104_ApciMessageDetail(short sendOrdinal, short recvOrdinal){
+        this.sendOrdinal = sendOrdinal;
+        this.recvOrdinal = recvOrdinal;
     }
 }

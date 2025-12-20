@@ -12,22 +12,39 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package master.handler;
+package enums;
 
-import core.scheduler.IEC104_ScheduledTaskPool;
-import handler.IEC104_seqManager;
-import io.netty.channel.ChannelHandlerContext;
-
-public class MasterSeqManager extends IEC104_seqManager {
+public enum IEC104_State {
     /**
-     * 自定义任务
-     * ChannelHandlerContext ctx 通道上下文
-     * AtomicInteger recvOrdinal 本地接收序号的原子引用
+     * 断开
      */
-    @Override
-    public void customTasks(ChannelHandlerContext ctx, int recvOrdinal) {
-        // 发送 S 帧
-        IEC104_ScheduledTaskPool.getFromChannel(ctx).sendSFrame((short) super.recvOrdinal.get());
-
-    }
+    DISCONNECTED,
+    /**
+     * 正在连接
+     */
+    CONNECTING,
+    /**
+     * 等待启动链路帧确认
+     */
+    WAIT_STARTED_CON,
+    /**
+     * 链路已建立
+     */
+    LINK_ESTABLISHED,
+    /**
+     * 正在总召
+     */
+    GENERAL_CALL,
+    /**
+     * 数据交互中
+     */
+    DATA_EXCHANGE,
+    /**
+     * 仅维持心跳
+     */
+    HEARTBEAT_ONLY,
+    /**
+     * 正在重连
+     */
+    RECONNECTING
 }
