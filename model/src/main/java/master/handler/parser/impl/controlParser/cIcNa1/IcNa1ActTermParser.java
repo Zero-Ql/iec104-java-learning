@@ -26,7 +26,6 @@ import impl.iec104.util.ByteBufResource;
  * IcNa1ActTermParser类用于解析总召终止
  */
 @Log4j2
-@AutoService(Parser.class)
 @ParserMeta(typeIdentifier = 0x64, causeTx = 0x0A)
 public class IcNa1ActTermParser implements Parser {
 

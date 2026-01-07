@@ -17,10 +17,11 @@ package master;
 import impl.iec104.core.scheduler.IEC104_ScheduledTaskPool;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class IEC104_ClientHandler extends ChannelHandlerAdapter {
+public class IEC104_ClientHandler extends ChannelInboundHandlerAdapter {
     private static final Logger log = LogManager.getLogger(IEC104_ClientHandler.class);
 
     /**

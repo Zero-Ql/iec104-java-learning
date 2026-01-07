@@ -1,18 +1,22 @@
 /*
  * IEC 60870-5-104 Protocol Implementation
  * Copyright (C) 2025 QSky
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
 package master.handler.parser;
+
+import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -24,6 +28,7 @@ import java.util.stream.StreamSupport;
  * ParserBootstrap类用于启动和管理Parser实例的缓存
  * 该类提供了一个线程安全、不可更改的Parser缓存映射
  */
+@Log4j2
 public final class ParserBootstrap {
 
     /**
@@ -44,7 +49,9 @@ public final class ParserBootstrap {
         // 获取 Parser 接口的所有实现类
         ServiceLoader<Parser> loader = ServiceLoader.load(Parser.class);
 
-        return StreamSupport.stream(loader.spliterator(), false)
+
+
+        var  t = StreamSupport.stream(loader.spliterator(), false)
                 // 如果反射获取的ParserMeta注解信息为null则过滤掉
                 .filter(parser -> parser.getClass().getAnnotation(ParserMeta.class) != null)
                 // 收集器
@@ -55,6 +62,8 @@ public final class ParserBootstrap {
                 }, Function.identity(), (a, b) -> {
                     throw new IllegalStateException("重复 key: " + a);
                 }));
+
+        return t;
     }
 
     /**
@@ -62,7 +71,7 @@ public final class ParserBootstrap {
      * 通过位运算将两个参数组合成一个整数key
      *
      * @param typeIdentifier 类型标识字节
-     * @param causeTx 传送原因短整型
+     * @param causeTx        传送原因短整型
      * @return 组合后的整数键值
      */
     public static int key(byte typeIdentifier, short causeTx) {

@@ -14,6 +14,9 @@
  */
 package master.handler.parser;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Map;
 
 /**
@@ -23,6 +26,7 @@ import java.util.Map;
 public final class ParserRouter {
     private static final ParserRouter INSTANCE = new ParserRouter();
     private static final Map<Integer, Parser> table = ParserBootstrap.CACHED;
+    private static final Logger log = LogManager.getLogger(ParserRouter.class);
 
     /**
      * 获取ParserRouter的单例实例

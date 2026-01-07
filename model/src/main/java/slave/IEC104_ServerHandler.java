@@ -21,7 +21,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 public class IEC104_ServerHandler extends SimpleChannelInboundHandler<IEC104_AsduMessageDetail> {
 
     @Override
-    protected void messageReceived(ChannelHandlerContext channelHandlerContext, IEC104_AsduMessageDetail IEC104AsduMessageDetail) throws Exception {
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, IEC104_AsduMessageDetail IEC104AsduMessageDetail) throws Exception {
         IEC104AsduMessageDetail.toString();
     }
 

@@ -20,10 +20,11 @@ import impl.iec104.frame.apci.event.UFrameEvent;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class IEC104_uFrameHandler extends ChannelHandlerAdapter {
+public class IEC104_uFrameHandler extends ChannelInboundHandlerAdapter {
     /**
      * @param ctx 通道上下文
      * @param evt 用户自定义事件

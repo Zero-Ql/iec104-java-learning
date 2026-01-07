@@ -27,7 +27,6 @@ import impl.iec104.util.ByteBufResource;
  * SpNa1SpontParser类用于解析突变遥信
  */
 @Log4j2
-@AutoService(Parser.class)
 @ParserMeta(typeIdentifier = 0x01, causeTx = 0x03)
 public class SpNa1SpontParser implements Parser{
     /**

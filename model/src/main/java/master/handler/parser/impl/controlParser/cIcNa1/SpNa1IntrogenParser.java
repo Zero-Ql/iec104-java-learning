@@ -26,7 +26,6 @@ import impl.iec104.util.ByteBufResource;
  * SpNa1IntrogenParser类用于解析总召遥信
  */
 @Log4j2
-@AutoService(Parser.class)
 @ParserMeta(typeIdentifier = 0x01, causeTx = 0x14)
 public class SpNa1IntrogenParser implements Parser {
     /**

@@ -28,7 +28,6 @@ import java.nio.ByteOrder;
  * MeNc1SpontParser类用于解析突变遥测
  */
 @Log4j2
-@AutoService(Parser.class)
 @ParserMeta(typeIdentifier = 0x0D, causeTx = 0x03)
 public class MeNc1SpontParser implements Parser {
 

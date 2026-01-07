@@ -28,7 +28,6 @@ import java.nio.ByteOrder;
  * MeNc1IntrogenParser类用于解析总召遥测
  */
 @Log4j2
-@AutoService(Parser.class)
 @ParserMeta(typeIdentifier = 0x0D, causeTx = 0x14)
 public class MeNc1IntrogenParser implements Parser {
 

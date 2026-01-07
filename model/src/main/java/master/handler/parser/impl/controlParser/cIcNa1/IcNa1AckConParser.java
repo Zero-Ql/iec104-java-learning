@@ -27,7 +27,6 @@ import impl.iec104.util.ByteBufResource;
  * <p><b>所有权转移：</b>调用者不再持有资源，本方法负责关闭。</p>
  */
 @Log4j2
-@AutoService(Parser.class)
 @ParserMeta(typeIdentifier = 0x64, causeTx = 0x07)
 public class IcNa1AckConParser implements Parser {
 

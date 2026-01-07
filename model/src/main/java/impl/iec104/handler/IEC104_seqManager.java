@@ -19,6 +19,7 @@ import impl.iec104.frame.asdu.IEC104_AsduMessageDetail;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.log4j.Log4j2;
 import impl.iec104.util.ByteUtil;
 import impl.iec104.util.IEC104Util;
@@ -26,7 +27,7 @@ import impl.iec104.util.IEC104Util;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Log4j2
-public abstract class IEC104_seqManager extends ChannelHandlerAdapter {
+public abstract class IEC104_seqManager extends ChannelInboundHandlerAdapter {
 
     // 本地接收序号
     protected final AtomicInteger recvOrdinal = new AtomicInteger(0);
@@ -44,6 +45,7 @@ public abstract class IEC104_seqManager extends ChannelHandlerAdapter {
      * @param msg 接收到的消息对象
      * @throws Exception 处理过程中可能抛出的异常
      */
+    @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         if (!(msg instanceof ByteBuf frame)) {

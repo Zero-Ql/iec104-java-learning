@@ -36,7 +36,7 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
      * @param asdu asdu对象
      */
     @Override
-    protected void messageReceived(ChannelHandlerContext ctx, IEC104_AsduMessageDetail asdu) {
+    protected void channelRead0(ChannelHandlerContext ctx, IEC104_AsduMessageDetail asdu) {
         if (asdu instanceof IEC104_AsduMessageDetail payload) {
             byte typeIdentifier = payload.getTypeIdentifier();
             // 通过构建器创建 IEC104_VSQ_COT_OA 对象
@@ -79,7 +79,7 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
             // 获取接口路由实例
             ParserRouter parserRouter = ParserRouter.getInstance();
 
-            try {
+//            try {
                 // 通过类型标识和传送原因组合为一个唯一键，这个键对应一个唯一的IOA结构
                 // 通过键获取对应的解析器
                 IOA.forEach(info -> {
@@ -88,9 +88,9 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
                     // 收到I帧，取消T1，重置T3
                     IEC104_ScheduledTaskPool.getFromChannel(ctx).onReceiveTestFRCon();
                 });
-            } catch (NullPointerException e) {
-                log.error("无法解析的I帧(未找到对应解析器)：{}", payload);
-            }
+//            } catch (NullPointerException e) {
+//                log.error("无法解析的I帧(未找到对应解析器)：{}", payload);
+//            }
         }
     }
 }

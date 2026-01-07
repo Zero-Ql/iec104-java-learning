@@ -15,11 +15,14 @@
 package impl.iec104.core.codec;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 
+@Log4j2
 public class IEC104_Decoder extends ByteToMessageDecoder {
 
     @Override
@@ -37,6 +40,7 @@ public class IEC104_Decoder extends ByteToMessageDecoder {
         int apduLength = byteBuf.readUnsignedByte();
         // 当前可读数据长度小于apdu长度，则重置指针
         if (byteBuf.readableBytes() < apduLength) {
+            log.info("当前可读数据长度小于apdu长度");
             byteBuf.resetReaderIndex();
             return;
         }
