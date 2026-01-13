@@ -11,7 +11,7 @@
     <name>javafx</name>
     <description>javafx</description>
     <modules>
-        <module>model</module>
+        <module>model-master</module>
         <module>controller</module>
         <module>view</module>
         <module>app</module>
@@ -47,6 +47,8 @@
 <!--        <netty.all.jar>${settings.localRepository}\io\netty\netty-all\${netty-all.version}\netty-all-${netty-all.version}.jar</netty.all.jar>-->
         <log4j.api.jar>${settings.localRepository}\org\apache\logging\log4j\log4j-api\${log4j.version}\log4j-api-${log4j.version}.jar</log4j.api.jar>
         <log4j.core.jar>${settings.localRepository}\org\apache\logging\log4j\log4j-core\${log4j.version}\log4j-core-${log4j.version}.jar</log4j.core.jar>
+
+        <cloud.yunyat.model.master>\model-master\target\classes\</cloud.yunyat.model.master>
 
         <module.path>${javafx.controls.jar}${path.separator}${javafx.fxml.jar}${path.separator}${javafx.graphics.jar}${path.separator}${ini4j.jar}${path.separator}${lombok.jar}${path.separator}${io.netty.handler.jar}${path.separator}${io.netty.codec.base.jar}${path.separator}${io.netty.transport.jar}${path.separator}${io.netty.buffer.jar}${path.separator}${io.netty.common.jar}${path.separator}${log4j.core.jar}${path.separator}${log4j.api.jar}</module.path>
     </properties>
@@ -131,13 +133,13 @@
                                 <version>${lombok.version}</version>
                             </path>
                         </annotationProcessorPaths>
-                        <compilerArgs combine.children="append">
-                            <arg>--add-modules</arg>
-                            <arg>javafx.controls,javafx.fxml,javafx.graphics,ini4j,lombok,io.netty.handler,io.netty.codec,io.netty.transport,io.netty.buffer,io.netty.common,org.apache.logging.log4j.core,org.apache.logging.log4j,cloud.yunyat.model</arg>
-                            <arg>--module-path</arg>
-                            <!--suppress UnresolvedMavenProperty -->
-                            <arg>${module.path}${path.separator}${project.basedir}\model\target\classes\</arg>
-                        </compilerArgs>
+<!--                        <compilerArgs combine.children="append">-->
+<!--                            <arg>&#45;&#45;add-modules</arg>-->
+<!--                            <arg>javafx.controls,javafx.fxml,javafx.graphics,ini4j,lombok,io.netty.handler,io.netty.codec,io.netty.transport,io.netty.buffer,io.netty.common,org.apache.logging.log4j.core,org.apache.logging.log4j,cloud.yunyat.model.master</arg>-->
+<!--                            <arg>&#45;&#45;module-path</arg>-->
+<!--                            &lt;!&ndash;suppress UnresolvedMavenProperty &ndash;&gt;-->
+<!--                            <arg>${module.path}${path.separator}${session.executionRootDirectory}${cloud.yunyat.model.master}</arg>-->
+<!--                        </compilerArgs>-->
                     </configuration>
                 </plugin>
                 <!-- 如果用 JavaFX，可在这里添加 javafx-maven-plugin 配置（可选） -->
