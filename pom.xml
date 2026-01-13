@@ -11,7 +11,7 @@
     <name>javafx</name>
     <description>javafx</description>
     <modules>
-        <module>model-master</module>
+        <module>model</module>
         <module>controller</module>
         <module>view</module>
         <module>app</module>
@@ -27,30 +27,30 @@
         <javafx.platform>win</javafx.platform>
         <lombok.version>1.18.30</lombok.version>
         <netty-all.version>4.2.9.Final</netty-all.version>
-
         <log4j.version>2.25.3</log4j.version>
         <javafx.version>21.0.10-ea+1</javafx.version>
-        <javafx.controls.jar>${settings.localRepository}\org\openjfx\javafx-controls\${javafx.version}\javafx-controls-${javafx.version}-${javafx.platform}.jar</javafx.controls.jar>
+        
+<!--        <javafx.controls.jar>${settings.localRepository}\org\openjfx\javafx-controls\${javafx.version}\javafx-controls-${javafx.version}-${javafx.platform}.jar</javafx.controls.jar>-->
 
-        <javafx.fxml.jar>${settings.localRepository}\org\openjfx\javafx-fxml\${javafx.version}\javafx-fxml-${javafx.version}-${javafx.platform}.jar</javafx.fxml.jar>
-        <javafx.graphics.jar>${settings.localRepository}\org\openjfx\javafx-graphics\${javafx.version}\javafx-graphics-${javafx.version}-${javafx.platform}.jar</javafx.graphics.jar>
+<!--        <javafx.fxml.jar>${settings.localRepository}\org\openjfx\javafx-fxml\${javafx.version}\javafx-fxml-${javafx.version}-${javafx.platform}.jar</javafx.fxml.jar>-->
+<!--        <javafx.graphics.jar>${settings.localRepository}\org\openjfx\javafx-graphics\${javafx.version}\javafx-graphics-${javafx.version}-${javafx.platform}.jar</javafx.graphics.jar>-->
 
-        <ini4j.jar>${settings.localRepository}\org\ini4j\ini4j\${ini4j.version}\ini4j-${ini4j.version}.jar</ini4j.jar>
+<!--        <ini4j.jar>${settings.localRepository}\org\ini4j\ini4j\${ini4j.version}\ini4j-${ini4j.version}.jar</ini4j.jar>-->
 
-        <lombok.jar>${settings.localRepository}\org\projectlombok\lombok\${lombok.version}\lombok-${lombok.version}.jar</lombok.jar>
+<!--        <lombok.jar>${settings.localRepository}\org\projectlombok\lombok\${lombok.version}\lombok-${lombok.version}.jar</lombok.jar>-->
 
-        <io.netty.handler.jar>${settings.localRepository}\io\netty\netty-handler\${netty-all.version}\netty-handler-${netty-all.version}.jar</io.netty.handler.jar>
-        <io.netty.codec.base.jar>${settings.localRepository}\io\netty\netty-codec-base\${netty-all.version}\netty-codec-base-${netty-all.version}.jar</io.netty.codec.base.jar>
-        <io.netty.transport.jar>${settings.localRepository}\io\netty\netty-transport\${netty-all.version}\netty-transport-${netty-all.version}.jar</io.netty.transport.jar>
-        <io.netty.buffer.jar>${settings.localRepository}\io\netty\netty-buffer\${netty-all.version}\netty-buffer-${netty-all.version}.jar</io.netty.buffer.jar>
-        <io.netty.common.jar>${settings.localRepository}\io\netty\netty-common\${netty-all.version}\netty-common-${netty-all.version}.jar</io.netty.common.jar>
+<!--        <io.netty.handler.jar>${settings.localRepository}\io\netty\netty-handler\${netty-all.version}\netty-handler-${netty-all.version}.jar</io.netty.handler.jar>-->
+<!--        <io.netty.codec.base.jar>${settings.localRepository}\io\netty\netty-codec-base\${netty-all.version}\netty-codec-base-${netty-all.version}.jar</io.netty.codec.base.jar>-->
+<!--        <io.netty.transport.jar>${settings.localRepository}\io\netty\netty-transport\${netty-all.version}\netty-transport-${netty-all.version}.jar</io.netty.transport.jar>-->
+<!--        <io.netty.buffer.jar>${settings.localRepository}\io\netty\netty-buffer\${netty-all.version}\netty-buffer-${netty-all.version}.jar</io.netty.buffer.jar>-->
+<!--        <io.netty.common.jar>${settings.localRepository}\io\netty\netty-common\${netty-all.version}\netty-common-${netty-all.version}.jar</io.netty.common.jar>-->
 <!--        <netty.all.jar>${settings.localRepository}\io\netty\netty-all\${netty-all.version}\netty-all-${netty-all.version}.jar</netty.all.jar>-->
-        <log4j.api.jar>${settings.localRepository}\org\apache\logging\log4j\log4j-api\${log4j.version}\log4j-api-${log4j.version}.jar</log4j.api.jar>
-        <log4j.core.jar>${settings.localRepository}\org\apache\logging\log4j\log4j-core\${log4j.version}\log4j-core-${log4j.version}.jar</log4j.core.jar>
+<!--        <log4j.api.jar>${settings.localRepository}\org\apache\logging\log4j\log4j-api\${log4j.version}\log4j-api-${log4j.version}.jar</log4j.api.jar>-->
+<!--        <log4j.core.jar>${settings.localRepository}\org\apache\logging\log4j\log4j-core\${log4j.version}\log4j-core-${log4j.version}.jar</log4j.core.jar>-->
 
-        <cloud.yunyat.model.master>\model-master\target\classes\</cloud.yunyat.model.master>
+<!--        <cloud.yunyat.model.master>\model-master\target\classes\</cloud.yunyat.model.master>-->
 
-        <module.path>${javafx.controls.jar}${path.separator}${javafx.fxml.jar}${path.separator}${javafx.graphics.jar}${path.separator}${ini4j.jar}${path.separator}${lombok.jar}${path.separator}${io.netty.handler.jar}${path.separator}${io.netty.codec.base.jar}${path.separator}${io.netty.transport.jar}${path.separator}${io.netty.buffer.jar}${path.separator}${io.netty.common.jar}${path.separator}${log4j.core.jar}${path.separator}${log4j.api.jar}</module.path>
+<!--        <module.path>${javafx.controls.jar}${path.separator}${javafx.fxml.jar}${path.separator}${javafx.graphics.jar}${path.separator}${ini4j.jar}${path.separator}${lombok.jar}${path.separator}${io.netty.handler.jar}${path.separator}${io.netty.codec.base.jar}${path.separator}${io.netty.transport.jar}${path.separator}${io.netty.buffer.jar}${path.separator}${io.netty.common.jar}${path.separator}${log4j.core.jar}${path.separator}${log4j.api.jar}</module.path>-->
     </properties>
 
     <dependencyManagement>

@@ -6,7 +6,7 @@ import cloud.yunyat.model.master.handler.parser.impl.controlParser.cIcNa1.SpNa1I
 import cloud.yunyat.model.master.handler.parser.impl.monitoringParser.MeNc1SpontParser;
 import cloud.yunyat.model.master.handler.parser.impl.monitoringParser.SpNa1SpontParser;
 
-module cloud.yunyat.model.master {
+module cloud.yunyat.model {
     requires ini4j;
     requires static lombok;
     requires io.netty.handler;
@@ -27,5 +27,8 @@ module cloud.yunyat.model.master {
                     MeNc1SpontParser,
                     SpNa1SpontParser;
 
+    opens cloud.yunyat.model.master to javafx.base, javafx.fxml;
+
+//    exports cloud.yunyat.model;
     exports cloud.yunyat.model.master;
 }
