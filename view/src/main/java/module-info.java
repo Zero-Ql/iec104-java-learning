@@ -1,3 +1,4 @@
-module view {
-//    requires controller;
+module cloud.yunyat.view {
+    requires cloud.yunyat.controller;
+    exports cloud.yunyat.view;
 }

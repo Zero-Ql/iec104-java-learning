@@ -15,7 +15,7 @@ package cloud.yunyat.app;/*
 import java.util.HashMap;
 import java.util.Map;
 
-import static master.IEC104_Client.runMultipleClients;
+import static cloud.yunyat.model.master.IEC104_Client.runMultipleClients;
 
 public class main {
     public static void main(String[] args) throws Exception {

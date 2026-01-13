@@ -19,9 +19,36 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <java.version>21</java.version>
+        <ini4j.version>0.5.4</ini4j.version>
+        <javafx.platform>win</javafx.platform>
+        <lombok.version>1.18.30</lombok.version>
+        <netty-all.version>4.2.9.Final</netty-all.version>
+
+        <log4j.version>2.25.3</log4j.version>
+        <javafx.version>21.0.10-ea+1</javafx.version>
+        <javafx.controls.jar>${settings.localRepository}\org\openjfx\javafx-controls\${javafx.version}\javafx-controls-${javafx.version}-${javafx.platform}.jar</javafx.controls.jar>
+
+        <javafx.fxml.jar>${settings.localRepository}\org\openjfx\javafx-fxml\${javafx.version}\javafx-fxml-${javafx.version}-${javafx.platform}.jar</javafx.fxml.jar>
+        <javafx.graphics.jar>${settings.localRepository}\org\openjfx\javafx-graphics\${javafx.version}\javafx-graphics-${javafx.version}-${javafx.platform}.jar</javafx.graphics.jar>
+
+        <ini4j.jar>${settings.localRepository}\org\ini4j\ini4j\${ini4j.version}\ini4j-${ini4j.version}.jar</ini4j.jar>
+
+        <lombok.jar>${settings.localRepository}\org\projectlombok\lombok\${lombok.version}\lombok-${lombok.version}.jar</lombok.jar>
+
+        <io.netty.handler.jar>${settings.localRepository}\io\netty\netty-handler\${netty-all.version}\netty-handler-${netty-all.version}.jar</io.netty.handler.jar>
+        <io.netty.codec.base.jar>${settings.localRepository}\io\netty\netty-codec-base\${netty-all.version}\netty-codec-base-${netty-all.version}.jar</io.netty.codec.base.jar>
+        <io.netty.transport.jar>${settings.localRepository}\io\netty\netty-transport\${netty-all.version}\netty-transport-${netty-all.version}.jar</io.netty.transport.jar>
+        <io.netty.buffer.jar>${settings.localRepository}\io\netty\netty-buffer\${netty-all.version}\netty-buffer-${netty-all.version}.jar</io.netty.buffer.jar>
+        <io.netty.common.jar>${settings.localRepository}\io\netty\netty-common\${netty-all.version}\netty-common-${netty-all.version}.jar</io.netty.common.jar>
+<!--        <netty.all.jar>${settings.localRepository}\io\netty\netty-all\${netty-all.version}\netty-all-${netty-all.version}.jar</netty.all.jar>-->
+        <log4j.api.jar>${settings.localRepository}\org\apache\logging\log4j\log4j-api\${log4j.version}\log4j-api-${log4j.version}.jar</log4j.api.jar>
+        <log4j.core.jar>${settings.localRepository}\org\apache\logging\log4j\log4j-core\${log4j.version}\log4j-core-${log4j.version}.jar</log4j.core.jar>
+
+        <module.path>${javafx.controls.jar}${path.separator}${javafx.fxml.jar}${path.separator}${javafx.graphics.jar}${path.separator}${ini4j.jar}${path.separator}${lombok.jar}${path.separator}${io.netty.handler.jar}${path.separator}${io.netty.codec.base.jar}${path.separator}${io.netty.transport.jar}${path.separator}${io.netty.buffer.jar}${path.separator}${io.netty.common.jar}${path.separator}${log4j.core.jar}${path.separator}${log4j.api.jar}</module.path>
     </properties>
 
     <dependencyManagement>
@@ -30,7 +57,7 @@
             <dependency>
                 <groupId>org.ini4j</groupId>
                 <artifactId>ini4j</artifactId>
-                <version>0.5.4</version>
+                <version>${ini4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>junit</groupId>
@@ -41,23 +68,28 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.30</version>
+                <version>${lombok.version}</version>
                 <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-core</artifactId>
-                <version>2.23.1</version>
+                <version>${log4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>
-                <version>2.23.1</version>
+                <version>${log4j.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
-                <version>4.2.9.Final</version>
+                <version>${netty-all.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-base</artifactId>
+                <version>${netty-all.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.poi</groupId>
@@ -76,12 +108,6 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.18.0</version>
             </dependency>
-            <dependency>
-                <groupId>com.google.auto.service</groupId>
-                <artifactId>auto-service</artifactId>
-                <version>1.1.1</version>
-                <optional>true</optional>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -92,25 +118,37 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.11.0</version>
+                    <version>3.14.0</version>
                     <configuration>
+<!--                        <fork>true</fork>-->
                         <release>${java.version}</release>
+                        <useIncrementalCompilation>false</useIncrementalCompilation>
                         <annotationProcessorPaths>
-                            <path>
-                                <groupId>com.google.auto.service</groupId>
-                                <artifactId>auto-service</artifactId>
-                                <version>1.1.1</version>
-                            </path>
                             <!-- lombok 作为编译注解处理器（如果需要） -->
                             <path>
                                 <groupId>org.projectlombok</groupId>
                                 <artifactId>lombok</artifactId>
-                                <version>1.18.30</version>
+                                <version>${lombok.version}</version>
                             </path>
                         </annotationProcessorPaths>
+                        <compilerArgs combine.children="append">
+                            <arg>--add-modules</arg>
+                            <arg>javafx.controls,javafx.fxml,javafx.graphics,ini4j,lombok,io.netty.handler,io.netty.codec,io.netty.transport,io.netty.buffer,io.netty.common,org.apache.logging.log4j.core,org.apache.logging.log4j,cloud.yunyat.model</arg>
+                            <arg>--module-path</arg>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <arg>${module.path}${path.separator}${project.basedir}\model\target\classes\</arg>
+                        </compilerArgs>
                     </configuration>
                 </plugin>
                 <!-- 如果用 JavaFX，可在这里添加 javafx-maven-plugin 配置（可选） -->
+<!--                <plugin>-->
+<!--                    <groupId>org.openjfx</groupId>-->
+<!--                    <artifactId>javafx-maven-plugin</artifactId>-->
+<!--                    <version>0.0.8</version>-->
+<!--                    <configuration>-->
+<!--                        <mainClass>cloud.yunyat.app.MainApp</mainClass>-->
+<!--                    </configuration>-->
+<!--                </plugin>-->
             </plugins>
         </pluginManagement>
     </build>

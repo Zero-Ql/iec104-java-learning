@@ -1,22 +1,31 @@
-module model {
+import cloud.yunyat.model.master.handler.parser.Parser;
+import cloud.yunyat.model.master.handler.parser.impl.controlParser.cIcNa1.IcNa1AckConParser;
+import cloud.yunyat.model.master.handler.parser.impl.controlParser.cIcNa1.IcNa1ActTermParser;
+import cloud.yunyat.model.master.handler.parser.impl.controlParser.cIcNa1.MeNc1IntrogenParser;
+import cloud.yunyat.model.master.handler.parser.impl.controlParser.cIcNa1.SpNa1IntrogenParser;
+import cloud.yunyat.model.master.handler.parser.impl.monitoringParser.MeNc1SpontParser;
+import cloud.yunyat.model.master.handler.parser.impl.monitoringParser.SpNa1SpontParser;
+
+module cloud.yunyat.model.master {
     requires ini4j;
     requires static lombok;
-    requires com.google.auto.service;
     requires io.netty.handler;
     requires io.netty.codec;
     requires io.netty.transport;
     requires io.netty.buffer;
     requires io.netty.common;
+//    requires netty.all;
+    requires org.apache.logging.log4j.core;
     requires org.apache.logging.log4j;
 
-    uses master.handler.parser.Parser;
-    provides master.handler.parser.Parser
-            with master.handler.parser.impl.controlParser.cIcNa1.IcNa1AckConParser,
-                    master.handler.parser.impl.controlParser.cIcNa1.IcNa1ActTermParser,
-                    master.handler.parser.impl.controlParser.cIcNa1.MeNc1IntrogenParser,
-                    master.handler.parser.impl.controlParser.cIcNa1.SpNa1IntrogenParser,
-                    master.handler.parser.impl.monitoringParser.MeNc1SpontParser,
-                    master.handler.parser.impl.monitoringParser.SpNa1SpontParser;
+    uses Parser;
+    provides Parser
+            with IcNa1AckConParser,
+                    IcNa1ActTermParser,
+                    MeNc1IntrogenParser,
+                    SpNa1IntrogenParser,
+                    MeNc1SpontParser,
+                    SpNa1SpontParser;
 
-    exports master;
+    exports cloud.yunyat.model.master;
 }

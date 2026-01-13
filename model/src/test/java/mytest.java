@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 import org.junit.Test;
-import impl.iec104.config.Piec104Config;
+import cloud.yunyat.model.impl.iec104.config.Piec104Config;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
 

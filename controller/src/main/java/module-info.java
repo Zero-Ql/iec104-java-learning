@@ -1,4 +1,4 @@
-module controller {
-    requires model;
-//    exports controller;
+module cloud.yunyat.controller {
+    requires cloud.yunyat.model.master;
+    exports cloud.yunyat.controller;
 }
