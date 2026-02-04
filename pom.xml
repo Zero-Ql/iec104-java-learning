@@ -124,7 +124,7 @@
                     <configuration>
 <!--                        <fork>true</fork>-->
                         <release>${java.version}</release>
-                        <useIncrementalCompilation>false</useIncrementalCompilation>
+<!--                        <useIncrementalCompilation>false</useIncrementalCompilation>-->
                         <annotationProcessorPaths>
                             <!-- lombok 作为编译注解处理器（如果需要） -->
                             <path>

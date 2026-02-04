@@ -51,7 +51,6 @@ public enum CommandQualifier {
                 : (byte) (qualifier & ~(1 << cq.bitIndex));
     }
 
-    /* ----------- 快捷工厂 ----------- */
 
     /** 生成单命令 SCO 字节 */
     public static byte buildSCO(boolean select, boolean on) {

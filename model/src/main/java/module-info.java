@@ -27,8 +27,7 @@ module cloud.yunyat.model {
                     MeNc1SpontParser,
                     SpNa1SpontParser;
 
-    opens cloud.yunyat.model.master to javafx.base, javafx.fxml;
-
 //    exports cloud.yunyat.model;
     exports cloud.yunyat.model.master;
+    exports cloud.yunyat.model.service;
 }
