@@ -2,6 +2,7 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
@@ -9,9 +10,11 @@
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.TreeItem?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
@@ -20,39 +23,34 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.control.TreeItem?>
-<?import javafx.scene.control.ContextMenu?>
-<?import javafx.scene.control.CustomMenuItem?>
-<BorderPane prefHeight="800" prefWidth="1200" xmlns="http://javafx.com/javafx/21.0.1"
-            stylesheets="@../css/mainView.css"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="cloud.yunyat.controller.MainController">
+<BorderPane prefHeight="800" prefWidth="1200" stylesheets="@../css/mainView.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cloud.yunyat.controller.MainController">
 
     <!-- 左侧菜单栏 -->
     <left>
         <VBox alignment="TOP_CENTER" spacing="5" styleClass="tool-bar">
             <padding>
-                <Insets bottom="10" left="5" right="5" top="10"/>
+                <Insets bottom="10" left="5" right="5" top="10" />
             </padding>
 
             <!-- 项目图标按钮 -->
             <ToggleButton fx:id="projectBtn" styleClass="tool-button" userData="project">
                 <graphic>
-                    <Label styleClass="tool-icon" text="📁"/>
+                    <Label styleClass="tool-icon" text="📁" />
                 </graphic>
                 <tooltip>
-                    <Tooltip text="站端"/>
+                    <Tooltip text="站端" />
                 </tooltip>
             </ToggleButton>
 
-            <Region VBox.vgrow="ALWAYS"/> <!-- 弹性空间 -->
+            <Region VBox.vgrow="ALWAYS" /> <!-- 弹性空间 -->
 
             <!-- 设置按钮 -->
             <ToggleButton fx:id="settingsBtn" styleClass="tool-button" userData="settings">
                 <graphic>
-                    <Label styleClass="tool-icon" text="⚙️"/>
+                    <Label styleClass="tool-icon" text="⚙️" />
                 </graphic>
                 <tooltip>
-                    <Tooltip text="设置"/>
+                    <Tooltip text="设置" />
                 </tooltip>
             </ToggleButton>
         </VBox>
@@ -62,13 +60,12 @@
     <center>
         <SplitPane fx:id="mainSplitPane" dividerPositions="0.2">
             <!-- 可展开的侧面板 -->
-            <VBox fx:id="sidePanel" managed="false" maxWidth="400" minWidth="0" prefWidth="250" styleClass="side-panel"
-                  visible="false">
+            <VBox fx:id="sidePanel" managed="false" maxWidth="400" minWidth="0" prefWidth="250" styleClass="side-panel" visible="false">
                 <!-- 面板标题栏 -->
                 <HBox alignment="CENTER_LEFT" styleClass="panel-header">
-                    <Label fx:id="panelTitle" styleClass="panel-title" HBox.hgrow="ALWAYS"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button fx:id="close_button" onAction="#closeSidePanel" styleClass="close-button" text="-"/>
+                    <Label fx:id="panelTitle" styleClass="panel-title" HBox.hgrow="ALWAYS" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button fx:id="close_button" onAction="#closeSidePanel" styleClass="close-button" text="-" />
                 </HBox>
 
                 <!-- 面板内容区域 -->
@@ -88,12 +85,12 @@
                                         <!--                                                </Label>-->
                                         <!--                                            </content>-->
                                         <!--                                        </CustomMenuItem>-->
-                                        <MenuItem text="添加设备" onAction="#addDevice"/>
+                                        <MenuItem onAction="#addDevice" text="添加设备" />
                                     </items>
                                 </ContextMenu>
                             </contextMenu>
                             <root>
-                                <TreeItem value="master" expanded="true">
+                                <TreeItem expanded="true" value="master">
                                     <children>
                                     </children>
                                 </TreeItem>
@@ -105,8 +102,22 @@
 
             <!-- 主编辑器区域 -->
             <TabPane fx:id="editorTabPane" styleClass="editor-area" VBox.vgrow="ALWAYS">
-                <tabs>
-                </tabs>
+            <tabs>
+               <Tab fx:id="deviceListTab" text="设备列表">
+                 <content>
+                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                        <children>
+                           <TableView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+                             <columns>
+                               <TableColumn prefWidth="75.0" text="C1" />
+                               <TableColumn prefWidth="75.0" text="C2" />
+                             </columns>
+                           </TableView>
+                        </children>
+                     </AnchorPane>
+                 </content>
+               </Tab>
+            </tabs>
             </TabPane>
         </SplitPane>
     </center>
@@ -115,17 +126,17 @@
             <menus>
                 <Menu mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Close"/>
+                        <MenuItem mnemonicParsing="false" text="Close" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Delete"/>
+                        <MenuItem mnemonicParsing="false" text="Delete" />
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="About"/>
+                        <MenuItem mnemonicParsing="false" text="About" />
                     </items>
                 </Menu>
             </menus>
@@ -134,18 +145,18 @@
     <right>
         <VBox alignment="TOP_CENTER" spacing="5" styleClass="communication-bar">
             <padding>
-                <Insets bottom="10" left="5" right="5" top="10"/>
+                <Insets bottom="10" left="5" right="5" top="10" />
             </padding>
 
             <ToggleButton fx:id="communicationBtn" styleClass="tool-button" userData="communication">
                 <graphic>
-                    <Label styleClass="communication-icon" text="占位"/>
+                    <Label styleClass="communication-icon" text="占位" />
                 </graphic>
                 <tooltip>
-                    <Tooltip text="通信参数"/>
+                    <Tooltip text="通信参数" />
                 </tooltip>
             </ToggleButton>
-            <Region VBox.vgrow="ALWAYS"/>
+            <Region VBox.vgrow="ALWAYS" />
         </VBox>
     </right>
 
@@ -153,25 +164,25 @@
     <bottom>
         <HBox prefHeight="30" styleClass="status-bar">
             <padding>
-                <Insets left="10" right="10"/>
+                <Insets left="10" right="10" />
             </padding>
 
             <!-- 左侧状态信息 -->
-            <Label fx:id="statusLabel" styleClass="status-text" text="就绪" HBox.hgrow="ALWAYS"/>
+            <Label fx:id="statusLabel" styleClass="status-text" text="就绪" HBox.hgrow="ALWAYS" />
 
             <!-- 右侧状态信息 -->
             <HBox spacing="20">
                 <!-- 行号和列号 -->
-                <Label fx:id="lineColLabel" styleClass="status-text" text="行: 1, 列: 1"/>
+                <Label fx:id="lineColLabel" styleClass="status-text" text="行: 1, 列: 1" />
 
                 <!-- 文件编码 -->
-                <Label fx:id="encodingLabel" styleClass="status-text" text="UTF-8"/>
+                <Label fx:id="encodingLabel" styleClass="status-text" text="UTF-8" />
 
                 <!-- 文件类型 -->
-                <Label fx:id="fileTypeLabel" styleClass="status-text" text="Java"/>
+                <Label fx:id="fileTypeLabel" styleClass="status-text" text="Java" />
 
                 <!-- 编辑状态 -->
-                <Label fx:id="editStatusLabel" styleClass="status-text" text="已保存"/>
+                <Label fx:id="editStatusLabel" styleClass="status-text" text="已保存" />
             </HBox>
         </HBox>
     </bottom>

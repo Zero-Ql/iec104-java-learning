@@ -42,6 +42,8 @@ public class MainController implements Initializable {
 
     @FXML
     private TabPane editorTabPane;
+    @FXML
+    private Tab deviceListTab;
 
     @FXML
     private Label statusLabel;
@@ -61,6 +63,8 @@ public class MainController implements Initializable {
         sidePanel.setManaged(false);
         projectPanel.setVisible(false);
         projectPanel.setManaged(false);
+
+        editorTabPane.getTabs().remove(deviceListTab);
 
 
         // 注册站端按钮监听器，在按钮被点击时显示面板
@@ -177,31 +181,32 @@ public class MainController implements Initializable {
 
     private void openDeviceInEditor(String deviceName) {
         // 如果已经打开则直接切换
-//        for (Tab t : editorTabPane.getTabs()) {
-//            if (t.getText().equals(deviceName)) {
-//                editorTabPane.getSelectionModel().select(t);
-//                return;
-//            }
-//        }
+        for (Tab t : editorTabPane.getTabs()) {
+            if (t.getText().equals(deviceName)) {
+                editorTabPane.getSelectionModel().select(t);
+                return;
+            }
+        }
 
         editorTabPane.getTabs().clear();
 
 
-
-        Tab tab = new Tab(deviceName);
-        TextArea ta = new TextArea("// 打开设备: " + deviceName + " ");
+//        Tab tab = new Tab(deviceName);
+//        TextArea ta = new TextArea("// 打开设备: " + deviceName + " ");
         // 设置内容区域自动换行
 //        ta.setWrapText(true);
         // 设置不可编辑
-        ta.setEditable(false);
+//        ta.setEditable(false);
         // 将 TextArea 设置为 tab 页的内容区域
-        tab.setContent(ta);
+//        tab.setContent();
         // 设置 tab 页可关闭
-        tab.setClosable(true);
+//        tab.setClosable(true);
         // 获取选项卡列表并将 tab 页添加进去
-        editorTabPane.getTabs().add(tab);
+
+        deviceListTab.setClosable(true);
+        editorTabPane.getTabs().add(deviceListTab);
         // 选择并设置标签页
-        editorTabPane.getSelectionModel().select(tab);
+        editorTabPane.getSelectionModel().select(deviceListTab);
 
 //        attachCaretListener(ta);
 //        updateFileTypeAndEncoding(filename);
