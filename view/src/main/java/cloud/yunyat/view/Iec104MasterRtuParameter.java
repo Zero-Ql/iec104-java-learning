@@ -1,7 +1,7 @@
 package cloud.yunyat.view;
 
 import cloud.yunyat.controller.iec104.WindowService;
-import cloud.yunyat.controller.iec104.addDeviceController;
+import cloud.yunyat.controller.iec104.addRTUController;
 import cloud.yunyat.model.pojo.Device;
 import cloud.yunyat.model.pojo.Rtu;
 import javafx.fxml.FXMLLoader;
@@ -13,15 +13,15 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.function.Consumer;
 
-public class Iec104MasterCommunicationParameters implements WindowService {
+public class Iec104MasterRtuParameter implements WindowService {
     @Override
-    public void showAddDeviceDialog(Consumer<Device> onDeviceCreated) {
+    public void showAddRtuDialog(Consumer<Rtu> onRtuCreated) {
         try {
-            FXMLLoader loader = new FXMLLoader(ViewRes.get("/cloud/yunyat/fxml/iec104MasterCommunicationParameters.fxml"));
+            FXMLLoader loader = new FXMLLoader(ViewRes.get("/cloud/yunyat/fxml/iec104MasterRtuParameter.fxml"));
             Parent root = loader.load();
 
-            addDeviceController adddevicecontroller = loader.getController();
-            adddevicecontroller.setOnDeviceCreated(onDeviceCreated);
+            addRTUController addRtuController = loader.getController();
+            addRtuController.setOnDeviceCreated(onRtuCreated);
 
             // 2. 创建新舞台 (Stage)
             Stage stage = new Stage();
@@ -38,6 +38,6 @@ public class Iec104MasterCommunicationParameters implements WindowService {
     }
 
     @Override
-    public void showAddRtuDialog(Consumer<Rtu> onRtuCreated) {
+    public void showAddDeviceDialog(Consumer<Device> onDeviceCreated) {
     }
 }

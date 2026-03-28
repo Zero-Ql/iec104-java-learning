@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
@@ -23,34 +21,35 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="800" prefWidth="1200" stylesheets="@../css/mainView.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="cloud.yunyat.controller.MainController">
+<BorderPane prefHeight="800" prefWidth="1200" stylesheets="@../css/mainView.css" xmlns="http://javafx.com/javafx/21.0.1"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="cloud.yunyat.controller.MainController">
 
     <!-- 左侧菜单栏 -->
     <left>
         <VBox alignment="TOP_CENTER" spacing="5" styleClass="tool-bar">
             <padding>
-                <Insets bottom="10" left="5" right="5" top="10" />
+                <Insets bottom="10" left="5" right="5" top="10"/>
             </padding>
 
             <!-- 项目图标按钮 -->
-            <ToggleButton fx:id="projectBtn" styleClass="tool-button" userData="project">
+            <ToggleButton fx:id="projectBtn" onAction="#handleSidebarToggle" styleClass="tool-button" userData="站端">
                 <graphic>
-                    <Label styleClass="tool-icon" text="📁" />
+                    <Label styleClass="tool-icon" text="📁"/>
                 </graphic>
                 <tooltip>
-                    <Tooltip text="站端" />
+                    <Tooltip text="站端"/>
                 </tooltip>
             </ToggleButton>
 
-            <Region VBox.vgrow="ALWAYS" /> <!-- 弹性空间 -->
+            <Region VBox.vgrow="ALWAYS"/> <!-- 弹性空间 -->
 
             <!-- 设置按钮 -->
-            <ToggleButton fx:id="settingsBtn" styleClass="tool-button" userData="settings">
+            <ToggleButton fx:id="settingsBtn" onAction="#handleSidebarToggle" styleClass="tool-button" userData="设置">
                 <graphic>
-                    <Label styleClass="tool-icon" text="⚙️" />
+                    <Label styleClass="tool-icon" text="⚙️"/>
                 </graphic>
                 <tooltip>
-                    <Tooltip text="设置" />
+                    <Tooltip text="设置"/>
                 </tooltip>
             </ToggleButton>
         </VBox>
@@ -58,39 +57,39 @@
 
     <!-- 主内容区域 -->
     <center>
-        <SplitPane fx:id="mainSplitPane" dividerPositions="0.2">
+        <HBox fx:id="mainContainer">
             <!-- 可展开的侧面板 -->
-            <VBox fx:id="sidePanel" managed="false" maxWidth="400" minWidth="0" prefWidth="250" styleClass="side-panel" visible="false">
+            <VBox fx:id="leftPanel" managed="false" maxWidth="400" minWidth="0" prefWidth="250" styleClass="side-panel"
+                  visible="false">
                 <!-- 面板标题栏 -->
                 <HBox alignment="CENTER_LEFT" styleClass="panel-header">
-                    <Label fx:id="panelTitle" styleClass="panel-title" HBox.hgrow="ALWAYS" />
-                    <Region HBox.hgrow="ALWAYS" />
-                    <Button fx:id="close_button" onAction="#closeSidePanel" styleClass="close-button" text="-" />
+                    <Label fx:id="leftPanelTitle" styleClass="panel-title" HBox.hgrow="ALWAYS"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <ToggleButton onAction="#closeSidebar" styleClass="close-button" text="-" userData="leftBtn"/>
                 </HBox>
 
                 <!-- 面板内容区域 -->
                 <StackPane styleClass="panel-content" VBox.vgrow="ALWAYS">
                     <!-- 项目面板 -->
-                    <VBox fx:id="projectPanel" managed="false" visible="false">
-                        <TreeView fx:id="projectTree" VBox.vgrow="ALWAYS">
+                    <VBox fx:id="leftProjectPanel" managed="false" visible="false">
+                        <TreeView fx:id="leftProjectTree" VBox.vgrow="ALWAYS">
                             <contextMenu>
-                                <ContextMenu>
+                                <ContextMenu fx:id="masterContextMenu">
                                     <items>
-                                        <!--                                        <CustomMenuItem>-->
-                                        <!--                                            <content>-->
-                                        <!--                                                <Label text="添加设备">-->
-                                        <!--                                                    <tooltip>-->
-                                        <!--                                                        <Tooltip text="右键添加主站"/>-->
-                                        <!--                                                    </tooltip>-->
-                                        <!--                                                </Label>-->
-                                        <!--                                            </content>-->
-                                        <!--                                        </CustomMenuItem>-->
-                                        <MenuItem onAction="#addDevice" text="添加设备" />
+                                        <MenuItem onAction="#addDevice" text="添加设备"/>
+                                    </items>
+                                </ContextMenu>
+                            </contextMenu>
+                            <contextMenu>
+                                <ContextMenu fx:id="rtuContextMenu">
+                                    <items>
+                                        <MenuItem onAction="#addRTU" text="添加RTU"/>
+                                        <MenuItem onAction="#deleteDevice" text="删除设备"/>
                                     </items>
                                 </ContextMenu>
                             </contextMenu>
                             <root>
-                                <TreeItem expanded="true" value="master">
+                                <TreeItem expanded="true">
                                     <children>
                                     </children>
                                 </TreeItem>
@@ -101,42 +100,184 @@
             </VBox>
 
             <!-- 主编辑器区域 -->
-            <TabPane fx:id="editorTabPane" styleClass="editor-area" VBox.vgrow="ALWAYS">
-            <tabs>
-               <Tab fx:id="deviceListTab" text="设备列表">
-                 <content>
-                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                        <children>
-                           <TableView AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
-                             <columns>
-                               <TableColumn prefWidth="75.0" text="C1" />
-                               <TableColumn prefWidth="75.0" text="C2" />
-                             </columns>
-                           </TableView>
-                        </children>
-                     </AnchorPane>
-                 </content>
-               </Tab>
-            </tabs>
+            <TabPane fx:id="editorTabPane" HBox.hgrow="ALWAYS" styleClass="editor-area">
+                <tabs>
+                    <Tab fx:id="deviceListTab" text="设备列表">
+                        <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                <children>
+                                    <TableView fx:id="deviceTable" AnchorPane.bottomAnchor="0.0"
+                                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                               AnchorPane.topAnchor="0.0" HBox.hgrow="ALWAYS"
+                                               VBox.vgrow="ALWAYS">
+                                        <columns>
+                                            <TableColumn fx:id="nameColumn" prefWidth="75.0" text="设备名称"/>
+                                            <TableColumn fx:id="ipColumn" prefWidth="75.0" text="设备IP"/>
+                                            <TableColumn fx:id="portColumn" prefWidth="75.0" text="设备端口"/>
+                                            <TableColumn fx:id="deviceStatusColumn" prefWidth="75.0"
+                                                         text="设备状态"/>
+                                        </columns>
+                                    </TableView>
+                                </children>
+                            </AnchorPane>
+                        </content>
+                    </Tab>
+
+                    <Tab fx:id="RTUListTab" text="RTU列表">
+                        <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                <children>
+                                    <TableView fx:id="RTUTable" AnchorPane.bottomAnchor="0.0"
+                                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                               AnchorPane.topAnchor="0.0" HBox.hgrow="ALWAYS"
+                                               VBox.vgrow="ALWAYS">
+                                        <columns>
+                                            <TableColumn fx:id="rtuNameColumn" prefWidth="75.0" text="RTU名称"/>
+                                            <TableColumn fx:id="coaColumn" prefWidth="75.0" text="公共地址"/>
+                                            <TableColumn fx:id="isActiveColumn" prefWidth="75.0"
+                                                         text="是否启用"/>
+                                        </columns>
+                                    </TableView>
+                                </children>
+                            </AnchorPane>
+                        </content>
+                    </Tab>
+                    <Tab fx:id="YcListTab" text="遥测列表" userData="analogInput">
+                        <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                <children>
+                                    <TableView fx:id="YcTable" AnchorPane.bottomAnchor="0.0"
+                                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                               AnchorPane.topAnchor="0.0" HBox.hgrow="ALWAYS"
+                                               VBox.vgrow="ALWAYS">
+                                        <columns>
+                                            <TableColumn fx:id="YcNameColumn" prefWidth="75.0" text="遥测名称"/>
+                                            <TableColumn fx:id="YcTypeColumn" prefWidth="75.0" text="遥测类型"/>
+                                            <TableColumn fx:id="YcPointColumn" prefWidth="75.0" text="点号"/>
+                                            <TableColumn fx:id="YcValueColumn" prefWidth="75.0" text="值"/>
+                                            <TableColumn fx:id="YcQualityColumn" prefWidth="75.0" text="质量码"/>
+                                            <TableColumn fx:id="YcTimeColumn" prefWidth="75.0" text="时标"/>
+                                            <TableColumn fx:id="YcMaxColumn" prefWidth="75.0" text="最大原始值"/>
+                                            <TableColumn fx:id="YcMinColumn" prefWidth="75.0" text="最小原始值"/>
+                                            <TableColumn fx:id="YcCoefficientColumn" prefWidth="75.0" text="系数"/>
+                                        </columns>
+                                    </TableView>
+                                </children>
+                            </AnchorPane>
+                        </content>
+                    </Tab>
+                    <Tab fx:id="YxListTab" text="遥信列表" userData="statusInput">
+                        <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                <children>
+                                    <TableView fx:id="YxTable" AnchorPane.bottomAnchor="0.0"
+                                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                               AnchorPane.topAnchor="0.0" HBox.hgrow="ALWAYS"
+                                               VBox.vgrow="ALWAYS">
+                                        <columns>
+                                            <TableColumn fx:id="YxNameColumn" prefWidth="75.0" text="遥信名称"/>
+                                            <TableColumn fx:id="YxTypeColumn" prefWidth="75.0" text="遥信类型"/>
+                                            <TableColumn fx:id="YxPointColumn" prefWidth="75.0" text="点号"/>
+                                            <TableColumn fx:id="YxValueColumn" prefWidth="75.0" text="值"/>
+                                            <TableColumn fx:id="YxQualityColumn" prefWidth="75.0" text="质量码"/>
+                                            <TableColumn fx:id="YxTimeColumn" prefWidth="75.0" text="时标"/>
+                                            <TableColumn fx:id="YxInvertColumn" prefWidth="75.0" text="取反"/>
+                                        </columns>
+                                    </TableView>
+                                </children>
+                            </AnchorPane>
+                        </content>
+                    </Tab>
+
+                    <Tab fx:id="YtListTab" text="遥调列表" userData="setPoint">
+                        <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                <children>
+                                    <TableView fx:id="YtTable" AnchorPane.bottomAnchor="0.0"
+                                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                               AnchorPane.topAnchor="0.0" HBox.hgrow="ALWAYS"
+                                               VBox.vgrow="ALWAYS">
+                                        <columns>
+                                            <TableColumn fx:id="YtNameColumn" prefWidth="75.0" text="遥调名称"/>
+                                            <TableColumn fx:id="YtTypeColumn" prefWidth="75.0" text="遥调类型"/>
+                                            <TableColumn fx:id="YtPointColumn" prefWidth="75.0" text="点号"/>
+                                            <TableColumn fx:id="YtValueColumn" prefWidth="75.0" text="值"/>
+                                            <TableColumn fx:id="YtQualityColumn" prefWidth="75.0" text="质量码"/>
+                                            <TableColumn fx:id="YtAssociatedIOAColumn" prefWidth="75.0" text="关联IOA"/>
+                                            <TableColumn fx:id="YtMaxColumn" prefWidth="75.0" text="最大原始值"/>
+                                            <TableColumn fx:id="YtMinColumn" prefWidth="75.0" text="最小原始值"/>
+                                            <TableColumn fx:id="YtTimeColumn" prefWidth="75.0" text="时标"/>
+                                            <TableColumn fx:id="YtCoefficientColumn" prefWidth="75.0" text="系数"/>
+                                        </columns>
+                                    </TableView>
+                                </children>
+                            </AnchorPane>
+                        </content>
+                    </Tab>
+
+                    <Tab fx:id="YkListTab" text="遥控列表" userData="digitalOutput">
+                        <content>
+                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                <children>
+                                    <TableView fx:id="YkTable" AnchorPane.bottomAnchor="0.0"
+                                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                               AnchorPane.topAnchor="0.0" HBox.hgrow="ALWAYS"
+                                               VBox.vgrow="ALWAYS">
+                                        <columns>
+                                            <TableColumn fx:id="YkNameColumn" prefWidth="75.0" text="遥控名称"/>
+                                            <TableColumn fx:id="YkTypeColumn" prefWidth="75.0" text="遥控类型"/>
+                                            <TableColumn fx:id="YkPointColumn" prefWidth="75.0" text="点号"/>
+                                            <TableColumn fx:id="YkValueColumn" prefWidth="75.0" text="值"/>
+                                            <TableColumn fx:id="YkQualityColumn" prefWidth="75.0" text="质量码"/>
+                                            <TableColumn fx:id="YkAssociatedIOAColumn" prefWidth="75.0" text="关联IOA"/>
+                                            <TableColumn fx:id="YkTimeColumn" prefWidth="75.0" text="时标"/>
+                                            <TableColumn fx:id="YkInvertColumn" prefWidth="75.0" text="取反"/>
+                                        </columns>
+                                    </TableView>
+                                </children>
+                            </AnchorPane>
+                        </content>
+                    </Tab>
+
+                </tabs>
             </TabPane>
-        </SplitPane>
+            <!-- 可展开的侧面板 -->
+            <VBox fx:id="rightPanel" managed="false" maxWidth="400" minWidth="0" prefWidth="250" styleClass="side-panel"
+                  visible="false">
+                <!-- 面板标题栏 -->
+                <HBox alignment="CENTER_LEFT" styleClass="panel-header">
+                    <Label fx:id="rightPanelTitle" styleClass="panel-title" HBox.hgrow="ALWAYS"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <ToggleButton onAction="#closeSidebar" styleClass="close-button" text="-" userData="rightBtn"/>
+                </HBox>
+
+                <!-- 面板内容区域 -->
+                <StackPane styleClass="panel-content" VBox.vgrow="ALWAYS">
+                    <!-- 项目面板 -->
+                    <VBox fx:id="rightProjectPanel" managed="false" visible="false">
+                        <TreeView fx:id="rightProjectTree1" VBox.vgrow="ALWAYS">
+                        </TreeView>
+                    </VBox>
+                </StackPane>
+            </VBox>
+        </HBox>
     </center>
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <menus>
                 <Menu mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Close" />
+                        <MenuItem mnemonicParsing="false" text="Close"/>
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Edit">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Delete" />
+                        <MenuItem mnemonicParsing="false" text="Delete"/>
                     </items>
                 </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="About" />
+                        <MenuItem mnemonicParsing="false" text="About"/>
                     </items>
                 </Menu>
             </menus>
@@ -145,18 +286,19 @@
     <right>
         <VBox alignment="TOP_CENTER" spacing="5" styleClass="communication-bar">
             <padding>
-                <Insets bottom="10" left="5" right="5" top="10" />
+                <Insets bottom="10" left="5" right="5" top="10"/>
             </padding>
 
-            <ToggleButton fx:id="communicationBtn" styleClass="tool-button" userData="communication">
+            <ToggleButton fx:id="messageDisplay" onAction="#handleSidebarToggle" styleClass="tool-button"
+                          userData="报文显示">
                 <graphic>
-                    <Label styleClass="communication-icon" text="占位" />
+                    <Label styleClass="communication-icon" text="占位"/>
                 </graphic>
                 <tooltip>
-                    <Tooltip text="通信参数" />
+                    <Tooltip text="报文显示"/>
                 </tooltip>
             </ToggleButton>
-            <Region VBox.vgrow="ALWAYS" />
+            <Region VBox.vgrow="ALWAYS"/>
         </VBox>
     </right>
 
@@ -164,25 +306,25 @@
     <bottom>
         <HBox prefHeight="30" styleClass="status-bar">
             <padding>
-                <Insets left="10" right="10" />
+                <Insets left="10" right="10"/>
             </padding>
 
             <!-- 左侧状态信息 -->
-            <Label fx:id="statusLabel" styleClass="status-text" text="就绪" HBox.hgrow="ALWAYS" />
+            <Label fx:id="statusLabel" styleClass="status-text" text="就绪" HBox.hgrow="ALWAYS"/>
 
             <!-- 右侧状态信息 -->
             <HBox spacing="20">
                 <!-- 行号和列号 -->
-                <Label fx:id="lineColLabel" styleClass="status-text" text="行: 1, 列: 1" />
+                <Label fx:id="lineColLabel" styleClass="status-text" text="行: 1, 列: 1"/>
 
                 <!-- 文件编码 -->
-                <Label fx:id="encodingLabel" styleClass="status-text" text="UTF-8" />
+                <Label fx:id="encodingLabel" styleClass="status-text" text="UTF-8"/>
 
                 <!-- 文件类型 -->
-                <Label fx:id="fileTypeLabel" styleClass="status-text" text="Java" />
+                <Label fx:id="fileTypeLabel" styleClass="status-text" text="Java"/>
 
                 <!-- 编辑状态 -->
-                <Label fx:id="editStatusLabel" styleClass="status-text" text="已保存" />
+                <Label fx:id="editStatusLabel" styleClass="status-text" text="已保存"/>
             </HBox>
         </HBox>
     </bottom>

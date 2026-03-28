@@ -10,13 +10,13 @@ module cloud.yunyat.model {
     requires ini4j;
     requires static lombok;
     requires io.netty.handler;
-    requires io.netty.codec;
+    //    requires netty.all;
+    requires org.apache.logging.log4j.core;
+    requires io.netty.codec.mqtt;
+    requires javafx.base;
     requires io.netty.transport;
     requires io.netty.buffer;
     requires io.netty.common;
-//    requires netty.all;
-    requires org.apache.logging.log4j.core;
-    requires org.apache.logging.log4j;
 
     uses Parser;
     provides Parser
@@ -27,7 +27,8 @@ module cloud.yunyat.model {
                     MeNc1SpontParser,
                     SpNa1SpontParser;
 
-//    exports cloud.yunyat.model;
+    exports cloud.yunyat.model.pojo;
     exports cloud.yunyat.model.master;
     exports cloud.yunyat.model.service;
+    exports cloud.yunyat.model.impl.iec104.enums;
 }

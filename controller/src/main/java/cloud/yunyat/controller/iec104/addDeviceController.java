@@ -1,5 +1,6 @@
 package cloud.yunyat.controller.iec104;
 
+import cloud.yunyat.model.pojo.Device;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -12,14 +13,14 @@ import javafx.stage.Stage;
 import lombok.Setter;
 
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
 
+import static cloud.yunyat.controller.tools.tools.closeStage;
+
 public class addDeviceController implements Initializable {
     @Setter
-    private Consumer<Map<String, String>> onDeviceCreated;
+    private Consumer<Device> onDeviceCreated;
 
     @FXML
     private TextField gmtField;
@@ -50,6 +51,8 @@ public class addDeviceController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        // 绑定GMT时区字段的禁用状态到时区启用复选框的反向选择状态
+        // 当enableTimezoneCheck未被选中时，gmtField将被禁用；当被选中时，gmtField可用
         gmtField.disableProperty().bind(enableTimezoneCheck.selectedProperty().not());
 
         addTipListener(gmtField, "目标时区");
@@ -66,20 +69,24 @@ public class addDeviceController implements Initializable {
 
     @FXML
     private void createBtn(ActionEvent event) {
-        Map<String, String> deviceData = new HashMap<>();
-        deviceData.put("name", deviceNameField.getText());
-        deviceData.put("ip", ipNameField.getText());
-        deviceData.put("port", portNameField.getText());
-        deviceData.put("T1", t1NameField.getText());
-        deviceData.put("T2", t2NameField.getText());
-        deviceData.put("T3", t3NameField.getText());
-        deviceData.put("W", wNameField.getText());
-        deviceData.put("G", generalInterrogationNameField.getText());
-        deviceData.put("C", clockSynchronizationNameField.getText());
-        deviceData.put("gmt", gmtField.getText());
-        if (deviceData.get("name") != null && !deviceData.get("name").trim().isEmpty()) {
+
+        Device device = Device.newDevice()
+                .name(deviceNameField.getText())
+                .ip(ipNameField.getText())
+                .port(Integer.parseInt(portNameField.getText()))
+                .t1(Integer.parseInt(t1NameField.getText()))
+                .t2(Integer.parseInt(t2NameField.getText()))
+                .t3(Integer.parseInt(t3NameField.getText()))
+                .w(Integer.parseInt(wNameField.getText()))
+                .generalInterrogation(Integer.parseInt(generalInterrogationNameField.getText()))
+                .clockSynchronization(Integer.parseInt(clockSynchronizationNameField.getText()))
+                .gmt(gmtField.getText())
+                .enableTimezone(enableTimezoneCheck.isSelected())
+                .build();
+
+        if (device.getName() != null && !device.getName().trim().isEmpty()) {
             if (onDeviceCreated != null) {
-                onDeviceCreated.accept(deviceData);
+                onDeviceCreated.accept(device);
             }
             closeStage(event);
         }
@@ -90,10 +97,6 @@ public class addDeviceController implements Initializable {
         closeStage(event);
     }
 
-    private void closeStage(ActionEvent event) {
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.close();
-    }
 
     private void addTipListener(Control control, String tipText) {
         control.focusedProperty().addListener((obs, oldVal, newVal) -> {

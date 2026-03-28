@@ -7,6 +7,6 @@ import java.util.function.Consumer;
 public class MessageManager implements MessageService{
     @Override
     public void getMessage(String stationId, Consumer<IEC104_AsduMessageDetail> message) {
-
+        // TODO 如何获取数据
     }
 }

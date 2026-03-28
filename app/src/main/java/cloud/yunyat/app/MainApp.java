@@ -3,6 +3,8 @@ package cloud.yunyat.app;
 
 import cloud.yunyat.controller.MainController;
 import cloud.yunyat.view.Iec104MasterCommunicationParameters;
+import cloud.yunyat.view.Iec104MasterRtuParameter;
+import cloud.yunyat.view.UnifiedWindowService;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -23,13 +25,13 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Iec104MasterCommunicationParameters iec104MasterCommunicationParameters = new Iec104MasterCommunicationParameters();
+        UnifiedWindowService unifiedWindowService = new UnifiedWindowService();
         FXMLLoader loader = new FXMLLoader(cloud.yunyat.view.ViewRes.get("/cloud/yunyat/fxml/mainView.fxml"));
 
         loader.setControllerFactory(type -> {
             if (type == MainController.class){
                 MainController controller = new MainController();
-                controller.setWindowService(iec104MasterCommunicationParameters);
+                controller.setWindowService(unifiedWindowService);
                 return controller;
             }
             try {

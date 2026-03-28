@@ -1,8 +1,11 @@
 package cloud.yunyat.controller.iec104;
 
-import java.util.Map;
+import cloud.yunyat.model.pojo.Device;
+import cloud.yunyat.model.pojo.Rtu;
+
 import java.util.function.Consumer;
 
 public interface WindowService {
-    void showAddDeviceDialog(Consumer<Map<String, String>> onDeviceCreated);
+    void showAddDeviceDialog(Consumer<Device> onDeviceCreated);
+    void showAddRtuDialog(Consumer<Rtu> onRtuCreated);
 }

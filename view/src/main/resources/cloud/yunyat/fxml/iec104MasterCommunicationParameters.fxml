@@ -199,7 +199,7 @@
                 <rowConstraints>
                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
                 </rowConstraints>
-                <Button maxWidth="70" mnemonicParsing="false" text="创建" onAction="#createBtn" GridPane.halignment="RIGHT"
+                <Button maxWidth="70" mnemonicParsing="false" text="确定" onAction="#createBtn" GridPane.halignment="RIGHT"
                         GridPane.valignment="CENTER" VBox.vgrow="ALWAYS"/>
                 <Button maxWidth="70" mnemonicParsing="false" text="取消" onAction="#cancelBtn" GridPane.columnIndex="1"
                         GridPane.halignment="LEFT" GridPane.valignment="CENTER" VBox.vgrow="ALWAYS"/>
@@ -212,10 +212,7 @@
                 <Insets top="13" left="5" right="10"/>
             </padding>
 
-            <!-- 左侧状态信息 -->
-<!--            <Label HBox.hgrow="ALWAYS"/>-->
-
-            <!-- 右侧状态信息 -->
+            <!-- 底栏状态信息 -->
             <HBox spacing="20">
                 <Label fx:id="Tips" text="就绪"/>
             </HBox>

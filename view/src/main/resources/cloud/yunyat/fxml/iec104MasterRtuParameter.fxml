@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.layout.VBox?>
+<GridPane hgap="15.0" vgap="10.0" xmlns="http://javafx.com/javafx/21.0.1"
+          xmlns:fx="http://javafx.com/fxml/1"
+          stylesheets="@../css/Iec104MasterRtuParameter.css"
+          fx:controller="cloud.yunyat.controller.iec104.addRTUController">
+    <padding>
+        <Insets bottom="20.0" left="30.0" right="20.0" top="20.0"/>
+    </padding>
+
+    <columnConstraints>
+        <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="60.0"/>
+        <ColumnConstraints hgrow="ALWAYS" minWidth="200.0"/>
+        <ColumnConstraints hgrow="SOMETIMES" minWidth="80.0"/>
+    </columnConstraints>
+
+    <Label text="Name" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+    <TextField fx:id="name" text="RTU1" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+    <Label text="COA" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+    <TextField fx:id="coa" text="1" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+    <CheckBox selected="true" text="Enable" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+    <VBox spacing="8.0" GridPane.columnIndex="2" GridPane.rowIndex="0" GridPane.rowSpan="3">
+        <padding>
+            <Insets left="10.0"/>
+        </padding>
+        <ToggleButton onAction="#createBtn" maxWidth="Infinity" text="OK"/>
+        <ToggleButton onAction="#cancelBtn" maxWidth="Infinity" text="Cancel"/>
+    </VBox>
+</GridPane>
