@@ -4,6 +4,7 @@ import cloud.yunyat.controller.iec104.WindowService;
 import cloud.yunyat.model.impl.iec104.enums.IEC104_TypeIdentifier;
 import cloud.yunyat.model.pojo.*;
 import cloud.yunyat.model.service.MessageService;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -174,8 +175,10 @@ public class MainController implements Initializable {
 
     private void initializeUI() {
         // 初始化编辑器标签页，移除默认的 Tab 页
-        editorTabPane.getTabs().remove(deviceListTab);
-        editorTabPane.getTabs().remove(RTUListTab);
+//        editorTabPane.getTabs().remove(deviceListTab);
+//        editorTabPane.getTabs().remove(RTUListTab);
+        editorTabs = List.of(YcListTab, YxListTab, YkListTab, YtListTab);
+        editorTabPane.getTabs().clear();
 
         leftPanel.prefWidthProperty().bind(mainContainer.widthProperty().multiply(0.25));
         rightPanel.prefWidthProperty().bind(mainContainer.widthProperty().multiply(0.25));
@@ -338,6 +341,16 @@ public class MainController implements Initializable {
     }
 
     @FXML
+    private void addYcData(){
+        if (messageService == null)return;
+        messageService.subscribeYcData(1, yc -> {
+            Platform.runLater(() -> {
+
+            });
+        });
+    }
+
+    @FXML
     private void addDevice() {
 
         if (windowService == null) return;
@@ -456,6 +469,21 @@ public class MainController implements Initializable {
                 editorTabPane.getSelectionModel().select(RTUListTab);
             }
             editStatusLabel.setText("已保存");
+        } else if (deviceWrapper instanceof RtuWrapper wrapper) {
+            // 如果已经打开则直接切换
+            for (Tab t : editorTabPane.getTabs()) {
+                if (t.getText().equals(wrapper.getDisplayName())) {
+                    editorTabPane.getSelectionModel().select(t);
+                    return;
+                }
+            }
+
+            editorTabs.forEach(e -> {
+                        e.setClosable(true);
+                        editorTabPane.getTabs().add(e);
+                        editorTabPane.getSelectionModel().select(e);
+                    }
+            );
         }
     }
 //    private void attachCaretListener(TextArea ta) {

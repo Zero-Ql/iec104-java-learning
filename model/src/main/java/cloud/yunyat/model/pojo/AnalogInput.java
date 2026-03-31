@@ -4,6 +4,8 @@ import cloud.yunyat.model.impl.iec104.enums.IEC104_TypeIdentifier;
 import javafx.beans.property.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AnalogInput {
     private final StringProperty name = new SimpleStringProperty();
@@ -15,6 +17,7 @@ public class AnalogInput {
     private final DoubleProperty max = new SimpleDoubleProperty();
     private final DoubleProperty min = new SimpleDoubleProperty();
     private final DoubleProperty coefficient = new SimpleDoubleProperty();
+    private final Map<String, Boolean> map = new HashMap<>();
 
 
     /**
@@ -37,6 +40,23 @@ public class AnalogInput {
         this.max.set(max);
         this.min.set(min);
         this.coefficient.set(coefficient);
+    }
+
+    public AnalogInput(IEC104_TypeIdentifier typeIdentifier, int point, double value, int quality, Map<String, Boolean> qualityBits){
+        // 自动生成一个占位名称，例如 "未命名_1"
+        this.name.set("未命名_" + point);
+        this.typeIdentifier.set(typeIdentifier);
+        this.point.set(point);
+        this.value.set(value);
+        this.quality.set(quality);
+        this.time.set(LocalDateTime.now());
+
+        // 给系数、最大最小值赋默认值
+        this.max.set(999999999.0);
+        this.min.set(-999999999.0);
+        this.coefficient.set(1.0);
+
+        this.map.putAll(qualityBits);
     }
 
     public StringProperty nameProperty() {

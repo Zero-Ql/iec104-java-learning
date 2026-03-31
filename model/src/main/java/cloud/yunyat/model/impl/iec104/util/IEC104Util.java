@@ -72,6 +72,8 @@ public class IEC104Util {
 
         List<IEC104_MessageInfo> messagelist = decoderIoa(typeIdentifier, sq, NumIx, IOAList);
 
+
+
         return new IEC104_AsduMessageDetail.Builder(
                 typeIdentifier,
                 variableStructureQualifiers,

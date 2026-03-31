@@ -1,12 +1,12 @@
 /*
  * IEC 60870-5-104 Protocol Implementation
  * Copyright (C) 2025 QSky
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -15,11 +15,15 @@
 package cloud.yunyat.model.master.handler.parser.impl.controlParser.cIcNa1;
 
 import cloud.yunyat.model.impl.iec104.enums.monitoringDirections.QualityBit;
+import cloud.yunyat.model.pojo.ParsedResult;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.log4j.Log4j2;
 import cloud.yunyat.model.master.handler.parser.Parser;
 import cloud.yunyat.model.master.handler.parser.ParserMeta;
 import cloud.yunyat.model.impl.iec104.util.ByteBufResource;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * SpNa1IntrogenParser类用于解析总召遥信
@@ -36,7 +40,7 @@ public class SpNa1IntrogenParser implements Parser {
      * @param ctx                通道处理器上下文，提供网络通信相关功能
      */
     @Override
-    public void parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx) {
+    public ParsedResult parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx) {
         // 使用try-with-resources确保valueResource在使用完毕后被正确关闭
         try (ByteBufResource valueResource = value) {
             // 记录总召响应的相关信息，包括IOA和各种质量位的状态
@@ -46,7 +50,20 @@ public class SpNa1IntrogenParser implements Parser {
                     QualityBit.isSet(qualityDescriptors, QualityBit.SUBSTITUTED),
                     QualityBit.isSet(qualityDescriptors, QualityBit.BLOCKED),
                     QualityBit.isSet(qualityDescriptors, QualityBit.OVERFLOW) ? "On" : "Off");
+            return new ParsedResult(ioa, value, qualityDescriptors, Map.copyOf(scan(qualityDescriptors)));
         }
+    }
+
+    private Map<String, Boolean> scan(byte qualityDescriptors) {
+        Map<String, Boolean> map = new HashMap<>();
+
+        map.put("IV", QualityBit.isSet(qualityDescriptors, QualityBit.INVALID));
+        map.put("NT", QualityBit.isSet(qualityDescriptors, QualityBit.NOT_CURRENT));
+        map.put("SB", QualityBit.isSet(qualityDescriptors, QualityBit.SUBSTITUTED));
+        map.put("BL", QualityBit.isSet(qualityDescriptors, QualityBit.BLOCKED));
+        map.put("SPI", QualityBit.isSet(qualityDescriptors, QualityBit.OVERFLOW));
+
+        return map;
     }
 }
 

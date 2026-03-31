@@ -2,6 +2,7 @@ package cloud.yunyat.app;
 
 
 import cloud.yunyat.controller.MainController;
+import cloud.yunyat.model.service.MessageManager;
 import cloud.yunyat.view.Iec104MasterCommunicationParameters;
 import cloud.yunyat.view.Iec104MasterRtuParameter;
 import cloud.yunyat.view.UnifiedWindowService;
@@ -26,12 +27,14 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         UnifiedWindowService unifiedWindowService = new UnifiedWindowService();
+        MessageManager messageManager = MessageManager.getInstance();
         FXMLLoader loader = new FXMLLoader(cloud.yunyat.view.ViewRes.get("/cloud/yunyat/fxml/mainView.fxml"));
 
         loader.setControllerFactory(type -> {
-            if (type == MainController.class){
+            if (type == MainController.class) {
                 MainController controller = new MainController();
                 controller.setWindowService(unifiedWindowService);
+                controller.setMessageService(messageManager);
                 return controller;
             }
             try {

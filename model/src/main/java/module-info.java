@@ -14,6 +14,7 @@ module cloud.yunyat.model {
     requires org.apache.logging.log4j.core;
     requires io.netty.codec.mqtt;
     requires javafx.base;
+    requires io.netty.codec;
     requires io.netty.transport;
     requires io.netty.buffer;
     requires io.netty.common;
@@ -31,4 +32,5 @@ module cloud.yunyat.model {
     exports cloud.yunyat.model.master;
     exports cloud.yunyat.model.service;
     exports cloud.yunyat.model.impl.iec104.enums;
+    exports cloud.yunyat.model.impl.iec104.frame.asdu;
 }

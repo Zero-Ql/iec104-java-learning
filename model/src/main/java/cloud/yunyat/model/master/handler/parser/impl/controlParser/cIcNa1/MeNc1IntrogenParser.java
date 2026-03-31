@@ -15,6 +15,8 @@
 package cloud.yunyat.model.master.handler.parser.impl.controlParser.cIcNa1;
 
 import cloud.yunyat.model.impl.iec104.enums.monitoringDirections.QualityBit;
+import cloud.yunyat.model.pojo.ParsedResult;
+import cloud.yunyat.model.service.MessageManager;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.log4j.Log4j2;
 import cloud.yunyat.model.master.handler.parser.Parser;
@@ -22,6 +24,8 @@ import cloud.yunyat.model.master.handler.parser.ParserMeta;
 import cloud.yunyat.model.impl.iec104.util.ByteBufResource;
 
 import java.nio.ByteOrder;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * MeNc1IntrogenParser类用于解析总召遥测
@@ -38,7 +42,7 @@ public class MeNc1IntrogenParser implements Parser {
      * @param ctx 通道处理上下文
      */
     @Override
-    public void parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx) {
+    public ParsedResult parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx) {
         // 创建一个try-with-resources块，用于自动释放valueResource
         try (ByteBufResource valueResource = value) {
             // 记录总召响应的IOA、value和质量描述符信息
@@ -49,7 +53,21 @@ public class MeNc1IntrogenParser implements Parser {
                     QualityBit.isSet(qualityDescriptors, QualityBit.SUBSTITUTED),
                     QualityBit.isSet(qualityDescriptors, QualityBit.BLOCKED),
                     QualityBit.isSet(qualityDescriptors, QualityBit.OVERFLOW));
+
+            return new ParsedResult(ioa, v, qualityDescriptors, Map.copyOf(scan(qualityDescriptors)));
         }
+    }
+
+    private Map<String, Boolean> scan(byte qualityDescriptors){
+        Map<String, Boolean> map = new HashMap<>();
+
+        map.put("IV", QualityBit.isSet(qualityDescriptors, QualityBit.INVALID));
+        map.put("NT", QualityBit.isSet(qualityDescriptors, QualityBit.NOT_CURRENT));
+        map.put("SB", QualityBit.isSet(qualityDescriptors, QualityBit.SUBSTITUTED));
+        map.put("BL", QualityBit.isSet(qualityDescriptors, QualityBit.BLOCKED));
+        map.put("OV", QualityBit.isSet(qualityDescriptors, QualityBit.OVERFLOW));
+
+        return map;
     }
 }
 

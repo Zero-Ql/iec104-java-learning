@@ -4,6 +4,8 @@ import cloud.yunyat.model.impl.iec104.enums.IEC104_TypeIdentifier;
 import javafx.beans.property.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 public class StatusInput {
     private final StringProperty name = new SimpleStringProperty();
@@ -13,6 +15,7 @@ public class StatusInput {
     private final IntegerProperty quality = new SimpleIntegerProperty();
     private final ObjectProperty<LocalDateTime> time = new SimpleObjectProperty<>();
     private final BooleanProperty invert = new SimpleBooleanProperty();
+    private final Map<String, Boolean> map = new HashMap<>();
 
     /**
      * @param name           遥信点名称
@@ -29,6 +32,18 @@ public class StatusInput {
         this.value.set(value);
         this.quality.set(quality);
         this.invert.set(invert);
+    }
+
+    public StatusInput(IEC104_TypeIdentifier typeIdentifier, int point, boolean value, int quality, Map<String, Boolean> qualityBits) {
+        // 自动生成一个占位名称，例如 "未命名_1"
+        this.name.set("未命名_" + point);
+        this.typeIdentifier.set(typeIdentifier);
+        this.point.set(point);
+        this.value.set(value);
+        this.quality.set(quality);
+        this.time.set(LocalDateTime.now());
+        this.invert.set(false);
+        this.map.putAll(qualityBits);
     }
 
 

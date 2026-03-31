@@ -14,6 +14,8 @@
  */
 package cloud.yunyat.model.master.handler.parser;
 
+import cloud.yunyat.model.pojo.ParsedResult;
+import cloud.yunyat.model.service.MessageManager;
 import io.netty.channel.ChannelHandlerContext;
 import cloud.yunyat.model.impl.iec104.util.ByteBufResource;
 
@@ -21,6 +23,6 @@ import cloud.yunyat.model.impl.iec104.util.ByteBufResource;
  * 解析器接口，定义了解析数据的方法规范
  */
 public interface Parser {
-    void parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx);
+    ParsedResult parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx);
 }
 

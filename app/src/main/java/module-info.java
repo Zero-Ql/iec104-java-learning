@@ -4,6 +4,7 @@ module cloud.yunyat.app {
     requires cloud.yunyat.controller;
     requires javafx.fxml;
     requires javafx.graphics;
+    requires cloud.yunyat.model;
 
     exports cloud.yunyat.app;
 }
