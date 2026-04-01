@@ -36,7 +36,7 @@ public class AnalogInput {
      * @param min 最小值
      * @param coefficient 系数值
      */
-    AnalogInput(String name, IEC104_TypeIdentifier typeIdentifier, int point, double value, int quality, double max, double min, double coefficient) {
+    public AnalogInput(String name, IEC104_TypeIdentifier typeIdentifier, int point, double value, int quality, double max, double min, double coefficient) {
         this.name.set(name);
         this.typeIdentifier.set(typeIdentifier);
         this.point.set(point);

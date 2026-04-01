@@ -1,8 +1,9 @@
 package cloud.yunyat.view;
 
 import cloud.yunyat.controller.iec104.WindowService;
-import cloud.yunyat.controller.iec104.addDeviceController;
-import cloud.yunyat.model.pojo.Device;
+import cloud.yunyat.controller.iec104.addYcDataController;
+import cloud.yunyat.model.pojo.AnalogInput;
+import cloud.yunyat.model.service.MessageService;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -12,15 +13,16 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.function.Consumer;
 
-public class Iec104MasterCommunicationParameters implements WindowService {
+public class Iec104ShowAddYcDialog implements WindowService {
     @Override
-    public void showAddDeviceDialog(Consumer<Device> onDeviceCreated) {
+    public void showAddYcDialog(Consumer<AnalogInput> onYcCreated) {
         try {
-            FXMLLoader loader = new FXMLLoader(ViewRes.get("/cloud/yunyat/fxml/iec104MasterCommunicationParameters.fxml"));
+            FXMLLoader loader = new FXMLLoader(ViewRes.get("/cloud/yunyat/fxml/ycTagProperties.fxml"));
             Parent root = loader.load();
 
-            addDeviceController adddevicecontroller = loader.getController();
-            adddevicecontroller.setOnDeviceCreated(onDeviceCreated);
+            addYcDataController addYcController = loader.getController();
+
+            addYcController.setYcDataCreated(onYcCreated);
 
             // 2. 创建新舞台 (Stage)
             Stage stage = new Stage();

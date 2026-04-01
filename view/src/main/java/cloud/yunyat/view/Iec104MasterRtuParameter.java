@@ -36,8 +36,4 @@ public class Iec104MasterRtuParameter implements WindowService {
             e.printStackTrace();
         }
     }
-
-    @Override
-    public void showAddDeviceDialog(Consumer<Device> onDeviceCreated) {
-    }
 }

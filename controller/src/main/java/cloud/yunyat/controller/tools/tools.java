@@ -1,5 +1,7 @@
 package cloud.yunyat.controller.tools;
 
+import cloud.yunyat.model.impl.iec104.enums.IEC104_TypeIdentifier;
+import cloud.yunyat.model.pojo.AnalogInput;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -27,5 +29,11 @@ public class tools {
         alert.setHeaderText("添加失败");
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+
+    // 判断是否名称、点号相同
+    public static boolean isExist(AnalogInput oldV, AnalogInput newV) {
+        return !oldV.getName().equals(newV.getName()) && oldV.getPoint() != newV.getPoint();
     }
 }

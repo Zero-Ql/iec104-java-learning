@@ -144,7 +144,7 @@
                             </padding>
                             <HBox alignment="CENTER_LEFT" spacing="10.0">
                                 <Label alignment="CENTER_RIGHT" prefWidth="60.0" text="系数" />
-                                <TextField fx:id="factor" prefWidth="80.0" text="0" />
+                                <TextField fx:id="factor" prefWidth="80.0" text="1" />
                             </HBox>
                         </VBox>
                         <Label styleClass="connection-title" text="比例因子">
@@ -173,7 +173,7 @@
                 <rowConstraints>
                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 </rowConstraints>
-                <Button maxWidth="70" mnemonicParsing="false" onAction="#createBtn" text="确定" GridPane.halignment="RIGHT" GridPane.valignment="CENTER" VBox.vgrow="ALWAYS" />
+                <Button maxWidth="70" mnemonicParsing="false" onAction="#createYcBtn" text="确定" GridPane.halignment="RIGHT" GridPane.valignment="CENTER" VBox.vgrow="ALWAYS" />
                 <Button maxWidth="70" mnemonicParsing="false" onAction="#cancelBtn" text="取消" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.valignment="CENTER" VBox.vgrow="ALWAYS" />
             </GridPane>
 

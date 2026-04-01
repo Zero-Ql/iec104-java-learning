@@ -1,7 +1,7 @@
 package cloud.yunyat.controller.iec104;
 
+import cloud.yunyat.model.impl.iec104.enums.IEC104_TypeIdentifier;
 import cloud.yunyat.model.pojo.AnalogInput;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -20,7 +20,7 @@ public class addYcDataController implements Initializable {
     private Consumer<AnalogInput> ycDataCreated;
 
     @FXML
-    private ComboBox<String> typeCombo;
+    private ComboBox<IEC104_TypeIdentifier> typeCombo;
     @FXML
     private ComboBox<String> sboCombo;
     @FXML
@@ -90,6 +90,9 @@ public class addYcDataController implements Initializable {
         var factorInputDisabled = enableScaleCheck.selectedProperty().and(scaleFactorRadio.selectedProperty()).not();
         factor.disableProperty().bind(factorInputDisabled);
 
+        typeCombo.getItems().setAll(IEC104_TypeIdentifier.values());
+        typeCombo.setValue(IEC104_TypeIdentifier.M_SP_NA_1);
+
         addTipListener(tagNameField, "当前点名");
         addTipListener(ioaField, "该数据点的点号");
         addTipListener(raw1, "原始起始范围");
@@ -100,8 +103,79 @@ public class addYcDataController implements Initializable {
     }
 
     @FXML
-    private AnalogInput createYcBtn(ActionEvent event) {
+    private void createYcBtn(ActionEvent event) {
+        try {
+            String name = tagNameField.getText().trim();
 
+            if (name.isEmpty()) {
+                Tips.setText("错误：点位名称不能为空！");
+                return;
+            }
+
+            int point = getPoint();
+
+            AnalogInput newYc = getAnalogInput(name, point);
+
+            if (ycDataCreated != null) {
+                ycDataCreated.accept(newYc);
+            }
+
+            closeStage(event);
+
+        } catch (NumberFormatException e) {
+            Tips.setText("提示：请输入正确的数字格式！");
+        } catch (Exception e) {
+            Tips.setText("提示：发生未知错误！");
+        }
+    }
+
+    private int getPoint() {
+        int point = 0;
+        if (enableStructureIoaCheck.isSelected()) {
+            // 结构化 IOA 通常由 3 个字节组成。
+            // 工业标准算法：(Part3) + (Part2 * 256) + (Part1 * 65536)
+            int p1 = Integer.parseInt(ioaPart1Field.getText().trim());
+            int p2 = Integer.parseInt(ioaPart2Field.getText().trim());
+            int p3 = Integer.parseInt(ioaPart3Field.getText().trim());
+            point = (p1 << 16) | (p2 << 8) | p3;
+        } else {
+            // 普通 IOA 模式
+            point = Integer.parseInt(ioaField.getText().trim());
+        }
+        return point;
+    }
+
+    private AnalogInput getAnalogInput(String name, int point) {
+        IEC104_TypeIdentifier typeId = typeCombo.getValue();
+
+        double coefficient = 1.0;
+        if (enableScaleCheck.isSelected()) {
+            if (scaleFactorRadio.isSelected()) {
+                // 如果选了固定系数
+                coefficient = Double.parseDouble(factor.getText().trim());
+            } else if (linearRadio.isSelected()) {
+                // 如果选了线性转换，需要算出系数 (ScaleTo 范围 / Raw 范围)
+                double r1 = Double.parseDouble(raw1.getText().trim());
+                double r2 = Double.parseDouble(raw2.getText().trim());
+                double s1 = Double.parseDouble(scaleTo1.getText().trim());
+                double s2 = Double.parseDouble(scaleTo2.getText().trim());
+                if (r2 != r1) {
+                    coefficient = (s2 - s1) / (r2 - r1);
+                }
+            }
+        }
+
+        AnalogInput newYc = new AnalogInput(
+                name,
+                typeId,
+                point,
+                0.0,
+                0,
+                999999999.0,
+                -999999999.0,
+                coefficient
+        );
+        return newYc;
     }
 
     @FXML

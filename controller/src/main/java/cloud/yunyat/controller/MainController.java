@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import static cloud.yunyat.controller.tools.tools.isExist;
 import static cloud.yunyat.controller.tools.tools.showWarning;
 
 /**
@@ -68,6 +69,8 @@ public class MainController implements Initializable {
     private ContextMenu masterContextMenu;
     @FXML
     private ContextMenu rtuContextMenu;
+    @FXML
+    private ContextMenu ycContextMenu;
 
     @FXML
     private TableView<Device> deviceTable;
@@ -228,6 +231,8 @@ public class MainController implements Initializable {
             // 设置可复用标签
             private final Tooltip masterTooltip = new Tooltip("右键添加主站");
             private final Tooltip rtuTooltip = new Tooltip("右键添加RTU");
+            private final Tooltip ycTooltip = new Tooltip("右键添加遥测记录");
+
 
             /**
              * 更新树形表格单元格的显示内容
@@ -259,6 +264,8 @@ public class MainController implements Initializable {
                 } else if (item instanceof RtuWrapper rtuWrapper) {
                     // TODO 缺少右键添加表
                     setText(rtuWrapper.getDisplayName());
+                    setTooltip(ycTooltip);
+                    setContextMenu(ycContextMenu);
                 }
             }
         });
@@ -341,11 +348,53 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    private void addYcData(){
-        if (messageService == null)return;
-        messageService.subscribeYcData(1, yc -> {
-            Platform.runLater(() -> {
+    private void addYcData() {
 
+        if (messageService == null) {
+            log.error("messageservice为null");
+            return;
+        }
+
+        windowService.showAddYcDialog(ycConf -> {
+            // 获取Yc表所有行
+            ObservableList<AnalogInput> tableItems = YcTable.getItems();
+            for (AnalogInput existingYc : tableItems) {
+                if (!isExist(existingYc, ycConf)) {
+                    showWarning("遥测点 '" + ycConf.getName() + "' 已存在");
+                    return;
+                }
+
+                tableItems.add(ycConf);
+            }
+        });
+
+        int stationId = 0;
+        TreeItem<Object> selectedItem = leftProjectTree.getSelectionModel().getSelectedItem();
+        // 获取当前选中节点的站点标识
+        if (selectedItem.getValue() instanceof RtuWrapper rtu) stationId = rtu.getRtu().getCOA();
+
+        messageService.subscribeYcData(stationId, yc -> {
+            // 使用 JavaFx 线程更新UI组件数据
+            Platform.runLater(() -> {
+                ObservableList<AnalogInput> tableItems = YcTable.getItems();
+
+                boolean isExist = false;
+
+                for (AnalogInput existingYc : tableItems) {
+                    // 判断点号是否存在
+                    if (existingYc.pointProperty().get() == yc.pointProperty().get()) {
+                        existingYc.valueProperty().set(yc.valueProperty().get());
+                        existingYc.qualityProperty().set(yc.qualityProperty().get());
+                        existingYc.timeProperty().set(yc.timeProperty().get());
+
+                        isExist = true;
+                        break;
+                    }
+                }
+
+                if (!isExist) {
+                    tableItems.add(yc);
+                }
             });
         });
     }

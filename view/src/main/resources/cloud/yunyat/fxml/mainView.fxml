@@ -88,6 +88,14 @@
                                     </items>
                                 </ContextMenu>
                             </contextMenu>
+                            <contextMenu>
+                                <ContextMenu fx:id="ycContextMenu">
+                                    <items>
+                                        <MenuItem onAction="#addYcData" text="添加遥测记录"/>
+<!--                                        <MenuItem onAction="#deleteDevice" text="删除设备"/>-->
+                                    </items>
+                                </ContextMenu>
+                            </contextMenu>
                             <root>
                                 <TreeItem expanded="true">
                                     <children>

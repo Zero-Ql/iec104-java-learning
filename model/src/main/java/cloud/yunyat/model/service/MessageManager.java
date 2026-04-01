@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
-public class MessageManager implements MessageService {
+public class MessageManager implements MessageService{
 
     private static final MessageManager INSTANCE = new MessageManager();
 
