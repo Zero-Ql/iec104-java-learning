@@ -2,22 +2,28 @@ package cloud.yunyat.model.pojo;
 
 import cloud.yunyat.model.impl.iec104.enums.IEC104_TypeIdentifier;
 import javafx.beans.property.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+@Builder(builderMethodName = "newYcData")
+@AllArgsConstructor
+@NoArgsConstructor
 public class AnalogInput {
-    private final StringProperty name = new SimpleStringProperty();
-    private final ObjectProperty<IEC104_TypeIdentifier> typeIdentifier = new SimpleObjectProperty<>();
-    private final IntegerProperty point = new SimpleIntegerProperty();
-    private final DoubleProperty value = new SimpleDoubleProperty();
-    private final IntegerProperty quality = new SimpleIntegerProperty();
-    private final ObjectProperty<LocalDateTime> time = new SimpleObjectProperty<>();
-    private final DoubleProperty max = new SimpleDoubleProperty();
-    private final DoubleProperty min = new SimpleDoubleProperty();
-    private final DoubleProperty coefficient = new SimpleDoubleProperty();
-    private final Map<String, Boolean> map = new HashMap<>();
+    private StringProperty name = new SimpleStringProperty();
+    private ObjectProperty<IEC104_TypeIdentifier> typeIdentifier = new SimpleObjectProperty<>();
+    private IntegerProperty point = new SimpleIntegerProperty();
+    private DoubleProperty value = new SimpleDoubleProperty();
+    private IntegerProperty quality = new SimpleIntegerProperty();
+    private ObjectProperty<LocalDateTime> time = new SimpleObjectProperty<>();
+    private DoubleProperty max = new SimpleDoubleProperty();
+    private DoubleProperty min = new SimpleDoubleProperty();
+    private DoubleProperty coefficient = new SimpleDoubleProperty();
+    @Setter
+    @Getter
+    private Map<String, Boolean> map = new HashMap<>();
 
 
     /**
@@ -59,40 +65,111 @@ public class AnalogInput {
         this.map.putAll(qualityBits);
     }
 
+    public String getName() {
+        return name.get();
+    }
+
     public StringProperty nameProperty() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name.set(name);
+    }
+
+    public IEC104_TypeIdentifier getTypeIdentifier() {
+        return typeIdentifier.get();
     }
 
     public ObjectProperty<IEC104_TypeIdentifier> typeIdentifierProperty() {
         return typeIdentifier;
     }
 
-    public IntegerProperty pointProperty() {
+    public void setTypeIdentifier(IEC104_TypeIdentifier typeIdentifier) {
+        this.typeIdentifier.set(typeIdentifier);
+    }
 
+    public int getPoint() {
+        return point.get();
+    }
+
+    public IntegerProperty pointProperty() {
         return point;
+    }
+
+    public void setPoint(int point) {
+        this.point.set(point);
+    }
+
+    public double getValue() {
+        return value.get();
     }
 
     public DoubleProperty valueProperty() {
         return value;
     }
 
+    public void setValue(double value) {
+        this.value.set(value);
+    }
+
+    public int getQuality() {
+        return quality.get();
+    }
+
     public IntegerProperty qualityProperty() {
         return quality;
+    }
+
+    public void setQuality(int quality) {
+        this.quality.set(quality);
+    }
+
+    public LocalDateTime getTime() {
+        return time.get();
     }
 
     public ObjectProperty<LocalDateTime> timeProperty() {
         return time;
     }
 
+    public void setTime(LocalDateTime time) {
+        this.time.set(time);
+    }
+
+    public double getMax() {
+        return max.get();
+    }
+
     public DoubleProperty maxProperty() {
         return max;
+    }
+
+    public void setMax(double max) {
+        this.max.set(max);
+    }
+
+    public double getMin() {
+        return min.get();
     }
 
     public DoubleProperty minProperty() {
         return min;
     }
 
+    public void setMin(double min) {
+        this.min.set(min);
+    }
+
+    public double getCoefficient() {
+        return coefficient.get();
+    }
+
     public DoubleProperty coefficientProperty() {
         return coefficient;
+    }
+
+    public void setCoefficient(double coefficient) {
+        this.coefficient.set(coefficient);
     }
 }
