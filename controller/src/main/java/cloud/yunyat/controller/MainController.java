@@ -2,6 +2,7 @@ package cloud.yunyat.controller;
 
 import cloud.yunyat.controller.iec104.WindowService;
 import cloud.yunyat.model.impl.iec104.enums.IEC104_TypeIdentifier;
+import cloud.yunyat.model.master.IEC104_Client;
 import cloud.yunyat.model.pojo.*;
 import cloud.yunyat.model.service.MessageService;
 import javafx.application.Platform;
@@ -20,7 +21,9 @@ import lombok.extern.log4j.Log4j2;
 
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import static cloud.yunyat.controller.tools.tools.isExist;
@@ -44,12 +47,19 @@ public class MainController implements Initializable {
     @Setter
     private WindowService windowService;
 
+    private Thread currentClientThread;
+
     @FXML
     private ToggleButton projectBtn;
     @FXML
     private ToggleButton settingsBtn;
     @FXML
     private ToggleButton messageDisplay;
+
+    @FXML
+    private Button startBtn;
+    @FXML
+    private Button stopBtn;
 
     @FXML
     private HBox mainContainer;
@@ -308,23 +318,37 @@ public class MainController implements Initializable {
         });
     }
 
+    /**
+     * 实现自定义最小化功能
+     */
     @FXML
     private void minimizeWindow(ActionEvent event) {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setIconified(true);
     }
 
+    /**
+     * 实现自定义最大化功能
+     */
     @FXML
     private void maximizeWindow(ActionEvent event) {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.setMaximized(!stage.isMaximized());
     }
 
+    /**
+     * 实现自定义关闭窗口功能
+     */
     @FXML
     private void closeWindow(ActionEvent event) {
-        // 安全退出程序
-        Platform.exit();
-        System.exit(0);
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.hide();
+
+        // 新启动一个线程来执行 JVM退出和资源清理
+        new Thread(() -> {
+            Platform.exit();
+            System.exit(0);
+        }).start();
     }
 
     @FXML
@@ -562,7 +586,77 @@ public class MainController implements Initializable {
     }
 
     @FXML
-    private void startDevice(){
+    private void startDevice() {
+        DeviceWrapper deviceWrapper;
+        startBtn.setDisable(true);
+        stopBtn.setDisable(false);
+        Map<String, Integer> ipList = new HashMap<>();
+        //TODO 待关联model启动方法
+        TreeItem<Object> selectedItem = leftProjectTree.getSelectionModel().getSelectedItem();
+        if (selectedItem == null) {
+            statusLabel.setText("当前选中节点为空");
+            startBtn.setDisable(false); // 恢复绿色启动
+            stopBtn.setDisable(true);   // 终止按钮变灰
+            return;
+        }
+
+        if (selectedItem.getValue() instanceof DeviceWrapper wrapper && !"master".equals(wrapper.getDisplayName())) {
+            deviceWrapper = wrapper;
+            ipList.put(deviceWrapper.getDevice().getIp(), deviceWrapper.getDevice().getPort());
+        } else {
+            return;
+        }
+
+        if (statusLabel != null) statusLabel.setText("设备 " + deviceWrapper.getDisplayName() + " 连接中...");
+
+        currentClientThread = new Thread(() -> {
+            try {
+
+                Platform.runLater(() -> {
+                    if (statusLabel != null) statusLabel.setText("设备 " + deviceWrapper.getDisplayName() + " 运行中");
+                });
+
+                IEC104_Client.runMultipleClients(ipList);
+
+                Platform.runLater(() -> {
+                    log.info("设备 {} 已断开连接", deviceWrapper.getDisplayName());
+                    if (statusLabel != null) statusLabel.setText("设备 " + deviceWrapper.getDisplayName() + " 已断开");
+                });
+
+            } catch (InterruptedException e) {
+                // 捕获中断异常，这是正常的停止操作，不需要报错
+                log.info("设备 {} 已被用户手动停止", deviceWrapper.getDisplayName());
+                Platform.runLater(() -> {
+                    if (statusLabel != null) statusLabel.setText("设备 " + deviceWrapper.getDisplayName() + " 已停止");
+                });
+            } catch (Exception e) {
+                log.error("设备 {} 启动或运行异常: ", deviceWrapper.getDisplayName(), e);
+                Platform.runLater(() -> {
+                    showWarning("设备 '" + deviceWrapper.getDisplayName() + "' 启动失败：\n" + e.getMessage());
+                    if (statusLabel != null)
+                        statusLabel.setText("设备 " + deviceWrapper.getDisplayName() + " 启动失败");
+                });
+            } finally {
+                // 🌟 3. 关键兜底：无论是因为报错结束、还是手动点击停止结束
+                // 必须在 finally 块里把 UI 状态恢复为初始状态
+                Platform.runLater(() -> {
+                    startBtn.setDisable(false); // 恢复绿色启动
+                    stopBtn.setDisable(true);   // 终止按钮变灰
+                });
+            }
+        });
+
+        currentClientThread.setDaemon(true);
+        currentClientThread.setName("IEC104-ClientThread-" + deviceWrapper.getDisplayName());
+        currentClientThread.start();
+
+
+    }
+
+    @FXML
+    private void stopDevice() {
+        //TODO 待关联model停止方法
+
 
     }
 

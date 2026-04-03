@@ -53,4 +53,8 @@ public class MessageManager implements MessageService{
         yxListener.getOrDefault(stationId, List.of())
                 .forEach(con -> con.accept(detail));
     }
+
+    public void startDevice(){
+
+    }
 }
