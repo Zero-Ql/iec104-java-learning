@@ -21,4 +21,5 @@ public class Device {
     private int clockSynchronization;  // 时钟同步周期
     private String gmt;       // 时区设置
     private boolean enableTimezone; // 是否启用时区
+    private boolean deviceStatusColumn; // 设备状态
 }

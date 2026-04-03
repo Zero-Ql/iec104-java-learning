@@ -11,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -47,6 +48,10 @@ public class MainApp extends Application {
 
         Parent root = loader.load();
         Scene scene = new Scene(root);
+
+        // 隐藏系统默认的标题栏跟边框
+        stage.initStyle(StageStyle.UNDECORATED);
+
         stage.setScene(scene);
         stage.setTitle("Main");
         stage.show();

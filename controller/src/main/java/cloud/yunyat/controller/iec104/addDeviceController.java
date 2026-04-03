@@ -68,25 +68,37 @@ public class addDeviceController implements Initializable {
     @FXML
     private void createBtn(ActionEvent event) {
 
-        Device device = Device.newDevice()
-                .name(deviceNameField.getText())
-                .ip(ipNameField.getText())
-                .port(Integer.parseInt(portNameField.getText()))
-                .t1(Integer.parseInt(t1NameField.getText()))
-                .t2(Integer.parseInt(t2NameField.getText()))
-                .t3(Integer.parseInt(t3NameField.getText()))
-                .w(Integer.parseInt(wNameField.getText()))
-                .generalInterrogation(Integer.parseInt(generalInterrogationNameField.getText()))
-                .clockSynchronization(Integer.parseInt(clockSynchronizationNameField.getText()))
-                .gmt(gmtField.getText())
-                .enableTimezone(enableTimezoneCheck.isSelected())
-                .build();
+        try {
 
-        if (device.getName() != null && !device.getName().trim().isEmpty()) {
-            if (onDeviceCreated != null) {
-                onDeviceCreated.accept(device);
+            String name = deviceNameField.getText();
+
+            Device device = Device.newDevice()
+                    .name(name)
+                    .ip(ipNameField.getText())
+                    .port(Integer.parseInt(portNameField.getText()))
+                    .t1(Integer.parseInt(t1NameField.getText()))
+                    .t2(Integer.parseInt(t2NameField.getText()))
+                    .t3(Integer.parseInt(t3NameField.getText()))
+                    .w(Integer.parseInt(wNameField.getText()))
+                    .generalInterrogation(Integer.parseInt(generalInterrogationNameField.getText()))
+                    .clockSynchronization(Integer.parseInt(clockSynchronizationNameField.getText()))
+                    .gmt(gmtField.getText())
+                    .enableTimezone(enableTimezoneCheck.isSelected())
+                    .build();
+
+            if (device.getName() != null && !device.getName().trim().isEmpty()) {
+                if (onDeviceCreated != null) {
+                    onDeviceCreated.accept(device);
+                }
+                closeStage(event);
+            }else {
+                Tips.setText("ERROR: 设备名称不能为空！");
             }
-            closeStage(event);
+
+        }catch (NumberFormatException e){
+            Tips.setText("请输入正确的数据格式！");
+        }catch (Exception e){
+            Tips.setText("发生未知错误");
         }
     }
 

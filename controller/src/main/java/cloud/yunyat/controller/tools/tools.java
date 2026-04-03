@@ -18,6 +18,8 @@ public class tools {
         );
     }
 
+
+
     public static void closeStage(ActionEvent event) {
         Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
         stage.close();
@@ -34,6 +36,6 @@ public class tools {
 
     // 判断是否名称、点号相同
     public static boolean isExist(AnalogInput oldV, AnalogInput newV) {
-        return !oldV.getName().equals(newV.getName()) && oldV.getPoint() != newV.getPoint();
+        return oldV.getName().equals(newV.getName()) && oldV.getPoint() == newV.getPoint();
     }
 }

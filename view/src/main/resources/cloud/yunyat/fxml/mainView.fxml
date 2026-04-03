@@ -21,8 +21,25 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.control.Button?>
 <BorderPane prefHeight="800" prefWidth="1200" stylesheets="@../css/mainView.css" xmlns="http://javafx.com/javafx/21.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="cloud.yunyat.controller.MainController">
+
+    <HBox fx:id="customTitleBar" prefHeight="45.0" alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: #2B2D30; -fx-padding: 0 15 0 15;">
+
+        <Label text="IEC104-Client" textFill="#DFE1E5" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+
+        <Region HBox.hgrow="ALWAYS" />
+
+        <Button text="▶ 启动" onAction="#startDevice"
+                style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand;" />
+
+        <Region HBox.hgrow="ALWAYS" />
+
+        <Button text="—" onAction="#minimizeWindow" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" />
+        <Button text="口" onAction="#maximizeWindow" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" />
+        <Button text="X" onAction="#closeWindow" style="-fx-background-color: transparent; -fx-text-fill: white; -fx-cursor: hand;" />
+    </HBox>
 
     <!-- 左侧菜单栏 -->
     <left>

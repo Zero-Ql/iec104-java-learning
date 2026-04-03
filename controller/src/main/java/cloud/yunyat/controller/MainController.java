@@ -9,10 +9,12 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
@@ -30,6 +32,12 @@ import static cloud.yunyat.controller.tools.tools.showWarning;
  */
 @Log4j2
 public class MainController implements Initializable {
+
+    @FXML
+    private HBox customTitleBar;
+    private double xOffset = 0;
+    private double yOffset = 0;
+
 
     @Setter
     private MessageService messageService;
@@ -168,6 +176,8 @@ public class MainController implements Initializable {
 
         setupEventHandlers();
 
+        setupDraggableTitleBar();
+
         // 为已存在的 tab 中的 TextArea 添加监听器（示例）
 //        editorTabPane.getTabs().forEach(tab -> {
 //            if (tab.getContent() instanceof TextArea) {
@@ -177,9 +187,6 @@ public class MainController implements Initializable {
     }
 
     private void initializeUI() {
-        // 初始化编辑器标签页，移除默认的 Tab 页
-//        editorTabPane.getTabs().remove(deviceListTab);
-//        editorTabPane.getTabs().remove(RTUListTab);
         editorTabs = List.of(YcListTab, YxListTab, YkListTab, YtListTab);
         editorTabPane.getTabs().clear();
 
@@ -197,12 +204,12 @@ public class MainController implements Initializable {
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         ipColumn.setCellValueFactory(new PropertyValueFactory<>("ip"));
         portColumn.setCellValueFactory(new PropertyValueFactory<>("port"));
+        deviceStatusColumn.setCellValueFactory(new PropertyValueFactory<>("deviceStatusColumn"));
 
         // 初始化RTU表格
         rtuNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         coaColumn.setCellValueFactory(new PropertyValueFactory<>("COA"));
         isActiveColumn.setCellValueFactory(new PropertyValueFactory<>("enable"));
-
 
         // 初始化Yc表格
         YcNameColumn.setCellValueFactory(cell -> cell.getValue().nameProperty());
@@ -262,7 +269,7 @@ public class MainController implements Initializable {
                     setTooltip(rtuTooltip);
                     setContextMenu(rtuContextMenu);
                 } else if (item instanceof RtuWrapper rtuWrapper) {
-                    // TODO 缺少右键添加表
+                    // 表格
                     setText(rtuWrapper.getDisplayName());
                     setTooltip(ycTooltip);
                     setContextMenu(ycContextMenu);
@@ -275,9 +282,49 @@ public class MainController implements Initializable {
         // 监听项目树的选择变化事件
         leftProjectTree.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
             if (newV != null && newV.getValue() != null) {
+                refreshTablesData(newV);
                 openDeviceInEditor(newV.getValue());
             }
         });
+    }
+
+    /**
+     * 实现自定义标题栏的拖拽功能
+     */
+    private void setupDraggableTitleBar() {
+        if (customTitleBar == null) return;
+
+        // 鼠标按下时，记录相对偏移量
+        customTitleBar.setOnMousePressed(event -> {
+            xOffset = event.getSceneX();
+            yOffset = event.getSceneY();
+        });
+
+        // 鼠标拖动时，根据偏移量更新窗口位置
+        customTitleBar.setOnMouseDragged(event -> {
+            Stage stage = (Stage) customTitleBar.getScene().getWindow();
+            stage.setX(event.getScreenX() - xOffset);
+            stage.setY(event.getScreenY() - yOffset);
+        });
+    }
+
+    @FXML
+    private void minimizeWindow(ActionEvent event) {
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setIconified(true);
+    }
+
+    @FXML
+    private void maximizeWindow(ActionEvent event) {
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setMaximized(!stage.isMaximized());
+    }
+
+    @FXML
+    private void closeWindow(ActionEvent event) {
+        // 安全退出程序
+        Platform.exit();
+        System.exit(0);
     }
 
     @FXML
@@ -350,28 +397,44 @@ public class MainController implements Initializable {
     @FXML
     private void addYcData() {
 
-        if (messageService == null) {
-            log.error("messageservice为null");
+        if (messageService == null) return;
+
+        TreeItem<Object> selectedItem = leftProjectTree.getSelectionModel().getSelectedItem();
+        // 检查是否有选中节点
+        if (selectedItem == null || !(selectedItem.getValue() instanceof RtuWrapper)) {
+            showWarning("请选择一个RTU节点");
             return;
         }
 
+        // 弹出遥测添加窗口
         windowService.showAddYcDialog(ycConf -> {
             // 获取Yc表所有行
             ObservableList<AnalogInput> tableItems = YcTable.getItems();
+            boolean hasDuplicate = false;
             for (AnalogInput existingYc : tableItems) {
-                if (!isExist(existingYc, ycConf)) {
-                    showWarning("遥测点 '" + ycConf.getName() + "' 已存在");
-                    return;
+                // isExist 返回 true 代表两者发生冲突/重复
+                if (isExist(existingYc, ycConf)) {
+                    hasDuplicate = true;
+                    break; // 找到重复项，直接退出循环
                 }
-
-                tableItems.add(ycConf);
             }
+
+            // 如果存在重复，提示并中止添加
+            if (hasDuplicate) {
+                showWarning("遥测点 '" + ycConf.getName() + "' 已存在");
+                return;
+            }
+
+            // 如果没有重复，在循环外进行添加操作
+            tableItems.add(ycConf);
         });
 
-        int stationId = 0;
-        TreeItem<Object> selectedItem = leftProjectTree.getSelectionModel().getSelectedItem();
-        // 获取当前选中节点的站点标识
-        if (selectedItem.getValue() instanceof RtuWrapper rtu) stationId = rtu.getRtu().getCOA();
+        int stationId;
+
+        // 获取当前选中节点实体
+        Rtu rtu = ((RtuWrapper) selectedItem.getValue()).getRtu();
+
+        stationId = rtu.getCOA();
 
         messageService.subscribeYcData(stationId, yc -> {
             // 使用 JavaFx 线程更新UI组件数据
@@ -428,7 +491,10 @@ public class MainController implements Initializable {
 
             parentItem.getChildren().add(deviceItem);
 
-            deviceTable.getItems().add(device);
+            // 只有当前选中项正是我们要添加设备的父节点时，才直接更新 UI 表格
+            if (leftProjectTree.getSelectionModel().getSelectedItem() == parentItem) {
+                deviceTable.getItems().add(device);
+            }
 
             // 展开父节点，显示新添加的 设备
             parentItem.setExpanded(true);
@@ -485,11 +551,19 @@ public class MainController implements Initializable {
 
             parentItem.getChildren().add(rtuItem);
 
-            RTUTable.getItems().add(rtu);
+            // 只有当前选中项正是我们要添加 RTU 的设备节点时，才直接更新 UI 表格
+            if (leftProjectTree.getSelectionModel().getSelectedItem() == parentItem) {
+                RTUTable.getItems().add(rtu);
+            }
 
             // 展开父节点，显示新添加的 RTU
             parentItem.setExpanded(true);
         });
+    }
+
+    @FXML
+    private void startDevice(){
+
     }
 
     private void openDeviceInEditor(Object deviceWrapper) {
@@ -533,6 +607,42 @@ public class MainController implements Initializable {
                         editorTabPane.getSelectionModel().select(e);
                     }
             );
+        }
+    }
+
+    /**
+     * 根据当前选中的树节点，动态刷新右侧表格的数据
+     */
+    private void refreshTablesData(TreeItem<Object> selectedItem) {
+        if (selectedItem == null || selectedItem.getValue() == null) return;
+
+        Object wrapper = selectedItem.getValue();
+
+        if (wrapper instanceof DeviceWrapper dw) {
+            if ("master".equals(dw.getDisplayName())) {
+                // 如果选中了主站根节点，刷新设备列表 (deviceTable)
+                deviceTable.getItems().clear(); // 先清空旧数据
+                // 遍历子节点，把具体的 Device 加回来
+                for (TreeItem<Object> child : selectedItem.getChildren()) {
+                    if (child.getValue() instanceof DeviceWrapper childDw && childDw.getDevice() != null) {
+                        deviceTable.getItems().add(childDw.getDevice());
+                    }
+                }
+            } else {
+                // 如果选中了具体的设备节点，刷新它的 RTU 列表 (RTUTable)
+                RTUTable.getItems().clear(); // 先清空旧数据
+                // 遍历该设备下的子节点，把对应的 RTU 加回来
+                for (TreeItem<Object> child : selectedItem.getChildren()) {
+                    if (child.getValue() instanceof RtuWrapper rw && rw.getRtu() != null) {
+                        RTUTable.getItems().add(rw.getRtu());
+                    }
+                }
+            }
+        } else if (wrapper instanceof RtuWrapper rw) {
+            // 如果选中了某个具体的 RTU，这里未来需要刷新遥测(Yc)、遥信(Yx)等表格
+            if (rw.getRtu() != null) {
+                YcTable.setItems(rw.getRtu().getYcList());
+            }
         }
     }
 //    private void attachCaretListener(TextArea ta) {
