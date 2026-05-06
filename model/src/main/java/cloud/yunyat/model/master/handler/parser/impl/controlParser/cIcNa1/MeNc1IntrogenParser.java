@@ -27,6 +27,8 @@ import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Map;
 
+import static cloud.yunyat.model.impl.iec104.util.IEC104Util.ycScan;
+
 /**
  * MeNc1IntrogenParser类用于解析总召遥测
  */
@@ -54,20 +56,9 @@ public class MeNc1IntrogenParser implements Parser {
                     QualityBit.isSet(qualityDescriptors, QualityBit.BLOCKED),
                     QualityBit.isSet(qualityDescriptors, QualityBit.OVERFLOW));
 
-            return new ParsedResult(ioa, v, qualityDescriptors, Map.copyOf(scan(qualityDescriptors)));
+            return new ParsedResult(ioa, v, qualityDescriptors, Map.copyOf(ycScan(qualityDescriptors)));
         }
     }
 
-    private Map<String, Boolean> scan(byte qualityDescriptors){
-        Map<String, Boolean> map = new HashMap<>();
-
-        map.put("IV", QualityBit.isSet(qualityDescriptors, QualityBit.INVALID));
-        map.put("NT", QualityBit.isSet(qualityDescriptors, QualityBit.NOT_CURRENT));
-        map.put("SB", QualityBit.isSet(qualityDescriptors, QualityBit.SUBSTITUTED));
-        map.put("BL", QualityBit.isSet(qualityDescriptors, QualityBit.BLOCKED));
-        map.put("OV", QualityBit.isSet(qualityDescriptors, QualityBit.OVERFLOW));
-
-        return map;
-    }
 }
 

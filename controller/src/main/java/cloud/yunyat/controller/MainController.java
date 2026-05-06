@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static cloud.yunyat.controller.tools.tools.isExist;
 import static cloud.yunyat.controller.tools.tools.showWarning;
@@ -48,6 +49,7 @@ public class MainController implements Initializable {
     private WindowService windowService;
 
     private Thread currentClientThread;
+    private Map<String, IEC104_Client> activeClients = new ConcurrentHashMap<>();
 
     @FXML
     private ToggleButton projectBtn;
@@ -591,7 +593,6 @@ public class MainController implements Initializable {
         startBtn.setDisable(true);
         stopBtn.setDisable(false);
         Map<String, Integer> ipList = new HashMap<>();
-        //TODO 待关联model启动方法
         TreeItem<Object> selectedItem = leftProjectTree.getSelectionModel().getSelectedItem();
         if (selectedItem == null) {
             statusLabel.setText("当前选中节点为空");
@@ -607,39 +608,46 @@ public class MainController implements Initializable {
             return;
         }
 
-        if (statusLabel != null) statusLabel.setText("设备 " + deviceWrapper.getDisplayName() + " 连接中...");
+        String deviceName = deviceWrapper.getDisplayName();
+
+        if (statusLabel != null) statusLabel.setText("设备 " + deviceName + " 连接中...");
 
         currentClientThread = new Thread(() -> {
-            try {
 
+            IEC104_Client client = new IEC104_Client(deviceWrapper.getDevice().getIp(), deviceWrapper.getDevice().getPort());
+            activeClients.put(deviceName, client);
+
+            try {
                 Platform.runLater(() -> {
-                    if (statusLabel != null) statusLabel.setText("设备 " + deviceWrapper.getDisplayName() + " 运行中");
+                    if (statusLabel != null) statusLabel.setText("设备 " + deviceName + " 运行中");
                 });
 
-                IEC104_Client.runMultipleClients(ipList);
+                client.run();
 
                 Platform.runLater(() -> {
-                    log.info("设备 {} 已断开连接", deviceWrapper.getDisplayName());
-                    if (statusLabel != null) statusLabel.setText("设备 " + deviceWrapper.getDisplayName() + " 已断开");
+                    log.info("设备 {} 已断开连接", deviceName);
+                    if (statusLabel != null) statusLabel.setText("设备 " + deviceName + " 已断开");
                 });
 
             } catch (InterruptedException e) {
                 // 捕获中断异常，这是正常的停止操作，不需要报错
-                log.info("设备 {} 已被用户手动停止", deviceWrapper.getDisplayName());
+                log.info("设备 {} 已被用户手动停止", deviceName);
                 Platform.runLater(() -> {
-                    if (statusLabel != null) statusLabel.setText("设备 " + deviceWrapper.getDisplayName() + " 已停止");
+                    if (statusLabel != null) statusLabel.setText("设备 " + deviceName + " 已停止");
                 });
             } catch (Exception e) {
-                log.error("设备 {} 启动或运行异常: ", deviceWrapper.getDisplayName(), e);
+                log.error("设备 {} 启动或运行异常: ", deviceName, e);
                 Platform.runLater(() -> {
-                    showWarning("设备 '" + deviceWrapper.getDisplayName() + "' 启动失败：\n" + e.getMessage());
+                    showWarning("设备 '" + deviceName + "' 启动失败：\n" + e.getMessage());
                     if (statusLabel != null)
-                        statusLabel.setText("设备 " + deviceWrapper.getDisplayName() + " 启动失败");
+                        statusLabel.setText("设备 " + deviceName + " 启动失败");
                 });
             } finally {
-                // 🌟 3. 关键兜底：无论是因为报错结束、还是手动点击停止结束
+                // 无论是因为报错结束、还是手动点击停止结束
                 // 必须在 finally 块里把 UI 状态恢复为初始状态
+                activeClients.remove(deviceName);
                 Platform.runLater(() -> {
+                    log.info("设备{}线程已完全退出", deviceName);
                     startBtn.setDisable(false); // 恢复绿色启动
                     stopBtn.setDisable(true);   // 终止按钮变灰
                 });
@@ -650,13 +658,30 @@ public class MainController implements Initializable {
         currentClientThread.setName("IEC104-ClientThread-" + deviceWrapper.getDisplayName());
         currentClientThread.start();
 
-
     }
 
     @FXML
     private void stopDevice() {
         //TODO 待关联model停止方法
+        TreeItem<Object> selectedItem = leftProjectTree.getSelectionModel().getSelectedItem();
 
+        if (selectedItem != null && selectedItem.getValue() instanceof DeviceWrapper wrapper) {
+            String deviceName = wrapper.getDisplayName();
+
+            // 从 Map 中精确获取对应设备的客户端实例
+            IEC104_Client client = activeClients.get(deviceName);
+
+            if (client != null) {
+                log.info("正在手动停止设备: {}", deviceName);
+                // 调用 Netty 底层关闭方法
+                client.stop();
+
+                // 此时 startDevice 里的 client.run() 会解除阻塞并走到 finally 块更新 UI
+                if (statusLabel != null) statusLabel.setText("设备 " + deviceName + " 已发出停止指令");
+            } else {
+                showWarning("该设备目前未在运行状态");
+            }
+        }
 
     }
 
@@ -695,12 +720,29 @@ public class MainController implements Initializable {
                 }
             }
 
-            editorTabs.forEach(e -> {
-                        e.setClosable(true);
-                        editorTabPane.getTabs().add(e);
-                        editorTabPane.getSelectionModel().select(e);
-                    }
-            );
+            boolean found = false;
+            for (Tab e : editorTabs) {
+                if (!editorTabPane.getTabs().contains(e)) {
+                    e.setClosable(true);
+                    editorTabPane.getTabs().add(e);
+                    found = true;
+                }
+            }
+
+            // 只有在添加了新标签页后才进行选择操作
+            if (found && !editorTabPane.getTabs().isEmpty()) {
+                // 选择最后一个标签页
+                int lastIndex = editorTabPane.getTabs().size() - 1;
+                if (lastIndex >= 0) {  // 再次确认索引有效
+                    editorTabPane.getSelectionModel().select(editorTabPane.getTabs().get(lastIndex));
+                }
+            } else if (!editorTabPane.getTabs().isEmpty()) {
+                // 如果没有添加新标签页但存在标签页，则选择当前的最后一个
+                int lastIndex = editorTabPane.getTabs().size() - 1;
+                if (lastIndex >= 0) {
+                    editorTabPane.getSelectionModel().select(editorTabPane.getTabs().get(lastIndex));
+                }
+            }
         }
     }
 
