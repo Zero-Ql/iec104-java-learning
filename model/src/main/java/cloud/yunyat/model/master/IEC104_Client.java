@@ -40,6 +40,9 @@ public class IEC104_Client {
     private final String host;
     private final int port;
 
+    private EventLoopGroup group;
+    private Channel channel;
+
     public IEC104_Client(String host, int port) {
         this.host = host;
         this.port = port;
@@ -47,7 +50,7 @@ public class IEC104_Client {
 
     public void run() throws Exception {
         // 创建线程组
-        EventLoopGroup group = new NioEventLoopGroup();
+        group = new NioEventLoopGroup();
         try {
             // 创建客户端启动器
             Bootstrap b = new Bootstrap();
@@ -79,16 +82,18 @@ public class IEC104_Client {
             log.info("尝试连接到 {}:{}", host, port);
             // 启动器使用指定的 host和port 连接服务器，使用 sync 阻塞调用，直到连接成功或失败
             ChannelFuture f = b.connect(host, port).sync();
+
+            this.channel = f.channel();
+
             log.info("连接建立成功");
             // 阻塞等待通道关闭
-            f.channel().closeFuture().sync();
+            this.channel.closeFuture().sync();
         } catch (Exception e) {
             log.error("连接过程中发生异常: ", e);
             throw e;
         } finally {
             log.info("关闭客户端");
-            // 关闭线程组
-            group.shutdownGracefully();
+            stop();
         }
     }
 
@@ -98,7 +103,7 @@ public class IEC104_Client {
      * @param servers 服务器地址和端口的映射
      * @throws Exception 连接异常
      */
-    public static void runMultipleClients(Map<String, Integer> servers) throws Exception {
+    public void runMultipleClients(Map<String, Integer> servers) throws Exception {
         List<IEC104_Client> clients = new ArrayList<>();
 
         // 创建多个客户端实例
@@ -134,6 +139,19 @@ public class IEC104_Client {
             } finally {
                 executor.shutdown();
             }
+        }
+    }
+
+    /**
+     * 新增断开连接方法
+     */
+    public void stop() {
+        log.info("正在关闭客户端连接...");
+        if (channel != null && channel.isActive()) {
+            channel.close();
+        }
+        if (group != null && !group.isShutdown()) {
+            group.shutdownGracefully();
         }
     }
 }

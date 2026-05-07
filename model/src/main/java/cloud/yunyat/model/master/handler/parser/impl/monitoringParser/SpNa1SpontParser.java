@@ -25,6 +25,8 @@ import cloud.yunyat.model.impl.iec104.util.ByteBufResource;
 import java.util.HashMap;
 import java.util.Map;
 
+import static cloud.yunyat.model.impl.iec104.util.IEC104Util.yxScan;
+
 
 /**
  * SpNa1SpontParser类用于解析突变遥信
@@ -44,26 +46,16 @@ public class SpNa1SpontParser implements Parser {
     public ParsedResult parser(int ioa, ByteBufResource value, byte qualityDescriptors, ChannelHandlerContext ctx) {
         // 使用try-with-resources确保valueResource在使用完毕后被正确关闭
         try (ByteBufResource valueResource = value) {
+            boolean status = QualityBit.isSet(qualityDescriptors, QualityBit.OVERFLOW);
+
             // 记录总召响应的相关信息，包括IOA和各种质量位的状态
             log.info("Yx 突变  IOA：{}  IV：{}  NT：{}  SB：{}  BL：{}  SPI：{}", ioa,
                     QualityBit.isSet(qualityDescriptors, QualityBit.INVALID),
                     QualityBit.isSet(qualityDescriptors, QualityBit.NOT_CURRENT),
                     QualityBit.isSet(qualityDescriptors, QualityBit.SUBSTITUTED),
                     QualityBit.isSet(qualityDescriptors, QualityBit.BLOCKED),
-                    QualityBit.isSet(qualityDescriptors, QualityBit.OVERFLOW) ? "On" : "Off");
-            return new ParsedResult(ioa, value, qualityDescriptors, Map.copyOf(scan(qualityDescriptors)));
+                    status ? "On" : "Off");
+            return new ParsedResult(ioa, status, qualityDescriptors, Map.copyOf(yxScan(qualityDescriptors)));
         }
-    }
-
-    private Map<String, Boolean> scan(byte qualityDescriptors) {
-        Map<String, Boolean> map = new HashMap<>();
-
-        map.put("IV", QualityBit.isSet(qualityDescriptors, QualityBit.INVALID));
-        map.put("NT", QualityBit.isSet(qualityDescriptors, QualityBit.NOT_CURRENT));
-        map.put("SB", QualityBit.isSet(qualityDescriptors, QualityBit.SUBSTITUTED));
-        map.put("BL", QualityBit.isSet(qualityDescriptors, QualityBit.BLOCKED));
-        map.put("SPI", QualityBit.isSet(qualityDescriptors, QualityBit.OVERFLOW));
-
-        return map;
     }
 }

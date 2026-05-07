@@ -15,15 +15,14 @@
 package cloud.yunyat.model.impl.iec104.util;
 
 import cloud.yunyat.model.impl.iec104.enums.IEC104_TypeIdentifier;
+import cloud.yunyat.model.impl.iec104.enums.monitoringDirections.QualityBit;
 import cloud.yunyat.model.impl.iec104.frame.IEC104_MessageInfo;
 import cloud.yunyat.model.impl.iec104.frame.asdu.IEC104_AsduMessageDetail;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.CorruptedFrameException;
 import lombok.extern.log4j.Log4j2;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 
 @Log4j2
@@ -41,6 +40,29 @@ public class IEC104Util {
             // 取消超时任务
             task.cancel(false);
         }
+    }
+
+    public static Map<String, Boolean> ycScan(byte qualityDescriptors){
+        Map<String, Boolean> map = new HashMap<>(5);
+
+        map.put("IV", QualityBit.isSet(qualityDescriptors, QualityBit.INVALID));
+        map.put("NT", QualityBit.isSet(qualityDescriptors, QualityBit.NOT_CURRENT));
+        map.put("SB", QualityBit.isSet(qualityDescriptors, QualityBit.SUBSTITUTED));
+        map.put("BL", QualityBit.isSet(qualityDescriptors, QualityBit.BLOCKED));
+        map.put("OV", QualityBit.isSet(qualityDescriptors, QualityBit.OVERFLOW));
+
+        return map;
+    }
+    public static Map<String, Boolean> yxScan(byte qualityDescriptors){
+        Map<String, Boolean> map = new HashMap<>(5);
+
+        map.put("IV", QualityBit.isSet(qualityDescriptors, QualityBit.INVALID));
+        map.put("NT", QualityBit.isSet(qualityDescriptors, QualityBit.NOT_CURRENT));
+        map.put("SB", QualityBit.isSet(qualityDescriptors, QualityBit.SUBSTITUTED));
+        map.put("BL", QualityBit.isSet(qualityDescriptors, QualityBit.BLOCKED));
+        map.put("SPI", QualityBit.isSet(qualityDescriptors, QualityBit.OVERFLOW));
+
+        return map;
     }
 
     /**
