@@ -1,10 +1,12 @@
+package cloud.yunyat.app;
+
 import cloud.yunyat.view.Iec104MasterCommunicationParameters;
 import org.junit.Test;
 
 public class myAppTest {
     @Test
-    public void demo1(){
+    public void demo1() {
         var a = new Iec104MasterCommunicationParameters();
-//        a.showCustomWindow();
+        // a.showCustomWindow();
     }
 }

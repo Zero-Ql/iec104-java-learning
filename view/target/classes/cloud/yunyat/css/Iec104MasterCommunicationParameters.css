@@ -1,0 +1,41 @@
+/* 外层容器 */
+.connection-container {
+    -fx-background-color: transparent;
+}
+
+/* 边框线 */
+.connection-border {
+    -fx-border-color: #D0D0D0; /* 线条颜色 */
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+/* 标题样式 */
+.connection-title {
+    /* 关键：使用面板的背景色遮住下面的边框线 */
+    -fx-background-color: #F4F4F4; /* 这里的颜色要和 side-panel 的背景色完全一致 [cite: 5, 12] */
+    -fx-padding: 0 5 0 5; /* 左右留点空白，让断线更自然 */
+    -fx-font-size: 12px;
+    -fx-text-fill: #666666;
+    /* 微调垂直位置，使其正好压在边框线上 */
+    -fx-translate-y: -10;
+}
+
+.timing {
+    /* 上 右 下 左 */
+    -fx-padding: 5 0 0 5;
+}
+
+.tooltip {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+    -fx-border-color: #D0D0D0;
+    -fx-border-width: 1px;
+    -fx-font-size: 12px;
+    -fx-padding: 5px;
+}
+
+.Iec104MasterCommunicationParameters {
+    -fx-padding: 0 30 0 30; /* 统一设置子插件之间的间距 */
+}
+

@@ -12,6 +12,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+package cloud.yunyat.model;
+
 import org.junit.Test;
 import cloud.yunyat.model.impl.iec104.config.Piec104Config;
 import io.netty.buffer.ByteBuf;
@@ -30,7 +32,7 @@ public class mytest {
     @Test
     public void demo1() {
         int value = 0;
-        byte[] bytes = new byte[]{(byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x78};
+        byte[] bytes = new byte[] { (byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x78 };
         for (int i = 0; i < 4; i++) {
             int shift = (3 - i) * 8;
             value += (bytes[i] & 0xFF) << shift;
@@ -56,23 +58,23 @@ public class mytest {
      */
     @Test
     public void demo3() {
-        byte[] bytes = new byte[]{(byte) 0x83, (byte) 0x00, (byte) 0x00, (byte) 0x00};
+        byte[] bytes = new byte[] { (byte) 0x83, (byte) 0x00, (byte) 0x00, (byte) 0x00 };
         int key = ByteBuffer.wrap(bytes).getInt();
-//        System.out.println(U_CONTROL_MAP.get(key));
+        // System.out.println(U_CONTROL_MAP.get(key));
         System.out.println((bytes[0] & 0x003) == 0x003);
     }
 
     @Test
     public void demo4() {
-//        new b().test1();
+        // new b().test1();
 
         // 发送
         byte tx_1 = (byte) ((65534 >> 8) & 0xFF);
         byte tx_2 = (byte) (65534 & 0xFF);
 
         int test = 16;
-        test |= (1 << 7); //置1
-//        test &= ~(1 << 7); //清0
+        test |= (1 << 7); // 置1
+        // test &= ~(1 << 7); //清0
         // 接收
         int rx = ((tx_1 & 0xFF) << 8) | (tx_2 & 0xFF);
         System.out.println(rx);
@@ -91,55 +93,58 @@ public class mytest {
      */
     @Test
     public void demo6() {
-//
-//        List<IEC104_MessageInfo> ioa = new ArrayList<>();
-//        var iEC104_apciMessageDetail = new IEC104_ApciMessageDetail();
-//        boolean sq = false;
-//        short numIx = 1;
-//
-//        boolean negative = false;
-//        boolean test = false;
-//        short causeTx = 6;
-//
-//        byte variableStructureQualifiers;
-//        byte transferReason;
-//
-//        byte senderAddress = 0;
-//        short publicAddress = 1;
-//
-//        ioa.add(new IEC104_MessageInfo(0, IEC104_VariableStructureQualifiers.C_IC_NA_1_QUALIFIER.getValue()));
-//        iEC104_apciMessageDetail.setIEC104_controlField(new byte[]{0x00, 0x00, 0x00, 0x00});
-//
-//        if (sq) {
-//            numIx |= (1 << 7);
-//        } else {
-//            numIx &= ~(1 << 7);
-//        }
-//
-//        if (negative) {
-//            causeTx |= (1 << 7);
-//            if (test) {
-//                causeTx |= (1 << 6);
-//            } else {
-//                causeTx &= ~(1 << 6);
-//            }
-//        } else {
-//            causeTx &= ~(1 << 7);
-//        }
-//
-//        variableStructureQualifiers = (byte) numIx;
-//        transferReason = (byte) causeTx;
-//
-//        var iEC104_asduMessageDetail = new IEC104_AsduMessageDetail.Builder(
-//                IEC104_TypeIdentifier.C_IC_NA_1.getValue(),
-//                variableStructureQualifiers,
-//                transferReason,
-//                senderAddress,
-//                publicAddress,
-//                ioa).build();
-//
-//        var iEC104_FrameBuilder = new IEC104_FrameBuilder.Builder(iEC104_apciMessageDetail).setAsduMessageDetail(iEC104_asduMessageDetail).build();
-//        System.out.println(iEC104_FrameBuilder);
+        //
+        // List<IEC104_MessageInfo> ioa = new ArrayList<>();
+        // var iEC104_apciMessageDetail = new IEC104_ApciMessageDetail();
+        // boolean sq = false;
+        // short numIx = 1;
+        //
+        // boolean negative = false;
+        // boolean test = false;
+        // short causeTx = 6;
+        //
+        // byte variableStructureQualifiers;
+        // byte transferReason;
+        //
+        // byte senderAddress = 0;
+        // short publicAddress = 1;
+        //
+        // ioa.add(new IEC104_MessageInfo(0,
+        // IEC104_VariableStructureQualifiers.C_IC_NA_1_QUALIFIER.getValue()));
+        // iEC104_apciMessageDetail.setIEC104_controlField(new byte[]{0x00, 0x00, 0x00,
+        // 0x00});
+        //
+        // if (sq) {
+        // numIx |= (1 << 7);
+        // } else {
+        // numIx &= ~(1 << 7);
+        // }
+        //
+        // if (negative) {
+        // causeTx |= (1 << 7);
+        // if (test) {
+        // causeTx |= (1 << 6);
+        // } else {
+        // causeTx &= ~(1 << 6);
+        // }
+        // } else {
+        // causeTx &= ~(1 << 7);
+        // }
+        //
+        // variableStructureQualifiers = (byte) numIx;
+        // transferReason = (byte) causeTx;
+        //
+        // var iEC104_asduMessageDetail = new IEC104_AsduMessageDetail.Builder(
+        // IEC104_TypeIdentifier.C_IC_NA_1.getValue(),
+        // variableStructureQualifiers,
+        // transferReason,
+        // senderAddress,
+        // publicAddress,
+        // ioa).build();
+        //
+        // var iEC104_FrameBuilder = new
+        // IEC104_FrameBuilder.Builder(iEC104_apciMessageDetail).setAsduMessageDetail(iEC104_asduMessageDetail).build();
+        // System.out.println(iEC104_FrameBuilder);
     }
 
     @Test
