@@ -714,60 +714,36 @@ public class MainController implements Initializable {
 
     private void openDeviceInEditor(Object deviceWrapper) {
         if (deviceWrapper instanceof DeviceWrapper wrapper) {
-
-            // 如果已经打开则直接切换
-            for (Tab t : editorTabPane.getTabs()) {
-                if (t.getText().equals(wrapper.getDisplayName())) {
-                    editorTabPane.getSelectionModel().select(t);
-                    return;
-                }
-            }
-
-//            editorTabPane.getTabs().clear();
-
             if ("master".equals(wrapper.getDisplayName())) {
-                // 设置 tab 页可关闭
-                deviceListTab.setClosable(true);
-                // 获取选项卡列表并将 tab 页添加进去
-                editorTabPane.getTabs().add(deviceListTab);
-                // 选择并设置标签页
+                // 如果标签页不在面板中，则添加进去
+                if (!editorTabPane.getTabs().contains(deviceListTab)) {
+                    deviceListTab.setClosable(true);
+                    editorTabPane.getTabs().add(deviceListTab);
+                }
+                // 直接选中该标签页
                 editorTabPane.getSelectionModel().select(deviceListTab);
             } else {
-                RTUListTab.setClosable(true);
-                editorTabPane.getTabs().add(RTUListTab);
+                if (!editorTabPane.getTabs().contains(RTUListTab)) {
+                    RTUListTab.setClosable(true);
+                    editorTabPane.getTabs().add(RTUListTab);
+                }
                 editorTabPane.getSelectionModel().select(RTUListTab);
             }
             editStatusLabel.setText("已保存");
         } else if (deviceWrapper instanceof RtuWrapper wrapper) {
-            // 如果已经打开则直接切换
-            for (Tab t : editorTabPane.getTabs()) {
-                if (t.getText().equals(wrapper.getDisplayName())) {
-                    editorTabPane.getSelectionModel().select(t);
-                    return;
-                }
-            }
-
-            boolean found = false;
+            // 确保 RTU 相关的标签页都在面板中
             for (Tab e : editorTabs) {
                 if (!editorTabPane.getTabs().contains(e)) {
                     e.setClosable(true);
                     editorTabPane.getTabs().add(e);
-                    found = true;
                 }
             }
 
-            // 只有在添加了新标签页后才进行选择操作
-            if (found && !editorTabPane.getTabs().isEmpty()) {
-                // 选择最后一个标签页
-                int lastIndex = editorTabPane.getTabs().size() - 1;
-                if (lastIndex >= 0) {  // 再次确认索引有效
-                    editorTabPane.getSelectionModel().select(editorTabPane.getTabs().get(lastIndex));
-                }
-            } else if (!editorTabPane.getTabs().isEmpty()) {
-                // 如果没有添加新标签页但存在标签页，则选择当前的最后一个
-                int lastIndex = editorTabPane.getTabs().size() - 1;
-                if (lastIndex >= 0) {
-                    editorTabPane.getSelectionModel().select(editorTabPane.getTabs().get(lastIndex));
+            // 如果当前没有任何选中项，或者选中的不是 RTU 相关的标签页，则默认选中第一个 (遥测)
+            if (!editorTabs.isEmpty()) {
+                Tab selectedTab = editorTabPane.getSelectionModel().getSelectedItem();
+                if (!editorTabs.contains(selectedTab)) {
+                    editorTabPane.getSelectionModel().select(editorTabs.get(0));
                 }
             }
         }
