@@ -289,7 +289,7 @@
         </HBox>
     </center>
     <top>
-        <HBox fx:id="customTitleBar" prefHeight="40.0" alignment="CENTER_LEFT" spacing="10"
+        <HBox prefHeight="40.0" alignment="CENTER_LEFT" spacing="10"
               styleClass="title-menu">
 
             <Label text="IEC104" textFill="#DFE1E5" style="-fx-font-size: 14px; -fx-font-weight: bold;"/>

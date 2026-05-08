@@ -49,7 +49,7 @@ public class MainController implements Initializable {
     private WindowService windowService;
 
     private Thread currentClientThread;
-    private Map<String, IEC104_Client> activeClients = new ConcurrentHashMap<>();
+    private final Map<String, IEC104_Client> activeClients = new ConcurrentHashMap<>();
 
     @FXML
     private ToggleButton projectBtn;
@@ -589,100 +589,127 @@ public class MainController implements Initializable {
 
     @FXML
     private void startDevice() {
-        DeviceWrapper deviceWrapper;
-        startBtn.setDisable(true);
-        stopBtn.setDisable(false);
-        Map<String, Integer> ipList = new HashMap<>();
+        // 获取当前选中的项目树节点
         TreeItem<Object> selectedItem = leftProjectTree.getSelectionModel().getSelectedItem();
-        if (selectedItem == null) {
-            statusLabel.setText("当前选中节点为空");
-            startBtn.setDisable(false); // 恢复绿色启动
-            stopBtn.setDisable(true);   // 终止按钮变灰
+        // 如果当前选中节点为空或不是设备节点
+        if (selectedItem == null || !(selectedItem.getValue() instanceof DeviceWrapper wrapper)) {
+            if (statusLabel != null) statusLabel.setText("当前选中节点为空或无效");
             return;
         }
 
-        if (selectedItem.getValue() instanceof DeviceWrapper wrapper && !"master".equals(wrapper.getDisplayName())) {
-            deviceWrapper = wrapper;
-            ipList.put(deviceWrapper.getDevice().getIp(), deviceWrapper.getDevice().getPort());
-        } else {
-            return;
-        }
+        // 如果当前选中节点是主节点，不允许启动
+        if ("master".equals(wrapper.getDisplayName())) return;
 
-        String deviceName = deviceWrapper.getDisplayName();
+        Device device = wrapper.getDevice();
+        String deviceName = wrapper.getDisplayName();
 
         if (statusLabel != null) statusLabel.setText("设备 " + deviceName + " 连接中...");
 
+        // 定义设备连接线程
         currentClientThread = new Thread(() -> {
 
-            IEC104_Client client = new IEC104_Client(deviceWrapper.getDevice().getIp(), deviceWrapper.getDevice().getPort());
+            IEC104_Client client = new IEC104_Client(device.getIp(), device.getPort());
             activeClients.put(deviceName, client);
+
+            // 设备状态设置为运行中
+            device.setDeviceStatusColumn(true);
+            // 提交一个任务
+            Platform.runLater(() -> {
+                updateButtonStatus(wrapper);
+                // 刷新设备表格
+                deviceTable.refresh();
+            });
 
             try {
                 Platform.runLater(() -> {
-                    if (statusLabel != null) statusLabel.setText("设备 " + deviceName + " 运行中");
+                    statusLabel.setText("设备 " + deviceName + " 运行中");
                 });
 
                 client.run();
 
                 Platform.runLater(() -> {
                     log.info("设备 {} 已断开连接", deviceName);
-                    if (statusLabel != null) statusLabel.setText("设备 " + deviceName + " 已断开");
+                    statusLabel.setText("设备 " + deviceName + " 已断开");
                 });
 
             } catch (InterruptedException e) {
                 // 捕获中断异常，这是正常的停止操作，不需要报错
                 log.info("设备 {} 已被用户手动停止", deviceName);
                 Platform.runLater(() -> {
-                    if (statusLabel != null) statusLabel.setText("设备 " + deviceName + " 已停止");
+                    statusLabel.setText("设备 " + deviceName + " 已停止");
                 });
             } catch (Exception e) {
                 log.error("设备 {} 启动或运行异常: ", deviceName, e);
                 Platform.runLater(() -> {
                     showWarning("设备 '" + deviceName + "' 启动失败：\n" + e.getMessage());
-                    if (statusLabel != null)
-                        statusLabel.setText("设备 " + deviceName + " 启动失败");
+                    statusLabel.setText("设备 " + deviceName + " 启动失败");
                 });
             } finally {
-                // 无论是因为报错结束、还是手动点击停止结束
-                // 必须在 finally 块里把 UI 状态恢复为初始状态
+                // 从 Map 中移除设备的客户端实例
                 activeClients.remove(deviceName);
+                // 把 UI 状态恢复为初始状态
+                device.setDeviceStatusColumn(false);
                 Platform.runLater(() -> {
-                    log.info("设备{}线程已完全退出", deviceName);
-                    startBtn.setDisable(false); // 恢复绿色启动
-                    stopBtn.setDisable(true);   // 终止按钮变灰
+                    log.info("设备 {} 线程已完全退出", deviceName);
+                    deviceTable.refresh();
                 });
             }
         });
 
+        // 设置为守护线程，确保在 JVM 退出时自动关闭
         currentClientThread.setDaemon(true);
-        currentClientThread.setName("IEC104-ClientThread-" + deviceWrapper.getDisplayName());
+        // 设置线程名称，方便调试
+        currentClientThread.setName("IEC104-ClientThread-" + wrapper.getDisplayName());
+        // 启动线程
         currentClientThread.start();
 
     }
 
     @FXML
     private void stopDevice() {
-        //TODO 待关联model停止方法
         TreeItem<Object> selectedItem = leftProjectTree.getSelectionModel().getSelectedItem();
 
         if (selectedItem != null && selectedItem.getValue() instanceof DeviceWrapper wrapper) {
             String deviceName = wrapper.getDisplayName();
 
-            // 从 Map 中精确获取对应设备的客户端实例
+            // 从 Map 中获取对应设备的客户端实例
             IEC104_Client client = activeClients.get(deviceName);
 
             if (client != null) {
                 log.info("正在手动停止设备: {}", deviceName);
+                stopBtn.setDisable(true);
                 // 调用 Netty 底层关闭方法
                 client.stop();
 
                 // 此时 startDevice 里的 client.run() 会解除阻塞并走到 finally 块更新 UI
-                if (statusLabel != null) statusLabel.setText("设备 " + deviceName + " 已发出停止指令");
+                log.info("设备 {} 已发出停止指令", deviceName);
             } else {
+                wrapper.getDevice().setDeviceStatusColumn(false);
+                deviceTable.refresh();
+                updateButtonStatus(wrapper);
                 showWarning("该设备目前未在运行状态");
             }
         }
+    }
 
+    /**
+     * @param wrapper 选中的节点
+     */
+    private void updateButtonStatus(Object wrapper) {
+        // 选中的节点类型为设备Wrapper 且不是 master 节点
+        if (wrapper instanceof DeviceWrapper dw && !"master".equals(dw.getDisplayName())) {
+            Device device = dw.getDevice();
+            if (device != null) {
+                boolean isRunning = device.isDeviceStatusColumn();// 获取运行状态
+                // 如果设备运行中，禁用启动按钮，启用终止按钮
+                startBtn.setDisable(isRunning);//
+                stopBtn.setDisable(!isRunning);
+            }
+        } else {
+            // 如果不是设备Wrapper 类型或为 master 节点，禁用所有按钮
+            startBtn.setDisable(true);
+            stopBtn.setDisable(true);
+        }
     }
 
     private void openDeviceInEditor(Object deviceWrapper) {

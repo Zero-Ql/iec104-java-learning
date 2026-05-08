@@ -93,7 +93,9 @@ public class IEC104_Client {
             throw e;
         } finally {
             log.info("关闭客户端");
-            stop();
+            if (group != null && !group.isShutdown()) {
+                group.shutdownGracefully();
+            }
         }
     }
 
