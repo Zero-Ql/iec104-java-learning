@@ -2,6 +2,7 @@ package cloud.yunyat.model.service;
 
 import cloud.yunyat.model.pojo.AnalogInput;
 import cloud.yunyat.model.pojo.StatusInput;
+import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
+@Log4j2
 public class MessageManager implements MessageService{
 
     private static final MessageManager INSTANCE = new MessageManager();
@@ -52,9 +54,5 @@ public class MessageManager implements MessageService{
     public void publishYxData(int stationId, StatusInput detail) {
         yxListener.getOrDefault(stationId, List.of())
                 .forEach(con -> con.accept(detail));
-    }
-
-    public void startDevice(){
-
     }
 }

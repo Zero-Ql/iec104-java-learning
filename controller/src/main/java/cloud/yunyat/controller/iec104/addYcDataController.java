@@ -130,7 +130,7 @@ public class addYcDataController implements Initializable {
     }
 
     private int getPoint() {
-        int point = 0;
+        int point;
         if (enableStructureIoaCheck.isSelected()) {
             // 结构化 IOA 通常由 3 个字节组成。
             // 工业标准算法：(Part3) + (Part2 * 256) + (Part1 * 65536)
@@ -165,17 +165,16 @@ public class addYcDataController implements Initializable {
             }
         }
 
-        AnalogInput newYc = new AnalogInput(
+        return new AnalogInput(
                 name,
                 typeId,
                 point,
                 0.0,
                 0,
-                999999999.0,
-                -999999999.0,
+                0,
+                0,
                 coefficient
         );
-        return newYc;
     }
 
     @FXML

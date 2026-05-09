@@ -18,4 +18,6 @@ public class Rtu {
 
     @Builder.Default
     private ObservableList<AnalogInput> ycList = FXCollections.observableArrayList();
+    @Builder.Default
+    private ObservableList<StatusInput> yxList = FXCollections.observableArrayList();
 }

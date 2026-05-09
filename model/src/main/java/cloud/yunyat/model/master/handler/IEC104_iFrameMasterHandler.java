@@ -113,6 +113,11 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
         }
     }
 
+    /**
+     * 分发并发布解析后的结果
+     *
+     * @param parsedResult 解析后的结果
+     */
     private void dispatchAndPublish(ParsedResult parsedResult) {
         if (parsedResult == null) return;
         if (isAnalogType(typeIdentifier)) {

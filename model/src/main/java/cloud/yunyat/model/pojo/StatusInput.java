@@ -2,6 +2,8 @@ package cloud.yunyat.model.pojo;
 
 import cloud.yunyat.model.impl.iec104.enums.IEC104_TypeIdentifier;
 import javafx.beans.property.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -15,7 +17,9 @@ public class StatusInput {
     private final IntegerProperty quality = new SimpleIntegerProperty();
     private final ObjectProperty<LocalDateTime> time = new SimpleObjectProperty<>();
     private final BooleanProperty invert = new SimpleBooleanProperty();
-    private final Map<String, Boolean> map = new HashMap<>();
+    @Setter
+    @Getter
+    private Map<String, Boolean> map = new HashMap<>();
 
     /**
      * @param name           遥信点名称

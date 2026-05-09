@@ -25,10 +25,10 @@ public class tools {
         stage.close();
     }
 
-    public static void showWarning(String content) {
+    public static void showWarning(String title, String header, String content) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("警告");
-        alert.setHeaderText("添加失败");
+        alert.setTitle(title);
+        alert.setHeaderText(header);
         alert.setContentText(content);
         alert.showAndWait();
     }

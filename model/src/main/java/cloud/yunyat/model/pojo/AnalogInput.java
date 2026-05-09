@@ -58,8 +58,8 @@ public class AnalogInput {
         this.time.set(LocalDateTime.now());
 
         // 给系数、最大最小值赋默认值
-        this.max.set(999999999.0);
-        this.min.set(-999999999.0);
+        if (value > this.max.get()) this.max.set(value);
+        if (value < this.min.get()) this.min.set(value);
         this.coefficient.set(1.0);
 
         this.map.putAll(qualityBits);

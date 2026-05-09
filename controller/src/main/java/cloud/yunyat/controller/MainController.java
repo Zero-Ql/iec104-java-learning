@@ -21,7 +21,6 @@ import lombok.extern.log4j.Log4j2;
 
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -48,7 +47,6 @@ public class MainController implements Initializable {
     @Setter
     private WindowService windowService;
 
-    private Thread currentClientThread;
     private final Map<String, IEC104_Client> activeClients = new ConcurrentHashMap<>();
 
     @FXML
@@ -294,8 +292,12 @@ public class MainController implements Initializable {
         // 监听项目树的选择变化事件
         leftProjectTree.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> {
             if (newV != null && newV.getValue() != null) {
+                // 刷新表格数据
                 refreshTablesData(newV);
+                // 打开设备编辑器
                 openDeviceInEditor(newV.getValue());
+                // 更新按钮状态
+                updateButtonStatus(newV.getValue());
             }
         });
     }
@@ -423,12 +425,14 @@ public class MainController implements Initializable {
     @FXML
     private void addYcData() {
 
-        if (messageService == null) return;
+        if (messageService == null) {
+            return;
+        }
 
         TreeItem<Object> selectedItem = leftProjectTree.getSelectionModel().getSelectedItem();
         // 检查是否有选中节点
         if (selectedItem == null || !(selectedItem.getValue() instanceof RtuWrapper)) {
-            showWarning("请选择一个RTU节点");
+            showWarning("警告", "添加遥测失败", "请选择一个RTU节点");
             return;
         }
 
@@ -447,44 +451,12 @@ public class MainController implements Initializable {
 
             // 如果存在重复，提示并中止添加
             if (hasDuplicate) {
-                showWarning("遥测点 '" + ycConf.getName() + "' 已存在");
+                showWarning("警告", "添加遥测失败", "遥测点 '" + ycConf.getName() + "' 已存在");
                 return;
             }
 
             // 如果没有重复，在循环外进行添加操作
             tableItems.add(ycConf);
-        });
-
-        int stationId;
-
-        // 获取当前选中节点实体
-        Rtu rtu = ((RtuWrapper) selectedItem.getValue()).getRtu();
-
-        stationId = rtu.getCOA();
-
-        messageService.subscribeYcData(stationId, yc -> {
-            // 使用 JavaFx 线程更新UI组件数据
-            Platform.runLater(() -> {
-                ObservableList<AnalogInput> tableItems = YcTable.getItems();
-
-                boolean isExist = false;
-
-                for (AnalogInput existingYc : tableItems) {
-                    // 判断点号是否存在
-                    if (existingYc.pointProperty().get() == yc.pointProperty().get()) {
-                        existingYc.valueProperty().set(yc.valueProperty().get());
-                        existingYc.qualityProperty().set(yc.qualityProperty().get());
-                        existingYc.timeProperty().set(yc.timeProperty().get());
-
-                        isExist = true;
-                        break;
-                    }
-                }
-
-                if (!isExist) {
-                    tableItems.add(yc);
-                }
-            });
         });
     }
 
@@ -508,7 +480,7 @@ public class MainController implements Initializable {
 
             // 名称已存在
             if (isDuplicate) {
-                showWarning("设备名 '" + name + "' 已存在");
+                showWarning("警告", "添加设备失败", "设备名 '" + name + "' 已存在");
                 return;
             }
 
@@ -532,6 +504,12 @@ public class MainController implements Initializable {
         // 获取当前选中的项目树节点
         TreeItem<Object> selectedItem = leftProjectTree.getSelectionModel().getSelectedItem();
         if (selectedItem != null && selectedItem.getValue() instanceof DeviceWrapper wrapper) {
+            // 检查设备是否正在运行
+            if (wrapper.getDevice().isDeviceStatusColumn()) {
+                showWarning("警告", "删除设备失败", "该设备目前在运行状态，无法删除");
+                return;
+            }
+
             // 获取根节点的子节点列表
             ObservableList<TreeItem<Object>> children = leftProjectTree.getRoot().getChildren();
             children.remove(selectedItem);
@@ -568,7 +546,7 @@ public class MainController implements Initializable {
 
             // 名称已存在
             if (isDuplicate) {
-                showWarning("RTU名 '" + name + "' 已存在");
+                showWarning("警告", "添加RTU失败", "RTU名 '" + name + "' 已存在");
                 return;
             }
 
@@ -584,6 +562,67 @@ public class MainController implements Initializable {
 
             // 展开父节点，显示新添加的 RTU
             parentItem.setExpanded(true);
+
+            if (messageService == null) return;
+
+            // 订阅遥测数据更新
+            messageService.subscribeYcData(rtu.getCOA(), yc -> {
+                // 使用 JavaFx 线程更新UI组件数据
+                Platform.runLater(() -> {
+                    ObservableList<AnalogInput> rtuYcList = rtu.getYcList();
+
+                    boolean isExist = false;
+
+                    for (AnalogInput existingYc : rtuYcList) {
+                        // 判断点号是否存在
+                        if (existingYc.pointProperty().get() == yc.pointProperty().get()) {
+                            existingYc.valueProperty().set(yc.valueProperty().get());
+                            existingYc.qualityProperty().set(yc.qualityProperty().get());
+                            existingYc.timeProperty().set(yc.timeProperty().get());
+
+                            // 更新最大最小值
+                            if (yc.valueProperty().get() > existingYc.getMax()) existingYc.setMax(yc.valueProperty().get());
+
+                            if (yc.valueProperty().get() < existingYc.getMin()) existingYc.setMin(yc.valueProperty().get());
+
+                            isExist = true;
+                            break;
+                        }
+                    }
+
+                    if (!isExist) {
+                        rtuYcList.add(yc);
+                    }
+                });
+            });
+
+            // 订阅遥信数据更新
+            messageService.subscribeYxData(rtu.getCOA(), yx -> {
+                // 使用 JavaFx 线程更新UI组件数据
+                Platform.runLater(() -> {
+                    ObservableList<StatusInput> rtuYxList = rtu.getYxList();
+
+                    boolean isExist = false;
+
+                    for (StatusInput existingYx : rtuYxList) {
+                        log.debug("existingYx: {}", existingYx);
+                        // 判断点号是否存在
+                        if (existingYx.pointProperty().get() == yx.pointProperty().get()) {
+                            existingYx.valueProperty().set(yx.valueProperty().get());
+                            existingYx.qualityProperty().set(yx.qualityProperty().get());
+                            existingYx.timeProperty().set(yx.timeProperty().get());
+
+                            isExist = true;
+                            break;
+                        }
+                    }
+
+                    if (!isExist) {
+                        log.debug("yx: {}", yx);
+                        rtuYxList.add(yx);
+                    }
+                });
+            });
         });
     }
 
@@ -606,7 +645,7 @@ public class MainController implements Initializable {
         if (statusLabel != null) statusLabel.setText("设备 " + deviceName + " 连接中...");
 
         // 定义设备连接线程
-        currentClientThread = new Thread(() -> {
+        Thread currentClientThread = new Thread(() -> {
 
             IEC104_Client client = new IEC104_Client(device.getIp(), device.getPort());
             activeClients.put(deviceName, client);
@@ -621,9 +660,7 @@ public class MainController implements Initializable {
             });
 
             try {
-                Platform.runLater(() -> {
-                    statusLabel.setText("设备 " + deviceName + " 运行中");
-                });
+                Platform.runLater(() -> statusLabel.setText("设备 " + deviceName + " 运行中"));
 
                 client.run();
 
@@ -635,13 +672,11 @@ public class MainController implements Initializable {
             } catch (InterruptedException e) {
                 // 捕获中断异常，这是正常的停止操作，不需要报错
                 log.info("设备 {} 已被用户手动停止", deviceName);
-                Platform.runLater(() -> {
-                    statusLabel.setText("设备 " + deviceName + " 已停止");
-                });
+                Platform.runLater(() -> statusLabel.setText("设备 " + deviceName + " 已停止"));
             } catch (Exception e) {
                 log.error("设备 {} 启动或运行异常: ", deviceName, e);
                 Platform.runLater(() -> {
-                    showWarning("设备 '" + deviceName + "' 启动失败：\n" + e.getMessage());
+                    showWarning("警告", "启动设备失败", "设备 '" + deviceName + "' 启动失败：\n" + e.getMessage());
                     statusLabel.setText("设备 " + deviceName + " 启动失败");
                 });
             } finally {
@@ -649,6 +684,7 @@ public class MainController implements Initializable {
                 activeClients.remove(deviceName);
                 // 把 UI 状态恢复为初始状态
                 device.setDeviceStatusColumn(false);
+                updateButtonStatus(wrapper);
                 Platform.runLater(() -> {
                     log.info("设备 {} 线程已完全退出", deviceName);
                     deviceTable.refresh();
@@ -687,7 +723,7 @@ public class MainController implements Initializable {
                 wrapper.getDevice().setDeviceStatusColumn(false);
                 deviceTable.refresh();
                 updateButtonStatus(wrapper);
-                showWarning("该设备目前未在运行状态");
+                showWarning("警告", "无法停止设备", "该设备目前未在运行状态");
             }
         }
     }
@@ -743,7 +779,7 @@ public class MainController implements Initializable {
             if (!editorTabs.isEmpty()) {
                 Tab selectedTab = editorTabPane.getSelectionModel().getSelectedItem();
                 if (!editorTabs.contains(selectedTab)) {
-                    editorTabPane.getSelectionModel().select(editorTabs.get(0));
+                    editorTabPane.getSelectionModel().select(editorTabs.getFirst());
                 }
             }
         }
