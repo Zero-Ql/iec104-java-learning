@@ -41,7 +41,6 @@ public class MainController implements Initializable {
     private double xOffset = 0;
     private double yOffset = 0;
 
-
     @Setter
     private MessageService messageService;
     @Setter
@@ -73,8 +72,8 @@ public class MainController implements Initializable {
     private VBox leftProjectPanel;
     @FXML
     private VBox rightProjectPanel;
-    //    @FXML
-//    private VBox
+    // @FXML
+    // private VBox
     @FXML
     private VBox leftPanel;
     @FXML
@@ -118,19 +117,19 @@ public class MainController implements Initializable {
     @FXML
     private TableColumn<AnalogInput, IEC104_TypeIdentifier> YcTypeColumn;
     @FXML
-    private TableColumn<AnalogInput, Integer> YcPointColumn;
+    private TableColumn<AnalogInput, Number> YcPointColumn;
     @FXML
-    private TableColumn<AnalogInput, Double> YcValueColumn;
+    private TableColumn<AnalogInput, Number> YcValueColumn;
     @FXML
-    private TableColumn<AnalogInput, Integer> YcQualityColumn;
+    private TableColumn<AnalogInput, Number> YcQualityColumn;
     @FXML
     private TableColumn<AnalogInput, LocalDateTime> YcTimeColumn;
     @FXML
-    private TableColumn<AnalogInput, Double> YcMaxColumn;
+    private TableColumn<AnalogInput, Number> YcMaxColumn;
     @FXML
-    private TableColumn<AnalogInput, Double> YcMinColumn;
+    private TableColumn<AnalogInput, Number> YcMinColumn;
     @FXML
-    private TableColumn<AnalogInput, Double> YcCoefficientColumn;
+    private TableColumn<AnalogInput, Number> YcCoefficientColumn;
 
     // 遥信Tab定义
     @FXML
@@ -140,11 +139,11 @@ public class MainController implements Initializable {
     @FXML
     private TableColumn<StatusInput, IEC104_TypeIdentifier> YxTypeColumn;
     @FXML
-    private TableColumn<StatusInput, Integer> YxPointColumn;
+    private TableColumn<StatusInput, Number> YxPointColumn;
     @FXML
     private TableColumn<StatusInput, Boolean> YxValueColumn;
     @FXML
-    private TableColumn<StatusInput, Integer> YxQualityColumn;
+    private TableColumn<StatusInput, Number> YxQualityColumn;
     @FXML
     private TableColumn<StatusInput, LocalDateTime> YxTimeColumn;
     @FXML
@@ -189,11 +188,11 @@ public class MainController implements Initializable {
         setupDraggableTitleBar();
 
         // 为已存在的 tab 中的 TextArea 添加监听器（示例）
-//        editorTabPane.getTabs().forEach(tab -> {
-//            if (tab.getContent() instanceof TextArea) {
-//                attachCaretListener((TextArea) tab.getContent());
-//            }
-//        });
+        // editorTabPane.getTabs().forEach(tab -> {
+        // if (tab.getContent() instanceof TextArea) {
+        // attachCaretListener((TextArea) tab.getContent());
+        // }
+        // });
     }
 
     private void initializeUI() {
@@ -224,22 +223,22 @@ public class MainController implements Initializable {
         // 初始化Yc表格
         YcNameColumn.setCellValueFactory(cell -> cell.getValue().nameProperty());
         YcTypeColumn.setCellValueFactory(cell -> cell.getValue().typeIdentifierProperty());
-        YcPointColumn.setCellValueFactory(cell -> cell.getValue().pointProperty().asObject());
-        YcValueColumn.setCellValueFactory(cell -> cell.getValue().valueProperty().asObject());
-        YcQualityColumn.setCellValueFactory(cell -> cell.getValue().qualityProperty().asObject());
+        YcPointColumn.setCellValueFactory(cell -> cell.getValue().pointProperty());
+        YcValueColumn.setCellValueFactory(cell -> cell.getValue().valueProperty());
+        YcQualityColumn.setCellValueFactory(cell -> cell.getValue().qualityProperty());
         YcTimeColumn.setCellValueFactory(cell -> cell.getValue().timeProperty());
-        YcMaxColumn.setCellValueFactory(cell -> cell.getValue().maxProperty().asObject());
-        YcMinColumn.setCellValueFactory(cell -> cell.getValue().minProperty().asObject());
-        YcCoefficientColumn.setCellValueFactory(cell -> cell.getValue().coefficientProperty().asObject());
+        YcMaxColumn.setCellValueFactory(cell -> cell.getValue().maxProperty());
+        YcMinColumn.setCellValueFactory(cell -> cell.getValue().minProperty());
+        YcCoefficientColumn.setCellValueFactory(cell -> cell.getValue().coefficientProperty());
 
         // 初始化Yx表格
         YxNameColumn.setCellValueFactory(cell -> cell.getValue().nameProperty());
         YxTypeColumn.setCellValueFactory(cell -> cell.getValue().typeIdentifierProperty());
-        YxPointColumn.setCellValueFactory(cell -> cell.getValue().pointProperty().asObject());
-        YxValueColumn.setCellValueFactory(cell -> cell.getValue().valueProperty().asObject());
-        YxQualityColumn.setCellValueFactory(cell -> cell.getValue().qualityProperty().asObject());
+        YxPointColumn.setCellValueFactory(cell -> cell.getValue().pointProperty());
+        YxValueColumn.setCellValueFactory(cell -> cell.getValue().valueProperty());
+        YxQualityColumn.setCellValueFactory(cell -> cell.getValue().qualityProperty());
         YxTimeColumn.setCellValueFactory(cell -> cell.getValue().timeProperty());
-        YxInvertColumn.setCellValueFactory(cell -> cell.getValue().invertProperty().asObject());
+        YxInvertColumn.setCellValueFactory(cell -> cell.getValue().invertProperty());
     }
 
     private void setupEventHandlers() {
@@ -250,12 +249,11 @@ public class MainController implements Initializable {
             private final Tooltip rtuTooltip = new Tooltip("右键添加RTU");
             private final Tooltip ycTooltip = new Tooltip("右键添加遥测记录");
 
-
             /**
              * 更新树形表格单元格的显示内容
              * 根据设备类型设置不同的显示文本、提示信息和右键菜单
              *
-             * @param item 当前单元格对应的 DeviceWrapper 对象，代表设备包装器
+             * @param item  当前单元格对应的 DeviceWrapper 对象，代表设备包装器
              * @param empty 标识当前单元格是否为空
              */
             @Override
@@ -268,7 +266,8 @@ public class MainController implements Initializable {
                     setGraphic(null);
                     setTooltip(null);
                     setContextMenu(null);
-                } else if (item instanceof DeviceWrapper deviceWrapper && "master".equals(deviceWrapper.getDisplayName())) {
+                } else if (item instanceof DeviceWrapper deviceWrapper
+                        && "master".equals(deviceWrapper.getDisplayName())) {
                     // 主站设备
                     setText(deviceWrapper.getDisplayName());
                     setTooltip(masterTooltip);
@@ -306,7 +305,8 @@ public class MainController implements Initializable {
      * 实现自定义标题栏的拖拽功能
      */
     private void setupDraggableTitleBar() {
-        if (customTitleBar == null) return;
+        if (customTitleBar == null)
+            return;
 
         // 鼠标按下时，记录相对偏移量
         customTitleBar.setOnMousePressed(event -> {
@@ -369,11 +369,13 @@ public class MainController implements Initializable {
         switch (side) {
             case "站端" -> {
                 setPanelState(leftPanel, leftProjectPanel, projectBtn, isSelected);
-                if (isSelected) leftPanelTitle.setText(side);
+                if (isSelected)
+                    leftPanelTitle.setText(side);
             }
             case "报文显示" -> {
                 setPanelState(rightPanel, rightProjectPanel, messageDisplay, isSelected);
-                if (isSelected) rightPanelTitle.setText(side);
+                if (isSelected)
+                    rightPanelTitle.setText(side);
             }
             default -> log.debug("点击了设置或未知的侧边栏: {}", side);
         }
@@ -463,7 +465,8 @@ public class MainController implements Initializable {
     @FXML
     private void addDevice() {
 
-        if (windowService == null) return;
+        if (windowService == null)
+            return;
 
         windowService.showAddDeviceDialog(device -> {
             String name = device.getName().trim();
@@ -472,7 +475,8 @@ public class MainController implements Initializable {
 
             // 统一查找范围：如果没选中，则查根节点；如果选中了，则查选中节点的子集
             TreeItem<Object> parentItem = leftProjectTree.getSelectionModel().getSelectedItem();
-            if (parentItem == null) parentItem = root;
+            if (parentItem == null)
+                parentItem = root;
 
             boolean isDuplicate = parentItem.getChildren().stream()
                     .anyMatch(child -> child.getValue() instanceof DeviceWrapper dw
@@ -529,7 +533,8 @@ public class MainController implements Initializable {
     @FXML
     private void addRTU() {
 
-        if (windowService == null) return;
+        if (windowService == null)
+            return;
 
         windowService.showAddRtuDialog(rtu -> {
             String name = rtu.getName().trim();
@@ -538,7 +543,8 @@ public class MainController implements Initializable {
 
             // 统一查找范围：如果没选中，则查根节点；如果选中了，则查选中节点的子集
             TreeItem<Object> parentItem = leftProjectTree.getSelectionModel().getSelectedItem();
-            if (parentItem == null) parentItem = root;
+            if (parentItem == null)
+                parentItem = root;
 
             boolean isDuplicate = parentItem.getChildren().stream()
                     .anyMatch(child -> child.getValue() instanceof RtuWrapper r
@@ -563,7 +569,8 @@ public class MainController implements Initializable {
             // 展开父节点，显示新添加的 RTU
             parentItem.setExpanded(true);
 
-            if (messageService == null) return;
+            if (messageService == null)
+                return;
 
             // 订阅遥测数据更新
             messageService.subscribeYcData(rtu.getCOA(), yc -> {
@@ -581,9 +588,11 @@ public class MainController implements Initializable {
                             existingYc.timeProperty().set(yc.timeProperty().get());
 
                             // 更新最大最小值
-                            if (yc.valueProperty().get() > existingYc.getMax()) existingYc.setMax(yc.valueProperty().get());
+                            if (yc.valueProperty().get() > existingYc.getMax())
+                                existingYc.setMax(yc.valueProperty().get());
 
-                            if (yc.valueProperty().get() < existingYc.getMin()) existingYc.setMin(yc.valueProperty().get());
+                            if (yc.valueProperty().get() < existingYc.getMin())
+                                existingYc.setMin(yc.valueProperty().get());
 
                             isExist = true;
                             break;
@@ -632,17 +641,20 @@ public class MainController implements Initializable {
         TreeItem<Object> selectedItem = leftProjectTree.getSelectionModel().getSelectedItem();
         // 如果当前选中节点为空或不是设备节点
         if (selectedItem == null || !(selectedItem.getValue() instanceof DeviceWrapper wrapper)) {
-            if (statusLabel != null) statusLabel.setText("当前选中节点为空或无效");
+            if (statusLabel != null)
+                statusLabel.setText("当前选中节点为空或无效");
             return;
         }
 
         // 如果当前选中节点是主节点，不允许启动
-        if ("master".equals(wrapper.getDisplayName())) return;
+        if ("master".equals(wrapper.getDisplayName()))
+            return;
 
         Device device = wrapper.getDevice();
         String deviceName = wrapper.getDisplayName();
 
-        if (statusLabel != null) statusLabel.setText("设备 " + deviceName + " 连接中...");
+        if (statusLabel != null)
+            statusLabel.setText("设备 " + deviceName + " 连接中...");
 
         // 定义设备连接线程
         Thread currentClientThread = new Thread(() -> {
@@ -789,7 +801,8 @@ public class MainController implements Initializable {
      * 根据当前选中的树节点，动态刷新右侧表格的数据
      */
     private void refreshTablesData(TreeItem<Object> selectedItem) {
-        if (selectedItem == null || selectedItem.getValue() == null) return;
+        if (selectedItem == null || selectedItem.getValue() == null)
+            return;
 
         Object wrapper = selectedItem.getValue();
 
@@ -817,37 +830,40 @@ public class MainController implements Initializable {
             // 如果选中了某个具体的 RTU，这里未来需要刷新遥测(Yc)、遥信(Yx)等表格
             if (rw.getRtu() != null) {
                 YcTable.setItems(rw.getRtu().getYcList());
+                YxTable.setItems(rw.getRtu().getYxList());
             }
         }
     }
-//    private void attachCaretListener(TextArea ta) {
-//        ta.caretPositionProperty().addListener((obs, oldPos, newPos) -> {
-//            int pos = newPos.intValue();
-//            String text = ta.getText();
-//            int line = 1;
-//            int col = pos + 1;
-//            if (pos > 0 && pos <= text.length()) {
-//                int lastNewline = text.lastIndexOf(' ', Math.max(0, pos - 1));
-//                line = (int) text.substring(0, pos).chars().filter(ch -> ch == ' ').count() + 1;
-//                col = pos - (lastNewline == -1 ? -1 : lastNewline);
-//            }
-//            lineColLabel.setText("行: " + line + ", 列: " + col);
-//        });
-//
-//        ta.textProperty().addListener((obs, oldT, newT) -> {
-//            editStatusLabel.setText("未保存");
-//        });
-//    }
-//
-//    private void updateFileTypeAndEncoding(String filename) {
-//        encodingLabel.setText("UTF-8");
-//        String lower = filename.toLowerCase();
-//        if (lower.endsWith(".java") || lower.endsWith(".class") || lower.endsWith(".jar")) {
-//            fileTypeLabel.setText("Java");
-//        } else if (lower.endsWith(".xml") || lower.endsWith(".fxml")) {
-//            fileTypeLabel.setText("XML");
-//        } else {
-//            fileTypeLabel.setText("文本");
-//        }
-//    }
+    // private void attachCaretListener(TextArea ta) {
+    // ta.caretPositionProperty().addListener((obs, oldPos, newPos) -> {
+    // int pos = newPos.intValue();
+    // String text = ta.getText();
+    // int line = 1;
+    // int col = pos + 1;
+    // if (pos > 0 && pos <= text.length()) {
+    // int lastNewline = text.lastIndexOf(' ', Math.max(0, pos - 1));
+    // line = (int) text.substring(0, pos).chars().filter(ch -> ch == ' ').count() +
+    // 1;
+    // col = pos - (lastNewline == -1 ? -1 : lastNewline);
+    // }
+    // lineColLabel.setText("行: " + line + ", 列: " + col);
+    // });
+    //
+    // ta.textProperty().addListener((obs, oldT, newT) -> {
+    // editStatusLabel.setText("未保存");
+    // });
+    // }
+    //
+    // private void updateFileTypeAndEncoding(String filename) {
+    // encodingLabel.setText("UTF-8");
+    // String lower = filename.toLowerCase();
+    // if (lower.endsWith(".java") || lower.endsWith(".class") ||
+    // lower.endsWith(".jar")) {
+    // fileTypeLabel.setText("Java");
+    // } else if (lower.endsWith(".xml") || lower.endsWith(".fxml")) {
+    // fileTypeLabel.setText("XML");
+    // } else {
+    // fileTypeLabel.setText("文本");
+    // }
+    // }
 }
