@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder(builderMethodName = "newDevice")
+@Builder(builderMethodName = "newRtu")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Rtu {

@@ -20,6 +20,7 @@ import cloud.yunyat.model.impl.iec104.frame.IEC104_FrameBuilder;
 import cloud.yunyat.model.impl.iec104.frame.IEC104_MessageInfo;
 import cloud.yunyat.model.impl.iec104.frame.apci.IEC104_ApciMessageDetail;
 import cloud.yunyat.model.impl.iec104.frame.asdu.IEC104_AsduMessageDetail;
+import cloud.yunyat.model.service.MessageManager;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +33,9 @@ public class IEC104_IFrameTaskManager {
     private final IEC104_ScheduledTaskPool parent;
     private final ChannelHandlerContext ctx;
 
+    // 获取消息管理实例
+    MessageManager messageManager = MessageManager.getInstance();
+
     private static final Logger log = LogManager.getLogger(IEC104_IFrameTaskManager.class);
 
     public IEC104_IFrameTaskManager(IEC104_ScheduledTaskPool parent, ChannelHandlerContext ctx) {
@@ -43,7 +47,7 @@ public class IEC104_IFrameTaskManager {
 
     }
 
-    public void sendInterrogationCommand() {
+    public void sendInterrogationCommand(short coa) {
         IEC104_ApciMessageDetail apciMessageDetail = new IEC104_ApciMessageDetail((short) 0x00, (short) 0x00);
         // sq + numIx IOA数量
         byte sqNumIx = 0x01;
@@ -52,8 +56,6 @@ public class IEC104_IFrameTaskManager {
         byte causeTx = 6;
         // OA 发送方地址
         byte oa = 0;
-        // 公共地址
-        short ca = 1;
 
         List<IEC104_MessageInfo> ioa = new ArrayList<>();
 
@@ -66,7 +68,7 @@ public class IEC104_IFrameTaskManager {
                                 sqNumIx,
                                 causeTx,
                                 oa,
-                                ca,
+                                coa,
                                 ioa).build())
                 .build();
         log.info("发送总召：{}", iFrame);

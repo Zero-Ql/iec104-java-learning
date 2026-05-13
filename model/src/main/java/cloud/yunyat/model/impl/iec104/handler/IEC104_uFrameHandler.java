@@ -22,8 +22,17 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.extern.log4j.Log4j2;
 
+import java.util.List;
+
 @Log4j2
 public class IEC104_uFrameHandler extends ChannelInboundHandlerAdapter {
+
+    private final List<Short> rtuCoasList;
+
+    public IEC104_uFrameHandler(List<Short> rtuCoasList) {
+        this.rtuCoasList = rtuCoasList;
+    }
+
     /**
      * @param ctx 通道上下文
      * @param evt 用户自定义事件
@@ -37,13 +46,17 @@ public class IEC104_uFrameHandler extends ChannelInboundHandlerAdapter {
             if (!e.isStart() && e.isStart_con()) {
                 iec.onReceiveStartDTCon();
                 // 发送总召
-                iec.sendInterrogationCommand();
+                for (short coa : rtuCoasList) {
+                    iec.sendInterrogationCommand(coa);
+                }
             }
+
             if (!e.isTest() && e.isTest_con()) {
                 log.info("收到 TESTFR_CON，链路正常");
                 // 取消T1，重置T3
                 iec.onReceiveTestFRCon();
             }
+
             if (!e.isStop() && e.isStop_con()) {
                 // 停止确认
                 ByteBuf result = IEC104_BasicInstructions.STOPDT_CON;

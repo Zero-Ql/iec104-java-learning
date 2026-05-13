@@ -2,6 +2,8 @@ package cloud.yunyat.model.service;
 
 import cloud.yunyat.model.pojo.AnalogInput;
 import cloud.yunyat.model.pojo.StatusInput;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;

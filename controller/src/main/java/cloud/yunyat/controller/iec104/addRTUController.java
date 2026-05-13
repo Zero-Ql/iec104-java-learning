@@ -22,7 +22,7 @@ public class addRTUController{
     @FXML
     private void createBtn(ActionEvent event) {
 
-        Rtu rtu = Rtu.newDevice()
+        Rtu rtu = Rtu.newRtu()
                 .name(name.getText())
                 .COA(Integer.parseInt(coa.getText()))
                 .build();

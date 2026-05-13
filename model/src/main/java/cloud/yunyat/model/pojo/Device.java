@@ -1,9 +1,14 @@
 package cloud.yunyat.model.pojo;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder(builderMethodName = "newDevice")
@@ -22,4 +27,7 @@ public class Device {
     private String gmt;       // 时区设置
     private boolean enableTimezone; // 是否启用时区
     private boolean deviceStatusColumn; // 设备状态
+
+    @Builder.Default
+    private List<Rtu> rtuList=new ArrayList<>();
 }

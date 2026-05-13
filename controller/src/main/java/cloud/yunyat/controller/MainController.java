@@ -4,6 +4,7 @@ import cloud.yunyat.controller.iec104.WindowService;
 import cloud.yunyat.model.impl.iec104.enums.IEC104_TypeIdentifier;
 import cloud.yunyat.model.master.IEC104_Client;
 import cloud.yunyat.model.pojo.*;
+import cloud.yunyat.model.service.MessageManager;
 import cloud.yunyat.model.service.MessageService;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -21,6 +22,7 @@ import lombok.extern.log4j.Log4j2;
 
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -569,6 +571,8 @@ public class MainController implements Initializable {
             // 展开父节点，显示新添加的 RTU
             parentItem.setExpanded(true);
 
+            if (parentItem.getValue() instanceof DeviceWrapper dw)
+                dw.getDevice().getRtuList().add(rtu);
             if (messageService == null)
                 return;
 
@@ -653,13 +657,24 @@ public class MainController implements Initializable {
         Device device = wrapper.getDevice();
         String deviceName = wrapper.getDisplayName();
 
+        List<Short> rtuCoasList = new ArrayList<>();
+        for (Rtu rtu : device.getRtuList()) {
+//            if (!rtu.isEnable()) continue;
+            rtuCoasList.add((short) rtu.getCOA());
+        }
+
+        if (rtuCoasList.isEmpty()) {
+            showWarning("警告", "无法启动设备", "该设备未配置 RTU");
+            return;
+        }
+
         if (statusLabel != null)
             statusLabel.setText("设备 " + deviceName + " 连接中...");
 
         // 定义设备连接线程
         Thread currentClientThread = new Thread(() -> {
 
-            IEC104_Client client = new IEC104_Client(device.getIp(), device.getPort());
+            IEC104_Client client = new IEC104_Client(device.getIp(), device.getPort(), rtuCoasList);
             activeClients.put(deviceName, client);
 
             // 设备状态设置为运行中
@@ -673,6 +688,7 @@ public class MainController implements Initializable {
 
             try {
                 Platform.runLater(() -> statusLabel.setText("设备 " + deviceName + " 运行中"));
+
 
                 client.run();
 

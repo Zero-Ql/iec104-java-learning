@@ -39,13 +39,15 @@ public class IEC104_Client {
 
     private final String host;
     private final int port;
+    private final List<Short> rtuCoasList;
 
     private EventLoopGroup group;
     private Channel channel;
 
-    public IEC104_Client(String host, int port) {
+    public IEC104_Client(String host, int port, List<Short> rtuCoasList) {
         this.host = host;
         this.port = port;
+        this.rtuCoasList = rtuCoasList;
     }
 
     public void run() throws Exception {
@@ -71,7 +73,7 @@ public class IEC104_Client {
 
                             ch.pipeline().addLast("masterSeqManager", new MasterSeqManager());
 
-                            ch.pipeline().addLast("uFrame", new IEC104_uFrameHandler());
+                            ch.pipeline().addLast("uFrame", new IEC104_uFrameHandler(rtuCoasList));
 
                             ch.pipeline().addLast("iFrame", new IEC104_iFrameMasterHandler());
 
@@ -95,51 +97,6 @@ public class IEC104_Client {
             log.info("关闭客户端");
             if (group != null && !group.isShutdown()) {
                 group.shutdownGracefully();
-            }
-        }
-    }
-
-    /**
-     * 运行多个客户端连接到不同的服务器
-     *
-     * @param servers 服务器地址和端口的映射
-     * @throws Exception 连接异常
-     */
-    public void runMultipleClients(Map<String, Integer> servers) throws Exception {
-        List<IEC104_Client> clients = new ArrayList<>();
-
-        // 创建多个客户端实例
-        for (Map.Entry<String, Integer> entry : servers.entrySet()) {
-            clients.add(new IEC104_Client(entry.getKey(), entry.getValue()));
-        }
-
-        // 并行运行所有客户端
-        try (ExecutorService executor = Executors.newFixedThreadPool(clients.size())) {
-            try {
-                List<Future<?>> futures = new ArrayList<>();
-
-                for (IEC104_Client client : clients) {
-                    // 遍历客户端列表并运行
-                    Future<?> future = executor.submit(() -> {
-                        try {
-                            client.run();
-                        } catch (Exception e) {
-                            log.error("客户端运行异常: ", e);
-                        }
-                    });
-                    futures.add(future);
-                }
-
-                // 等待所有客户端完成
-                for (Future<?> future : futures) {
-                    try {
-                        future.get();
-                    } catch (Exception e) {
-                        log.error("等待客户端完成时发生异常: ", e);
-                    }
-                }
-            } finally {
-                executor.shutdown();
             }
         }
     }

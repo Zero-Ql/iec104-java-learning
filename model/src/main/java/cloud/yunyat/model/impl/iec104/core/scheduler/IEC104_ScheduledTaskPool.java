@@ -137,8 +137,8 @@ public class IEC104_ScheduledTaskPool {
      * 当收到启动帧回复后立即调用此方法
      * 发送后启动T1计时器等待对方确认
      */
-    public void sendInterrogationCommand() {
-        iFrameTaskManager.sendInterrogationCommand();
+    public void sendInterrogationCommand(short coa) {
+        iFrameTaskManager.sendInterrogationCommand(coa);
     }
 
 
