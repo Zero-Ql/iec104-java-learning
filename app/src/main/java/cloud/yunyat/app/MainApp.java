@@ -28,14 +28,12 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         UnifiedWindowService unifiedWindowService = new UnifiedWindowService();
-        MessageManager messageManager = MessageManager.getInstance();
         FXMLLoader loader = new FXMLLoader(cloud.yunyat.view.ViewRes.get("/cloud/yunyat/fxml/mainView.fxml"));
 
         loader.setControllerFactory(type -> {
             if (type == MainController.class) {
                 MainController controller = new MainController();
                 controller.setWindowService(unifiedWindowService);
-                controller.setMessageService(messageManager);
                 return controller;
             }
             try {

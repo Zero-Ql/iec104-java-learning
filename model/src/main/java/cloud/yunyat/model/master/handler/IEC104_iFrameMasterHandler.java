@@ -37,20 +37,19 @@ import java.util.NoSuchElementException;
 public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC104_AsduMessageDetail> {
 
     // 获取接口路由实例
-    ParserRouter parserRouter = ParserRouter.getInstance();
+    private final ParserRouter parserRouter = ParserRouter.getInstance();
 
-    // 获取消息管理实例
-    MessageManager messageManager = MessageManager.getInstance();
+    // 消息管理实例
+    private final MessageManager messageManager;
 
-    IEC104_TypeIdentifier typeIdentifier;
+    private IEC104_TypeIdentifier typeIdentifier;
 
-    boolean sq;
-    short numIx;
-    boolean test;
-    boolean negative;
-    short causeTx;
-    byte senderAddress;
-    short publicAddress;
+    private short causeTx;
+    private short publicAddress;
+
+    public IEC104_iFrameMasterHandler(MessageManager messageManager) {
+        this.messageManager = messageManager;
+    }
 
     /**
      * @param ctx  通道上下文
@@ -66,12 +65,12 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
                     payload.getTransferReason(),
                     payload.getSenderAddress()
             ).build();
-            sq = vsqCotOa.isSQ();
-            numIx = vsqCotOa.getNumIx();
-            test = vsqCotOa.isTest();
-            negative = vsqCotOa.isNegative();
+            boolean sq = vsqCotOa.isSQ();
+            short numIx = vsqCotOa.getNumIx();
+            boolean test = vsqCotOa.isTest();
+            boolean negative = vsqCotOa.isNegative();
             causeTx = vsqCotOa.getCauseTx();
-            senderAddress = vsqCotOa.getSenderAddress();
+            byte senderAddress = vsqCotOa.getSenderAddress();
             publicAddress = payload.getPublicAddress();
             List<IEC104_MessageInfo> IOA = payload.getIOA();
             if (IOA == null) {

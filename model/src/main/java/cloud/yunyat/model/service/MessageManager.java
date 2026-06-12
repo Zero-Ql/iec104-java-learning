@@ -2,8 +2,6 @@ package cloud.yunyat.model.service;
 
 import cloud.yunyat.model.pojo.AnalogInput;
 import cloud.yunyat.model.pojo.StatusInput;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.List;
@@ -14,12 +12,6 @@ import java.util.function.Consumer;
 
 @Log4j2
 public class MessageManager implements MessageService{
-
-    private static final MessageManager INSTANCE = new MessageManager();
-
-    public static MessageManager getInstance() {
-        return INSTANCE;
-    }
 
     /**
      * 存储遥测订阅者

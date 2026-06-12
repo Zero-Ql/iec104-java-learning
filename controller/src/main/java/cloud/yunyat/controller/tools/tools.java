@@ -1,6 +1,5 @@
 package cloud.yunyat.controller.tools;
 
-import cloud.yunyat.model.impl.iec104.enums.IEC104_TypeIdentifier;
 import cloud.yunyat.model.pojo.AnalogInput;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;

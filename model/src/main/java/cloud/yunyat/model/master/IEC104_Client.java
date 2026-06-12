@@ -17,6 +17,7 @@ package cloud.yunyat.model.master;
 import cloud.yunyat.model.impl.iec104.core.codec.IEC104_Decoder;
 import cloud.yunyat.model.impl.iec104.core.codec.IEC104_Encoder;
 import cloud.yunyat.model.impl.iec104.handler.IEC104_uFrameHandler;
+import cloud.yunyat.model.service.MessageManager;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -24,18 +25,17 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import cloud.yunyat.model.master.handler.IEC104_iFrameMasterHandler;
 import cloud.yunyat.model.master.handler.MasterSeqManager;
+import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class IEC104_Client {
     private static final Logger log = LogManager.getLogger(IEC104_Client.class);
+
+    @Getter
+    private final MessageManager messageManager = new MessageManager();
 
     private final String host;
     private final int port;
@@ -75,7 +75,7 @@ public class IEC104_Client {
 
                             ch.pipeline().addLast("uFrame", new IEC104_uFrameHandler(rtuCoasList));
 
-                            ch.pipeline().addLast("iFrame", new IEC104_iFrameMasterHandler());
+                            ch.pipeline().addLast("iFrame", new IEC104_iFrameMasterHandler(messageManager));
 
                             ch.pipeline().addLast("clientHandler", new IEC104_ClientHandler());
                         }

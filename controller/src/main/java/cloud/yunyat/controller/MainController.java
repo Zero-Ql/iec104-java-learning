@@ -4,8 +4,6 @@ import cloud.yunyat.controller.iec104.WindowService;
 import cloud.yunyat.model.impl.iec104.enums.IEC104_TypeIdentifier;
 import cloud.yunyat.model.master.IEC104_Client;
 import cloud.yunyat.model.pojo.*;
-import cloud.yunyat.model.service.MessageManager;
-import cloud.yunyat.model.service.MessageService;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -43,8 +41,6 @@ public class MainController implements Initializable {
     private double xOffset = 0;
     private double yOffset = 0;
 
-    @Setter
-    private MessageService messageService;
     @Setter
     private WindowService windowService;
 
@@ -429,10 +425,6 @@ public class MainController implements Initializable {
     @FXML
     private void addYcData() {
 
-        if (messageService == null) {
-            return;
-        }
-
         TreeItem<Object> selectedItem = leftProjectTree.getSelectionModel().getSelectedItem();
         // 检查是否有选中节点
         if (selectedItem == null || !(selectedItem.getValue() instanceof RtuWrapper)) {
@@ -571,71 +563,9 @@ public class MainController implements Initializable {
             // 展开父节点，显示新添加的 RTU
             parentItem.setExpanded(true);
 
-            if (parentItem.getValue() instanceof DeviceWrapper dw)
+            if (parentItem.getValue() instanceof DeviceWrapper dw) {
                 dw.getDevice().getRtuList().add(rtu);
-            if (messageService == null)
-                return;
-
-            // 订阅遥测数据更新
-            messageService.subscribeYcData(rtu.getCOA(), yc -> {
-                // 使用 JavaFx 线程更新UI组件数据
-                Platform.runLater(() -> {
-                    ObservableList<AnalogInput> rtuYcList = rtu.getYcList();
-
-                    boolean isExist = false;
-
-                    for (AnalogInput existingYc : rtuYcList) {
-                        // 判断点号是否存在
-                        if (existingYc.pointProperty().get() == yc.pointProperty().get()) {
-                            existingYc.valueProperty().set(yc.valueProperty().get());
-                            existingYc.qualityProperty().set(yc.qualityProperty().get());
-                            existingYc.timeProperty().set(yc.timeProperty().get());
-
-                            // 更新最大最小值
-                            if (yc.valueProperty().get() > existingYc.getMax())
-                                existingYc.setMax(yc.valueProperty().get());
-
-                            if (yc.valueProperty().get() < existingYc.getMin())
-                                existingYc.setMin(yc.valueProperty().get());
-
-                            isExist = true;
-                            break;
-                        }
-                    }
-
-                    if (!isExist) {
-                        rtuYcList.add(yc);
-                    }
-                });
-            });
-
-            // 订阅遥信数据更新
-            messageService.subscribeYxData(rtu.getCOA(), yx -> {
-                // 使用 JavaFx 线程更新UI组件数据
-                Platform.runLater(() -> {
-                    ObservableList<StatusInput> rtuYxList = rtu.getYxList();
-
-                    boolean isExist = false;
-
-                    for (StatusInput existingYx : rtuYxList) {
-                        log.debug("existingYx: {}", existingYx);
-                        // 判断点号是否存在
-                        if (existingYx.pointProperty().get() == yx.pointProperty().get()) {
-                            existingYx.valueProperty().set(yx.valueProperty().get());
-                            existingYx.qualityProperty().set(yx.qualityProperty().get());
-                            existingYx.timeProperty().set(yx.timeProperty().get());
-
-                            isExist = true;
-                            break;
-                        }
-                    }
-
-                    if (!isExist) {
-                        log.debug("yx: {}", yx);
-                        rtuYxList.add(yx);
-                    }
-                });
-            });
+            }
         });
     }
 
@@ -675,6 +605,11 @@ public class MainController implements Initializable {
         Thread currentClientThread = new Thread(() -> {
 
             IEC104_Client client = new IEC104_Client(device.getIp(), device.getPort(), rtuCoasList);
+
+            for (Rtu rtu : device.getRtuList()) {
+                bindRtuDataListeners(rtu, client);
+            }
+
             activeClients.put(deviceName, client);
 
             // 设备状态设置为运行中
@@ -794,7 +729,7 @@ public class MainController implements Initializable {
                 editorTabPane.getSelectionModel().select(RTUListTab);
             }
             editStatusLabel.setText("已保存");
-        } else if (deviceWrapper instanceof RtuWrapper wrapper) {
+        } else if (deviceWrapper instanceof RtuWrapper) {
             // 确保 RTU 相关的标签页都在面板中
             for (Tab e : editorTabs) {
                 if (!editorTabPane.getTabs().contains(e)) {
@@ -843,12 +778,71 @@ public class MainController implements Initializable {
                 }
             }
         } else if (wrapper instanceof RtuWrapper rw) {
-            // 如果选中了某个具体的 RTU，这里未来需要刷新遥测(Yc)、遥信(Yx)等表格
+            // 如果选中了某个具体的 RTU 节点，刷新它的遥测(Yc)、遥信(Yx)等表格
             if (rw.getRtu() != null) {
                 YcTable.setItems(rw.getRtu().getYcList());
                 YxTable.setItems(rw.getRtu().getYxList());
             }
         }
+    }
+
+    private void bindRtuDataListeners(Rtu rtu, IEC104_Client client) {
+        // 订阅遥测数据更新
+        client.getMessageManager().subscribeYcData(rtu.getCOA(), yc -> {
+            // 使用 JavaFx 线程更新UI组件数据
+            Platform.runLater(() -> {
+                ObservableList<AnalogInput> rtuYcList = rtu.getYcList();
+
+                boolean isExist = false;
+
+                for (AnalogInput existingYc : rtuYcList) {
+                    // 判断点号是否存在
+                    if (existingYc.pointProperty().get() == yc.pointProperty().get()) {
+                        existingYc.valueProperty().set(yc.valueProperty().get());
+                        existingYc.qualityProperty().set(yc.qualityProperty().get());
+                        existingYc.timeProperty().set(yc.timeProperty().get());
+
+                        // 更新最大最小值
+                        if (yc.valueProperty().get() > existingYc.getMax())
+                            existingYc.setMax(yc.valueProperty().get());
+
+                        if (yc.valueProperty().get() < existingYc.getMin())
+                            existingYc.setMin(yc.valueProperty().get());
+
+                        isExist = true;
+                        break;
+                    }
+                }
+
+                if (!isExist)
+                    rtuYcList.add(yc);
+            });
+        });
+
+        // 订阅遥信数据更新
+        client.getMessageManager().subscribeYxData(rtu.getCOA(), yx -> {
+            // 使用 JavaFx 线程更新UI组件数据
+            Platform.runLater(() -> {
+                ObservableList<StatusInput> rtuYxList = rtu.getYxList();
+
+                boolean isExist = false;
+
+                for (StatusInput existingYx : rtuYxList) {
+                    // 判断点号是否存在
+                    if (existingYx.pointProperty().get() == yx.pointProperty().get()) {
+                        existingYx.valueProperty().set(yx.valueProperty().get());
+                        existingYx.qualityProperty().set(yx.qualityProperty().get());
+                        existingYx.timeProperty().set(yx.timeProperty().get());
+
+                        isExist = true;
+                        break;
+                    }
+                }
+
+                if (!isExist)
+                    rtuYxList.add(yx);
+            });
+        });
     }
     // private void attachCaretListener(TextArea ta) {
     // ta.caretPositionProperty().addListener((obs, oldPos, newPos) -> {

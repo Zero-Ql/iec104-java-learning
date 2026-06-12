@@ -20,7 +20,6 @@ import cloud.yunyat.model.impl.iec104.frame.IEC104_FrameBuilder;
 import cloud.yunyat.model.impl.iec104.frame.IEC104_MessageInfo;
 import cloud.yunyat.model.impl.iec104.frame.apci.IEC104_ApciMessageDetail;
 import cloud.yunyat.model.impl.iec104.frame.asdu.IEC104_AsduMessageDetail;
-import cloud.yunyat.model.service.MessageManager;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,9 +31,6 @@ public class IEC104_IFrameTaskManager {
 
     private final IEC104_ScheduledTaskPool parent;
     private final ChannelHandlerContext ctx;
-
-    // 获取消息管理实例
-    MessageManager messageManager = MessageManager.getInstance();
 
     private static final Logger log = LogManager.getLogger(IEC104_IFrameTaskManager.class);
 
