@@ -26,4 +26,8 @@ public class UnifiedWindowService implements WindowService {
     public void showAddYcDialog(Consumer<AnalogInput> onYcCreated) {
         ycService.showAddYcDialog(onYcCreated);
     }
+
+    public static UnifiedWindowService create() {
+        return new UnifiedWindowService();
+    }
 }

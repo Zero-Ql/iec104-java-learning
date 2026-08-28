@@ -24,7 +24,7 @@
 
 <?import javafx.scene.control.Button?>
 <BorderPane prefHeight="800" prefWidth="1200" stylesheets="@../css/mainView.css" xmlns="http://javafx.com/javafx/21.0.1"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="cloud.yunyat.controller.MainController">
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="cloud.yunyat.controller.MainControl">
 
     <HBox fx:id="customTitleBar" prefHeight="45.0" alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: #2B2D30; -fx-padding: 0 15 0 15;">
 
