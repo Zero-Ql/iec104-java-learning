@@ -5,8 +5,6 @@ module cloud.yunyat.controller {
     requires static lombok;
     requires org.apache.logging.log4j.core;
     requires org.apache.logging.log4j;
-    requires io.netty.buffer;
-    requires jdk.compiler;
 
     exports cloud.yunyat.controller;
     exports cloud.yunyat.controller.iec104;

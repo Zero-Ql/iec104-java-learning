@@ -1,5 +1,6 @@
 package cloud.yunyat.controller.iec104;
 
+import cloud.yunyat.model.pojo.Coa;
 import cloud.yunyat.model.pojo.Rtu;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,7 +25,7 @@ public class addRTUController{
 
         Rtu rtu = Rtu.newRtu()
                 .name(name.getText())
-                .COA(Integer.parseInt(coa.getText()))
+                .COA(new Coa(Integer.parseInt(coa.getText())))
                 .build();
 
         if (rtu.getName() != null && !rtu.getName().trim().isEmpty()) {
