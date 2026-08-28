@@ -1,19 +1,11 @@
 package cloud.yunyat.app;
 
-
-import cloud.yunyat.controller.MainController;
-import cloud.yunyat.model.service.MessageManager;
-import cloud.yunyat.view.Iec104MasterCommunicationParameters;
-import cloud.yunyat.view.Iec104MasterRtuParameter;
-import cloud.yunyat.view.UnifiedWindowService;
+import cloud.yunyat.view.MainSceneFactory;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-
-import java.lang.reflect.InvocationTargetException;
 
 public class MainApp extends Application {
     public static void main(String[] args) {
@@ -27,24 +19,8 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        UnifiedWindowService unifiedWindowService = new UnifiedWindowService();
-        FXMLLoader loader = new FXMLLoader(cloud.yunyat.view.ViewRes.get("/cloud/yunyat/fxml/mainView.fxml"));
-
-        loader.setControllerFactory(type -> {
-            if (type == MainController.class) {
-                MainController controller = new MainController();
-                controller.setWindowService(unifiedWindowService);
-                return controller;
-            }
-            try {
-                return type.getDeclaredConstructor().newInstance();
-            } catch (InstantiationException | NoSuchMethodException | InvocationTargetException |
-                     IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        Parent root = loader.load();
+        // 通过 view 模块的工厂方法创建主场景，app 不再直接依赖 controller 模块
+        Parent root = MainSceneFactory.createMainScene();
         Scene scene = new Scene(root);
 
         // 隐藏系统默认的标题栏跟边框
