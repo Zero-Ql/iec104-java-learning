@@ -10,9 +10,7 @@ module cloud.yunyat.model {
     requires ini4j;
     requires static lombok;
     requires io.netty.handler;
-    //    requires netty.all;
     requires org.apache.logging.log4j.core;
-    requires io.netty.codec.mqtt;
     requires javafx.base;
     requires io.netty.codec;
     requires io.netty.transport;

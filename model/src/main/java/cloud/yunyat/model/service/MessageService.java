@@ -1,6 +1,7 @@
 package cloud.yunyat.model.service;
 
 import cloud.yunyat.model.pojo.AnalogInput;
+import cloud.yunyat.model.pojo.Coa;
 import cloud.yunyat.model.pojo.StatusInput;
 
 import java.util.function.Consumer;
@@ -11,8 +12,12 @@ import java.util.function.Consumer;
 public interface MessageService {
 
     // 订阅遥测数据更新
-    default void subscribeYcData(int stationId, Consumer<AnalogInput> ycDetail){}
+    default Runnable subscribeYcData(Coa stationId, Consumer<AnalogInput> ycDetail){
+        return () -> {};
+    }
 
     // 订阅遥信数据更新
-    default void subscribeYxData(int stationId, Consumer<StatusInput> yxDetail){}
+    default Runnable subscribeYxData(Coa stationId, Consumer<StatusInput> yxDetail){
+        return () -> {};
+    }
 }

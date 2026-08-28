@@ -17,7 +17,6 @@ package cloud.yunyat.model.master.handler.parser.impl.controlParser.cIcNa1;
 import cloud.yunyat.model.impl.iec104.enums.QOI;
 import cloud.yunyat.model.master.handler.parser.Parser;
 import cloud.yunyat.model.pojo.ParsedResult;
-import cloud.yunyat.model.service.MessageManager;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.log4j.Log4j2;
 import cloud.yunyat.model.master.handler.parser.ParserMeta;

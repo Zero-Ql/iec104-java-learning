@@ -21,6 +21,7 @@ import cloud.yunyat.model.impl.iec104.frame.IEC104_MessageInfo;
 import cloud.yunyat.model.impl.iec104.frame.asdu.IEC104_AsduMessageDetail;
 import cloud.yunyat.model.impl.iec104.frame.asdu.IEC104_VSQ_COT_OA;
 import cloud.yunyat.model.pojo.AnalogInput;
+import cloud.yunyat.model.pojo.Coa;
 import cloud.yunyat.model.pojo.ParsedResult;
 import cloud.yunyat.model.pojo.StatusInput;
 import cloud.yunyat.model.service.MessageManager;
@@ -72,6 +73,7 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
             causeTx = vsqCotOa.getCauseTx();
             byte senderAddress = vsqCotOa.getSenderAddress();
             publicAddress = payload.getPublicAddress();
+            Coa coa = new Coa(publicAddress);
             List<IEC104_MessageInfo> IOA = payload.getIOA();
             if (IOA == null) {
                 log.warn("IOA列表为空");
@@ -104,7 +106,7 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
                         .parser(info.getMessageAddress(), ByteBufResource.of(info.getValue()), info.getQualityDescriptors(), ctx);
                 // 收到I帧，取消T1，重置T3
                 IEC104_ScheduledTaskPool.getFromChannel(ctx).onReceiveTestFRCon();
-                dispatchAndPublish(parsedResult);
+                dispatchAndPublish(parsedResult, coa);
             });
 //            } catch (NullPointerException e) {
 //                log.error("无法解析的I帧(未找到对应解析器)：{}", payload);
@@ -117,25 +119,25 @@ public class IEC104_iFrameMasterHandler extends SimpleChannelInboundHandler<IEC1
      *
      * @param parsedResult 解析后的结果
      */
-    private void dispatchAndPublish(ParsedResult parsedResult) {
+    private void dispatchAndPublish(ParsedResult parsedResult, Coa coa) {
         if (parsedResult == null) return;
         if (isAnalogType(typeIdentifier)) {
             AnalogInput yc = new AnalogInput(
                     typeIdentifier,
-                    parsedResult.getPoint(),
-                    ((Number) parsedResult.getValue()).doubleValue(),
-                    parsedResult.getQuality(),
-                    parsedResult.getQualityBits());
-            messageManager.publishYcData(publicAddress, yc);
+                    parsedResult.point(),
+                    ((Number) parsedResult.value()).doubleValue(),
+                    parsedResult.quality(),
+                    parsedResult.qualityBits());
+            messageManager.publishYcData(coa, yc);
         } else if (isStatusType(typeIdentifier)) {
             StatusInput yx = new StatusInput(
                     typeIdentifier,
-                    parsedResult.getPoint(),
-                    (Boolean) parsedResult.getValue(),
-                    parsedResult.getQuality(),
-                    parsedResult.getQualityBits()
+                    parsedResult.point(),
+                    (Boolean) parsedResult.value(),
+                    parsedResult.quality(),
+                    parsedResult.qualityBits()
             );
-            messageManager.publishYxData(publicAddress, yx);
+            messageManager.publishYxData(coa, yx);
         }
     }
 
